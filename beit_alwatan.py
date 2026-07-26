@@ -742,6 +742,476 @@ def run_daemon():
         time.sleep(CHECK_INTERVAL_MINUTES * 60)
 
 
+# ============================================================
+#  طبقة التوافق — API للاستخدام من monitor.py
+# ============================================================
+#
+# النسخة القديمة من الملف ده كانت module فيها دوال زي load/save/extract/
+# dashboard اللي بيستخدمها monitor.py. النسخة الحالية (سكريبت مستقل)
+# مافيهاش الدوال دي، فالـ import بيبوّظ. الطبقة دي بتوفّرها من غير ما
+# نبطّل السكريبت المستقل.
+#
+# البيانات بتتحفظ في state/beit_alwatan.json بالشكل ده:
+#   {
+#     "facts": {tracked_field: {value, since, source_title, source_link}},
+#     "timeline": [{field, from, to, when, source_title, source_link}],
+#     "dates": [{label, kind, raw, iso, days_left, status}],
+#     "cities": {city_name: count},
+#     "people": str | null,
+#     "forecast": str | null,
+#     "checklist": str | list | null,
+#     "summary": str | null,
+#     "sources": [links],
+#     "updated": iso,
+#   }
+
+import config as _config      # نفس config الحقيقي — سابقًا مكانش mستخدم هنا
+
+
+def _bw_state_path():
+    return getattr(_config, "BEIT_STATE", "state/beit_alwatan.json")
+
+
+def _bw_load_json(path, default):
+    if os.path.exists(path):
+        try:
+            with open(path, encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return default
+
+
+def _bw_save_json(path, data):
+    d = os.path.dirname(path)
+    if d:
+        os.makedirs(d, exist_ok=True)
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=1)
+    os.replace(tmp, path)
+
+
+def load():
+    """تحميل حالة بيت الوطن من الملف."""
+    state = _bw_load_json(_bw_state_path(), {})
+    state.setdefault("facts", {})
+    state.setdefault("timeline", [])
+    state.setdefault("dates", [])
+    state.setdefault("cities", {})
+    state.setdefault("sources", [])
+    return state
+
+
+def save(state):
+    """حفظ حالة بيت الوطن."""
+    state["updated"] = datetime.now(timezone.utc).isoformat()
+    _bw_save_json(_bw_state_path(), state)
+
+
+def filter_items(items):
+    """فلترة الأخبار/الفيديوهات اللي عنوانها فيه كلمات بيت الوطن."""
+    words = _config.BEIT_ALWATAN.get("match_words", [])
+    if not words:
+        return []
+    out = []
+    for it in items or []:
+        title = (it.get("title") or "") + " " + (it.get("snippet") or "")
+        if any(w in title for w in words):
+            out.append(it)
+    return out
+
+
+def _bw_pack_items(items, limit=25):
+    """يجهّز الأخبار في شكل مضغوط للـ AI."""
+    lines = []
+    for i, it in enumerate(items[:limit], 1):
+        title = (it.get("title") or "").strip()[:220]
+        src = (it.get("source") or "").strip()
+        snip = (it.get("snippet") or "").strip()[:280]
+        lines.append(f"{i}. {title} — {src}\n   {snip}")
+    return "\n".join(lines)
+
+
+def _bw_pack_videos(videos, limit=6):
+    lines = []
+    for i, (title, summary) in enumerate((videos or [])[:limit], 1):
+        s = str(summary or "").strip()[:600]
+        lines.append(f"{i}. {title}\n{s}")
+    return "\n\n".join(lines)
+
+
+def extract(ai, items, videos, official_lines):
+    """
+    استخراج حقائق منظمة عن بيت الوطن باستخدام AI.
+    بيرجّع dict بالحقول اللي في config.BEIT_ALWATAN['tracked_fields'].
+    """
+    if not ai or not items:
+        return {}
+    tracked = _config.BEIT_ALWATAN.get("tracked_fields", [])
+    news_txt = _bw_pack_items(items)
+    vids_txt = _bw_pack_videos(videos)
+    official_txt = "\n".join((official_lines or [])[:15])
+
+    prompt = f"""من الأخبار والفيديوهات والمصادر الرسمية دي عن مشروع بيت الوطن:
+
+الأخبار:
+{news_txt}
+
+الفيديوهات (ملخصاتها):
+{vids_txt or '—'}
+
+المصادر الرسمية (سطور رصدت):
+{official_txt or '—'}
+
+استخرج الحقائق التالية فقط بصيغة JSON. لأي حقل مالوش معلومة صريحة، سيبه null.
+مفيش تخمين — اللي مش موجود في النص = null.
+
+الحقول:
+{json.dumps(tracked, ensure_ascii=False)}
+
+كل قيمة تكون string قصير مباشر (مش جملة كاملة). مثال:
+{{"المرحلة_الحالية": "المرحلة 12", "سعر_المتر": "20 ألف جنيه", ...}}
+
+بالإضافة اذكر:
+- "درجة_الثقة": "عالية" أو "متوسطة" أو "منخفضة" حسب وضوح المصادر
+- "أرقم_مصدر": رقم أهم عنصر أخبار يعتمد عليه
+"""
+    data = ai.ask_json(prompt, system=SYSTEM_JSON_BW, fast=False)
+    if not isinstance(data, dict):
+        return {}
+
+    # نضيف source_link للـ facts اللي عندنا رقم مصدر
+    src_idx = data.pop("أرقم_مصدر", None)
+    src_title = src_link = ""
+    if isinstance(src_idx, (int, str)):
+        try:
+            src = items[int(src_idx) - 1]
+            src_title = src.get("title", "")
+            src_link = src.get("link", "")
+        except (ValueError, IndexError):
+            pass
+
+    facts = {}
+    for k, v in data.items():
+        if v is None or (isinstance(v, str) and not v.strip()):
+            continue
+        facts[k] = {
+            "value": str(v).strip(),
+            "source_title": src_title,
+            "source_link": src_link,
+        }
+    return facts
+
+
+SYSTEM_JSON_BW = (
+    "أنت محرر بيانات دقيق. ترد بـ JSON صالح فقط، بدون أي نص قبله أو بعده "
+    "وبدون أسوار كود. لا تخترع معلومات غير موجودة في النص المعطى لك. "
+    "إذا لم تجد معلومة، استخدم null."
+)
+
+
+def diff_and_update(state, facts, items):
+    """
+    يقارن الحقائق الجديدة بالمحفوظة، يحدّث state، ويرجّع قائمة التغييرات.
+    """
+    changes = []
+    old = state.setdefault("facts", {})
+    now = datetime.now(timezone.utc).isoformat()
+
+    for field, entry in (facts or {}).items():
+        new_val = entry.get("value") if isinstance(entry, dict) else str(entry)
+        if not new_val:
+            continue
+        old_entry = old.get(field) or {}
+        old_val = old_entry.get("value") if isinstance(old_entry, dict) else old_entry
+        if old_val == new_val:
+            # ثبّت المصدر لو مكانش موجود
+            if isinstance(old_entry, dict) and not old_entry.get("source_link"):
+                old[field] = {**old_entry, **entry, "since": old_entry.get("since", now)}
+            continue
+
+        record = {
+            "value": new_val,
+            "since": now,
+            "source_title": entry.get("source_title") if isinstance(entry, dict) else "",
+            "source_link": entry.get("source_link") if isinstance(entry, dict) else "",
+        }
+        old[field] = record
+        changes.append({
+            "field": field,
+            "from": old_val,
+            "to": new_val,
+            "when": now,
+            "source_title": record["source_title"],
+            "source_link": record["source_link"],
+        })
+
+    if changes:
+        state.setdefault("timeline", []).extend(changes)
+        state["timeline"] = state["timeline"][-200:]
+
+    # حدّث cities count من items
+    city_names = _config.BEIT_ALWATAN.get("cities", [])
+    counts = state.setdefault("cities", {})
+    for it in items or []:
+        blob = (it.get("title") or "") + " " + (it.get("snippet") or "")
+        for city in city_names:
+            if city in blob:
+                counts[city] = counts.get(city, 0) + 1
+
+    # حدّث sources (لينكات فقط — التوافق مع النسخ القديمة اللي كانت dicts)
+    existing = state.get("sources") or []
+    srcs = set()
+    for s in existing:
+        if isinstance(s, str):
+            srcs.add(s)
+        elif isinstance(s, dict) and s.get("link"):
+            srcs.add(s["link"])
+    for it in items or []:
+        if it.get("link"):
+            srcs.add(it["link"])
+    state["sources"] = list(srcs)[-50:]
+
+    return changes
+
+
+def people_pulse(ai, comments, limit=40):
+    """ملخص كلام الناس في الكومنتات."""
+    if not ai or not comments:
+        return None
+    packed = []
+    for c in (comments or [])[:limit]:
+        txt = (c.get("text") if isinstance(c, dict) else str(c)) or ""
+        txt = txt.strip()[:280]
+        if txt:
+            packed.append(f"- {txt}")
+    if not packed:
+        return None
+    prompt = f"""دي كومنتات من متابعين ومهتمين ببيت الوطن:
+
+{chr(10).join(packed)}
+
+المطلوب فقرة قصيرة (٤-٥ جمل) توضح:
+- المزاج العام (متفائل / متوجّس / محايد)
+- أهم ٢-٣ مخاوف متكررة
+- أهم ٢ سؤال محدش رد عليه
+اكتب مباشرة، بدون تعداد ولا عناوين."""
+    return ai.ask(prompt, system=SYSTEM_AR_BW)
+
+
+def summarize(ai, state, items):
+    """ملخص تنفيذي ٣-٤ جمل عن حالة الملف حاليًا."""
+    if not ai:
+        return None
+    facts = state.get("facts") or {}
+    facts_txt = "\n".join(f"- {k.replace('_', ' ')}: "
+                         f"{v.get('value') if isinstance(v, dict) else v}"
+                         for k, v in facts.items())
+    news = _bw_pack_items(items, limit=8)
+    prompt = f"""حالة ملف بيت الوطن حاليًا:
+{facts_txt or '(بيانات ناقصة)'}
+
+آخر أخبار:
+{news or '—'}
+
+اكتب ملخص من ٣-٤ جمل مباشرة يجاوب على:
+"إيه الوضع دلوقتي وإيه اللي المصري المغترب محتاج يعرفه؟"
+بدون عناوين ولا تعداد."""
+    return ai.ask(prompt, system=SYSTEM_AR_BW)
+
+
+def forecast(ai, state, items, people):
+    """توقعات وسيناريوهات لبيت الوطن."""
+    if not ai:
+        return None
+    facts = state.get("facts") or {}
+    facts_txt = "\n".join(f"- {k.replace('_', ' ')}: "
+                         f"{v.get('value') if isinstance(v, dict) else v}"
+                         for k, v in facts.items())
+    news = _bw_pack_items(items, limit=10)
+    people_txt = people or ""
+    prompt = f"""بناءً على المعطيات دي:
+
+الحقائق المرصودة:
+{facts_txt or '—'}
+
+آخر أخبار:
+{news or '—'}
+
+كلام الناس:
+{people_txt or '—'}
+
+اكتب ٣ فقرات قصيرة:
+1. أين نحن الآن (فقرة واحدة).
+2. المتوقع في الأسابيع القادمة (فقرة واحدة، مع تحفظات صريحة).
+3. سيناريوهات (٣ أسطر: الأرجح · متفائل · متحفظ).
+
+لا تخترع تواريخ أو أرقام غير موجودة."""
+    return ai.ask(prompt, system=SYSTEM_AR_BW)
+
+
+def checklist(ai, state):
+    """خطوات مقترحة للمستخدم."""
+    if not ai:
+        return None
+    booking = None
+    facts = state.get("facts") or {}
+    entry = facts.get("حالة_الحجز")
+    if isinstance(entry, dict):
+        booking = entry.get("value")
+
+    prompt = f"""حالة الحجز في بيت الوطن حاليًا: {booking or 'غير معلومة'}
+
+اكتب قائمة من ٤-٦ خطوات عملية مباشرة يعملها المصري المغترب دلوقتي
+عشان يكون جاهز لما الحجز يفتح (لو مقفول)، أو يتقدم صح (لو مفتوح).
+كل خطوة سطر واحد قصير مباشر يبدأ برقم.
+بدون شرح طويل."""
+    text = ai.ask(prompt, system=SYSTEM_AR_BW)
+    if not text:
+        return None
+    # نحوّل النص لقائمة نظيفة
+    steps = []
+    for line in text.split("\n"):
+        line = line.strip()
+        # نشيل الترقيم "1." أو "1-" أو "1)"
+        line = re.sub(r"^[\d]+[\.\-\)]\s*", "", line)
+        line = re.sub(r"^[\*\-]\s*", "", line)
+        if len(line) > 8:
+            steps.append(line)
+    return steps[:6] if steps else None
+
+
+SYSTEM_AR_BW = (
+    "أنت محلل عقاري مصري محترف متخصص في الفرص المتاحة للمصريين المقيمين "
+    "بالخارج. ترد بالعربية المصرية الواضحة، بدقة وإيجاز، وبدون مبالغة أو "
+    "ترويج. لا تخترع أرقامًا أو تواريخ غير موجودة في النص المعطى لك."
+)
+
+
+# ---------- استخراج المواعيد وحساب الأيام المتبقية ----------
+
+_DATE_LABELS = {
+    "موعد_فتح_الحجز": "فتح الحجز",
+    "موعد_غلق_الحجز": "غلق الحجز",
+    "موعد_السداد": "السداد",
+    "موعد_القرعة": "القرعة",
+}
+
+
+def _parse_days_left(raw_value):
+    """يحاول يستخرج تاريخ ISO ويحسب الأيام المتبقية. بيرجع (iso, days)."""
+    if not raw_value:
+        return None, None
+    txt = str(raw_value)
+    # yyyy-mm-dd or dd/mm/yyyy
+    m = re.search(r"(\d{4})[-/](\d{1,2})[-/](\d{1,2})", txt)
+    if m:
+        y, mo, d = map(int, m.groups())
+    else:
+        m = re.search(r"(\d{1,2})[/\-](\d{1,2})[/\-](\d{4})", txt)
+        if m:
+            d, mo, y = map(int, m.groups())
+        else:
+            return None, None
+    try:
+        target = datetime(y, mo, d, tzinfo=timezone.utc)
+    except ValueError:
+        return None, None
+    diff = (target - datetime.now(timezone.utc)).days
+    return target.date().isoformat(), diff
+
+
+def dashboard(state):
+    """
+    يحوّل state الخام لشكل مناسب للعرض في الصفحة ورسالة تليجرام.
+    """
+    facts = state.get("facts") or {}
+
+    def _v(field):
+        e = facts.get(field)
+        if isinstance(e, dict):
+            return e.get("value")
+        return e
+
+    # قائمة المواعيد بترتيب زمني (الأقرب الأول)
+    dates = []
+    for field, label in _DATE_LABELS.items():
+        raw = _v(field)
+        if not raw:
+            continue
+        iso, days_left = _parse_days_left(raw)
+        dates.append({
+            "label": label,
+            "kind": field,
+            "raw": raw,
+            "iso": iso,
+            "days_left": days_left,
+            "status": "قادم" if (days_left is not None and days_left >= 0)
+                       else ("مرّ" if days_left is not None else "غير محدد بدقة"),
+        })
+    # الأقرب أولاً (اللي ليه days_left >= 0)
+    upcoming = [d for d in dates if isinstance(d["days_left"], int) and d["days_left"] >= 0]
+    upcoming.sort(key=lambda d: d["days_left"])
+    nxt = upcoming[0] if upcoming else None
+
+    cities = state.get("cities") or {}
+    top_cities = sorted(cities.items(), key=lambda x: -x[1])[:5]
+    cities_out = [c for c, _ in top_cities]
+
+    checklist_val = state.get("checklist")
+    if isinstance(checklist_val, str):
+        # نص → قائمة
+        lines = []
+        for line in checklist_val.split("\n"):
+            line = re.sub(r"^[#\*\-\d\.\)\s]+", "", line).strip()
+            if len(line) > 8:
+                lines.append(line)
+        checklist_val = lines[:6] if lines else checklist_val
+
+    return {
+        "stage":      _v("المرحلة_الحالية"),
+        "booking":    _v("حالة_الحجز"),
+        "price":      _v("سعر_المتر"),
+        "deposit":    _v("قيمة_الجدية"),
+        "areas":      _v("المساحات_المتاحة"),
+        "payment":    _v("شروط_التقديم"),
+        "conditions": _v("شروط_التقديم"),
+        "last":       _v("آخر_تطور"),
+        "confidence": _v("درجة_الثقة"),
+        "cities":     cities_out,
+        "dates":      dates,
+        "next":       nxt,
+        "summary":    state.get("summary"),
+        "people":     state.get("people"),
+        "forecast":   state.get("forecast"),
+        "checklist":  checklist_val,
+        "timeline":   (state.get("timeline") or [])[-15:],
+    }
+
+
+def format_changes(changes):
+    """صياغة تغييرات ملف بيت الوطن لرسالة تليجرام (backward compat)."""
+    if not changes:
+        return None
+    import html as _html
+    lines = [f"🏘️ <b>تحديثات على ملف بيت الوطن ({len(changes)})</b>", ""]
+    for ch in changes[:8]:
+        field = str(ch.get("field", "")).replace("_", " ")
+        to = _html.escape(str(ch.get("to", ""))[:160])
+        if ch.get("from"):
+            frm = _html.escape(str(ch["from"])[:90])
+            lines.append(f"• <b>{_html.escape(field)}</b>: {to} "
+                         f"<s>{frm}</s>")
+        else:
+            lines.append(f"• <b>{_html.escape(field)}</b>: {to}")
+    return "\n".join(lines).strip()
+
+
+# ============================================================
+#  السكريبت المستقل (النسخة المبسّطة الأصلية)
+# ============================================================
+
 def main():
     parser = argparse.ArgumentParser(description="متابعة بيت الوطن المبسّطة")
     parser.add_argument("--once", action="store_true", help="دورة واحدة")
