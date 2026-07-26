@@ -22,10 +22,14 @@ class MultiAI:
         self.providers = []
         self.stats = {}
 
-        if config.GEMINI_API_KEY:
-            self.providers.append(("Gemini", self._call_gemini))
+        # الترتيب: Groq الأول (سريع وموثوق)، وGemini بعده كاحتياطي
+        # — بعض حسابات Gemini بتاخد مفاتيح بصيغة "AQ." بترجع 401 بشكل دائم
+        # (باج معروف عند جوجل من يونيو 2026). لو حصلك كده، شيل GEMINI_API_KEY
+        # خالص وسيب Groq يشتغل لوحده، أفضل من محاولات فاشلة بتبطّئ كل دورة.
         if config.GROQ_API_KEY:
             self.providers.append(("Groq", self._call_groq))
+        if config.GEMINI_API_KEY:
+            self.providers.append(("Gemini", self._call_gemini))
         if config.CEREBRAS_API_KEY:
             self.providers.append(("Cerebras", self._call_cerebras))
         if config.OPENROUTER_API_KEY:
