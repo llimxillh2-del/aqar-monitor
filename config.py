@@ -129,7 +129,8 @@ YOUTUBE_CHANNELS = [
     ("الإسكان مع عمرو زكي", "UC68MAMp5g8Lft48Knm3pheg"),
     ("كلام في المفيد — هاني الخميسي", "UCl3L_aO3A1-nqQhBRFtbcnw"),
     ("عقارات", "UCGiEiZDpqoyfXUcWmTrLfWw"),
-    ("elwakil immobilier", "UC2Oea1tnYIPAEIF9sqebRNw"),
+    # ملحوظة: "elwakil immobilier" قناة جزائرية (عقارات في تيبازة والجزائر العاصمة)
+    # اتشالت لأنها مش بتخص السوق المصري إطلاقًا رغم اسمها المضلل بالفرنسية
 ]
 
 # ترتيب الفيديوهات بمعدل التفاعل (مشاهدات ÷ عمر الفيديو) بدل التاريخ فقط
