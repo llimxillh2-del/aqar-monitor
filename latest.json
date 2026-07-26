@@ -1,0 +1,53 @@
+{
+ "updated": "2026-07-26T20:57:59.427568+00:00",
+ "brief": null,
+ "forecast": null,
+ "market": [],
+ "beit": {
+  "stage": null,
+  "booking": null,
+  "price": null,
+  "areas": null,
+  "deposit": null,
+  "conditions": null,
+  "payment": null,
+  "last": null,
+  "confidence": null,
+  "dates": [],
+  "next": null,
+  "cities": {
+   "القاهرة الجديدة": 3,
+   "الشيخ زايد": 1,
+   "بدر": 1
+  },
+  "summary": null,
+  "people": null,
+  "forecast": null,
+  "checklist": null,
+  "timeline": []
+ },
+ "intel": {
+  "counts": {
+   "total": 0,
+   "strong": 0,
+   "novel": 0,
+   "confirmed": 0
+  },
+  "stats": {
+   "cycles": 1,
+   "utterances": 121,
+   "confirmed": 0,
+   "avg_lead_days": null
+  },
+  "digest": null,
+  "signals": [],
+  "questions": []
+ },
+ "urgent": [],
+ "top": [],
+ "counts": {
+  "total": 53,
+  "new": 53,
+  "beit": 5
+ }
+}
