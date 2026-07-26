@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 مصادر البيانات: أخبار · يوتيوب · سوشيال ميديا (RSSHub) · RSS عام
+
+إصلاحات عن النسخة القديمة:
+  • feedparser مابقاش بيجيب الرابط بنفسه (كان بدون مهلة ولا User-Agent
+    وممكن يعلّق للأبد) — بنجيب بـ requests بمهلة وبعدين نمرّر البايتات.
+  • ضبط الترميز يدويًا للمواقع المصرية اللي مابتبعتش charset.
+  • جلسة requests واحدة بـ retry تلقائي.
 """
 
 import re
@@ -10,8 +16,39 @@ from datetime import datetime, timezone, timedelta
 
 import feedparser
 import requests
+from requests.adapters import HTTPAdapter
+
+try:                                     # urllib3 v2 و v1 مختلفين في المسار
+    from urllib3.util.retry import Retry
+except ImportError:                      # pragma: no cover
+    Retry = None
 
 import config
+
+
+UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+      "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+
+_SESSION = None
+
+
+def session():
+    """جلسة واحدة بإعادة محاولة تلقائية — أسرع وأثبت من requests.get المباشر."""
+    global _SESSION
+    if _SESSION is not None:
+        return _SESSION
+    s = requests.Session()
+    s.headers.update({"User-Agent": UA, "Accept-Language": "ar,en;q=0.8"})
+    if Retry is not None:
+        retry = Retry(total=2, backoff_factor=0.6,
+                      status_forcelist=(429, 500, 502, 503, 504),
+                      allowed_methods=frozenset(["GET", "POST"]))
+        adapter = HTTPAdapter(max_retries=retry, pool_connections=10,
+                              pool_maxsize=10)
+        s.mount("https://", adapter)
+        s.mount("http://", adapter)
+    _SESSION = s
+    return s
 
 
 # ============================================================
@@ -23,25 +60,45 @@ def _cutoff():
 
 
 def _entry_date(entry):
-    if getattr(entry, "published_parsed", None):
-        return datetime(*entry.published_parsed[:6], tzinfo=timezone.utc)
-    if getattr(entry, "updated_parsed", None):
-        return datetime(*entry.updated_parsed[:6], tzinfo=timezone.utc)
+    for attr in ("published_parsed", "updated_parsed"):
+        parsed = getattr(entry, attr, None)
+        if parsed:
+            try:
+                return datetime(*parsed[:6], tzinfo=timezone.utc)
+            except (TypeError, ValueError):
+                continue
     return None
 
 
 def _strip_html(text):
-    text = re.sub(r"<[^>]+>", " ", text or "")
+    text = re.sub(r"(?is)<(script|style)[^>]*>.*?</\1>", " ", text or "")
+    text = re.sub(r"<[^>]+>", " ", text)
     return re.sub(r"\s+", " ", text).strip()
+
+
+def fetch_bytes(url, timeout=None):
+    """يجيب محتوى رابط كبايتات — بمهلة وUser-Agent. يرجّع (bytes, error)."""
+    timeout = timeout or config.REQUEST_TIMEOUT
+    try:
+        r = session().get(url, timeout=timeout)
+        r.raise_for_status()
+        return r.content, None
+    except Exception as exc:
+        return None, str(exc)[:120]
 
 
 def parse_feed(url, label=""):
     """يقرأ أي RSS ويرجع عناصر موحّدة الشكل."""
     items = []
+    raw, err = fetch_bytes(url)
+    if err:
+        print(f"  [!] فشل قراءة {label or url}: {err}")
+        return items
+
     try:
-        feed = feedparser.parse(url)
+        feed = feedparser.parse(raw)
     except Exception as exc:
-        print(f"  [!] فشل قراءة {label or url}: {exc}")
+        print(f"  [!] فشل تحليل {label or url}: {str(exc)[:90]}")
         return items
 
     cutoff = _cutoff()
@@ -49,12 +106,20 @@ def parse_feed(url, label=""):
         published = _entry_date(entry)
         if published and published < cutoff:
             continue
+
         source = ""
-        if getattr(entry, "source", None) is not None:
-            source = getattr(entry.source, "title", "") or ""
+        src_obj = getattr(entry, "source", None)
+        if src_obj is not None:
+            source = getattr(src_obj, "title", "") or ""
+
+        link = entry.get("link", "") or ""
+        title = _strip_html(entry.get("title", ""))
+        if not link or not title:
+            continue
+
         items.append({
-            "title": _strip_html(entry.get("title", "")),
-            "link": entry.get("link", ""),
+            "title": title,
+            "link": link,
             "source": source or label,
             "snippet": _strip_html(entry.get("summary", ""))[:400],
             "published": published.isoformat() if published else "",
@@ -68,6 +133,7 @@ def parse_feed(url, label=""):
 # ============================================================
 
 def _clean_title(title):
+    """Google News بيلزق ' - اسم الموقع' في آخر العنوان."""
     return re.sub(r"\s+-\s+[^-]+$", "", title).strip()
 
 
@@ -82,35 +148,61 @@ def google_news(query):
 
 
 def score_item(item):
+    """أولوية مبدئية بالكلمات — قبل ما الـ AI يشوفها."""
+    title = item.get("title", "")
     s = 0
     for word in config.PRIORITY_WORDS:
-        if word in item["title"]:
+        if word in title:
             s += 10
+    for word in config.BEIT_ALWATAN["match_words"]:
+        if word in title:
+            s += 15
+            break
     return s
 
 
-def fetch_news():
-    """يجمع كل أقسام الأخبار."""
+def fetch_news(extra_queries=None):
+    """
+    يجمع كل أقسام الأخبار.
+    extra_queries: عبارات إضافية تتحط في القسم الأول (بيت الوطن).
+    """
     result = {}
-    for section, queries in config.NEWS_SECTIONS.items():
+    sections = {k: list(v) for k, v in config.NEWS_SECTIONS.items()}
+
+    if extra_queries:
+        first = next(iter(sections))
+        for q in extra_queries:
+            if q not in sections[first]:
+                sections[first].append(q)
+
+    for section, queries in sections.items():
         print(f"[*] أخبار: {section}")
-        seen_links, bucket = set(), []
+        seen_links, seen_titles, bucket = set(), set(), []
         for q in queries:
             print(f"    - {q}")
             for item in google_news(q):
-                if not item["link"] or item["link"] in seen_links:
+                key = re.sub(r"\W+", "", item["title"])[:60]
+                if item["link"] in seen_links or key in seen_titles:
                     continue
                 seen_links.add(item["link"])
+                seen_titles.add(key)
                 bucket.append(item)
-            time.sleep(1)
+            time.sleep(0.8)
         bucket.sort(key=lambda x: (score_item(x), x["published_ts"]), reverse=True)
         result[section] = bucket
+        print(f"    → {len(bucket)} عنصر")
     return result
 
 
 # ============================================================
 #  يوتيوب
 # ============================================================
+
+def _extract_video_id(url):
+    m = re.search(r"(?:v=|youtu\.be/|/shorts/|/embed/)([A-Za-z0-9_-]{11})",
+                  url or "")
+    return m.group(1) if m else ""
+
 
 def youtube_channel_feed(channel_id, name="YouTube"):
     """RSS رسمي لأي قناة — مجاني وبدون مفتاح."""
@@ -123,42 +215,41 @@ def youtube_channel_feed(channel_id, name="YouTube"):
     return items
 
 
-def youtube_search(query):
+def youtube_search(query, max_results=6):
     """بحث يوتيوب — يحتاج YOUTUBE_API_KEY (مجاني)."""
     if not config.YOUTUBE_API_KEY:
         return []
     try:
-        r = requests.get("https://www.googleapis.com/youtube/v3/search", params={
+        r = session().get("https://www.googleapis.com/youtube/v3/search", params={
             "key": config.YOUTUBE_API_KEY,
             "q": query,
             "part": "snippet",
             "type": "video",
             "order": "date",
-            "maxResults": 6,
+            "maxResults": max_results,
             "relevanceLanguage": "ar",
-        }, timeout=30)
+        }, timeout=config.REQUEST_TIMEOUT)
         r.raise_for_status()
     except Exception as exc:
         print(f"  [!] بحث يوتيوب فشل: {str(exc)[:90]}")
         return []
 
-    items = []
-    cutoff = _cutoff()
+    items, cutoff = [], _cutoff()
     for entry in r.json().get("items", []):
         sn = entry.get("snippet", {})
-        vid = entry.get("id", {}).get("videoId")
+        vid = (entry.get("id") or {}).get("videoId")
         if not vid:
             continue
         published = None
         try:
             published = datetime.fromisoformat(
-                sn.get("publishedAt", "").replace("Z", "+00:00"))
-        except Exception:
+                (sn.get("publishedAt") or "").replace("Z", "+00:00"))
+        except (TypeError, ValueError):
             pass
         if published and published < cutoff:
             continue
         items.append({
-            "title": sn.get("title", ""),
+            "title": _strip_html(sn.get("title", "")),
             "link": f"https://www.youtube.com/watch?v={vid}",
             "source": sn.get("channelTitle", ""),
             "snippet": (sn.get("description") or "")[:300],
@@ -168,11 +259,6 @@ def youtube_search(query):
             "video_id": vid,
         })
     return items
-
-
-def _extract_video_id(url):
-    m = re.search(r"(?:v=|youtu\.be/|/shorts/)([A-Za-z0-9_-]{11})", url or "")
-    return m.group(1) if m else ""
 
 
 def get_transcript(video_id):
@@ -185,16 +271,13 @@ def get_transcript(video_id):
 
     try:
         api = YouTubeTranscriptApi()
-        # الأفضلية للعربية ثم الإنجليزية ثم أي لغة متاحة
         try:
             fetched = api.fetch(video_id, languages=["ar", "ar-EG", "en"])
         except Exception:
             listing = api.list(video_id)
             first = next(iter(listing))
             fetched = first.fetch()
-        parts = []
-        for snippet in fetched:
-            parts.append(getattr(snippet, "text", "") or "")
+        parts = [getattr(sn, "text", "") or "" for sn in fetched]
         text = " ".join(p for p in parts if p).strip()
         return text or None
     except Exception as exc:
@@ -203,19 +286,18 @@ def get_transcript(video_id):
 
 
 def get_video_stats(video_ids):
-    """إحصائيات الفيديوهات (مشاهدات/إعجابات/كومنتات) — يحتاج مفتاح."""
+    """إحصائيات الفيديوهات — يحتاج مفتاح."""
     if not config.YOUTUBE_API_KEY or not video_ids:
         return {}
-    stats = {}
-    ids = list(video_ids)
+    stats, ids = {}, list(dict.fromkeys(video_ids))
     for i in range(0, len(ids), 50):
         chunk = ids[i:i + 50]
         try:
-            r = requests.get("https://www.googleapis.com/youtube/v3/videos", params={
+            r = session().get("https://www.googleapis.com/youtube/v3/videos", params={
                 "key": config.YOUTUBE_API_KEY,
                 "id": ",".join(chunk),
                 "part": "statistics",
-            }, timeout=30)
+            }, timeout=config.REQUEST_TIMEOUT)
             r.raise_for_status()
         except Exception as exc:
             print(f"  [!] تعذّر جلب الإحصائيات: {str(exc)[:80]}")
@@ -231,19 +313,20 @@ def get_video_stats(video_ids):
 
 
 def get_top_comments(video_id, limit=None):
-    """أكتر الكومنتات تفاعلًا على الفيديو — مجاني عبر YouTube Data API."""
+    """أكتر الكومنتات تفاعلًا على الفيديو."""
     limit = limit or config.MAX_COMMENTS_PER_VIDEO
     if not config.YOUTUBE_API_KEY:
         return []
     try:
-        r = requests.get("https://www.googleapis.com/youtube/v3/commentThreads", params={
-            "key": config.YOUTUBE_API_KEY,
-            "videoId": video_id,
-            "part": "snippet",
-            "order": "relevance",       # الأكثر تفاعلًا
-            "maxResults": min(limit, 100),
-            "textFormat": "plainText",
-        }, timeout=30)
+        r = session().get(
+            "https://www.googleapis.com/youtube/v3/commentThreads", params={
+                "key": config.YOUTUBE_API_KEY,
+                "videoId": video_id,
+                "part": "snippet",
+                "order": "relevance",
+                "maxResults": min(limit, 100),
+                "textFormat": "plainText",
+            }, timeout=config.REQUEST_TIMEOUT)
         r.raise_for_status()
     except Exception as exc:
         msg = str(exc)
@@ -255,9 +338,8 @@ def get_top_comments(video_id, limit=None):
 
     out = []
     for thread in r.json().get("items", []):
-        sn = (thread.get("snippet", {})
-                    .get("topLevelComment", {})
-                    .get("snippet", {}))
+        top = (thread.get("snippet", {}) or {}).get("topLevelComment", {}) or {}
+        sn = top.get("snippet", {}) or {}
         text = (sn.get("textDisplay") or "").strip()
         if not text:
             continue
@@ -265,7 +347,9 @@ def get_top_comments(video_id, limit=None):
             "author": sn.get("authorDisplayName", ""),
             "text": text,
             "likes": int(sn.get("likeCount", 0) or 0),
-            "replies": int(thread.get("snippet", {}).get("totalReplyCount", 0) or 0),
+            "replies": int((thread.get("snippet", {}) or {})
+                           .get("totalReplyCount", 0) or 0),
+            "video_id": video_id,
         })
     out.sort(key=lambda c: (c["likes"], c["replies"]), reverse=True)
     return out
@@ -285,21 +369,27 @@ def _engagement_rate(item):
     return views / age_days
 
 
-def fetch_videos():
+def fetch_videos(extra_queries=None):
     """يجمع فيديوهات من القنوات المتابَعة والبحث + إحصائيات التفاعل."""
     print("[*] يوتيوب")
     seen, bucket = set(), []
 
     for entry in config.YOUTUBE_CHANNELS:
-        name, ch_id = entry if isinstance(entry, (tuple, list)) else ("YouTube", entry)
+        name, ch_id = entry if isinstance(entry, (tuple, list)) \
+            else ("YouTube", entry)
         print(f"    - قناة: {name}")
         for it in youtube_channel_feed(ch_id, name):
             if it["link"] not in seen:
                 seen.add(it["link"])
                 bucket.append(it)
-        time.sleep(1)
+        time.sleep(0.6)
 
-    for q in config.YOUTUBE_QUERIES:
+    queries = list(config.YOUTUBE_QUERIES)
+    for q in (extra_queries or []):
+        if q not in queries:
+            queries.append(q)
+
+    for q in queries:
         found = youtube_search(q)
         if found:
             print(f"    - بحث: {q} ({len(found)})")
@@ -307,32 +397,31 @@ def fetch_videos():
             if it["link"] not in seen:
                 seen.add(it["link"])
                 bucket.append(it)
-        time.sleep(1)
+        time.sleep(0.6)
 
-    # إحصائيات التفاعل
     vids = [it["video_id"] for it in bucket if it.get("video_id")]
     stats = get_video_stats(vids)
     if stats:
         for it in bucket:
             it["stats"] = stats.get(it.get("video_id"), {})
-        print(f"    - تم جلب إحصائيات {len(stats)} فيديو")
+        print(f"    - إحصائيات {len(stats)} فيديو")
 
     if config.RANK_VIDEOS_BY_ENGAGEMENT and stats:
-        bucket.sort(key=lambda x: (score_item(x), _engagement_rate(x)), reverse=True)
+        bucket.sort(key=lambda x: (score_item(x), _engagement_rate(x)),
+                    reverse=True)
     else:
-        bucket.sort(key=lambda x: (score_item(x), x["published_ts"]), reverse=True)
+        bucket.sort(key=lambda x: (score_item(x), x["published_ts"]),
+                    reverse=True)
+    print(f"    → {len(bucket)} فيديو")
     return bucket
 
 
 # ============================================================
-#  السوشيال ميديا عبر RSSHub
+#  السوشيال ميديا عبر RSSHub + RSS إضافي
 # ============================================================
 
 def fetch_social():
-    """
-    ⚠️ يعتمد على RSSHub. النسخة العامة كثيرًا ما تُحجب من المنصات.
-    شغّل نسخة خاصة بك وحدّث RSSHUB_BASE للحصول على ثبات.
-    """
+    """يعتمد على RSSHub. النسخة العامة كثيرًا ما تُحجب من المنصات."""
     if not config.SOCIAL_FEEDS:
         return []
     print("[*] السوشيال ميديا (RSSHub)")
@@ -342,11 +431,11 @@ def fetch_social():
         print(f"    - {feed['name']}")
         items = parse_feed(url, label=feed["name"])
         if not items:
-            print(f"      (لا توجد نتائج — قد يكون المسار محجوبًا)")
+            print("      (لا توجد نتائج — قد يكون المسار محجوبًا)")
         for it in items:
             it["kind"] = "social"
         out.extend(items)
-        time.sleep(1)
+        time.sleep(0.8)
     out.sort(key=lambda x: x["published_ts"], reverse=True)
     return out
 
@@ -363,6 +452,6 @@ def fetch_extra_rss():
         for it in items:
             it["kind"] = "news"
         out.extend(items)
-        time.sleep(1)
+        time.sleep(0.6)
     out.sort(key=lambda x: (score_item(x), x["published_ts"]), reverse=True)
     return out

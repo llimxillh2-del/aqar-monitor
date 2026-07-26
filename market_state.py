@@ -2,23 +2,32 @@
 """
 ذاكرة السوق
 ============
-ده اللي بيخلي النظام "فاهم السوق" بدل ما يبقى مجرد قارئ عناوين.
-بيحتفظ بحالة كل موضوع متابَع (المرحلة الحالية، المواعيد، آخر تطور)
-ويقارن كل دورة عشان يعرف إيه **اللي اتغير فعلًا**.
+بيحتفظ بحالة كل موضوع متابَع (المرحلة، المواعيد، آخر تطور) ويقارن كل دورة
+عشان يعرف إيه **اللي اتغير فعلًا** — مش إيه اللي اتقال.
+
+إصلاح: كان بيعتبر أي إعادة صياغة من الـ AI "تغيير" ويبعت تنبيه.
+دلوقتي فيه فلتر تشابه بيمنع الإنذارات الكاذبة دي.
 """
 
 import os
+import re
 import json
+import html
 from datetime import datetime, timezone
 
 import config
+from ai_engine import SYSTEM_JSON
 
 
 def load():
-    if os.path.exists(config.MARKET_STATE):
+    path = config.MARKET_STATE
+    if os.path.exists(path):
         try:
-            with open(config.MARKET_STATE, encoding="utf-8") as f:
-                return json.load(f)
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+            return {"topics": data.get("topics") or {},
+                    "history": data.get("history") or [],
+                    "updated": data.get("updated")}
         except Exception:
             pass
     return {"topics": {}, "history": [], "updated": None}
@@ -26,17 +35,13 @@ def load():
 
 def save(state):
     state["updated"] = datetime.now(timezone.utc).isoformat()
-    # الاحتفاظ بآخر 120 حدث
-    state["history"] = state.get("history", [])[-120:]
-    with open(config.MARKET_STATE, "w", encoding="utf-8") as f:
+    state["history"] = (state.get("history") or [])[-150:]
+    path = config.MARKET_STATE
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
         json.dump(state, f, ensure_ascii=False, indent=1)
-
-
-EXTRACT_SYSTEM = (
-    "أنت محرر بيانات دقيق. ترد بـ JSON صالح فقط، بدون أي نص قبله أو بعده. "
-    "لا تخترع معلومات غير موجودة في النص المعطى لك. "
-    "إذا لم تجد معلومة، استخدم null."
-)
+    os.replace(tmp, path)
 
 
 def extract_facts(ai, items):
@@ -45,47 +50,52 @@ def extract_facts(ai, items):
         return None
 
     listing = "\n".join(f"- {it['title']}" for it in items[:30])
-    topics = "\n".join(f'  "{t}"' for t in config.TRACKED_TOPICS)
+    topics_json = ",\n".join(
+        f'  "{t}": {{"المرحلة_الحالية": null, "آخر_تطور": null, '
+        f'"موعد_قادم": null, "الحالة": "غير معروف"}}'
+        for t in config.TRACKED_TOPICS
+    )
 
     prompt = f"""من العناوين دي:
 
 {listing}
 
-استخرج حالة كل موضوع من المواضيع دي:
-{topics}
-
-رجّع JSON بالشكل ده بالظبط:
+استخرج حالة كل موضوع. رجّع JSON بالشكل ده بالظبط:
 {{
-  "بيت الوطن": {{
-     "المرحلة_الحالية": "نص أو null",
-     "آخر_تطور": "جملة واحدة أو null",
-     "موعد_قادم": "نص التاريخ أو null",
-     "الحالة": "مفتوح/مغلق/منتظر/غير معروف"
-  }},
-  "بيتك في مصر": {{ ...نفس الحقول... }},
-  "طروحات أراضي وزارة الإسكان": {{ ...نفس الحقول... }},
-  "منصة مصر العقارية": {{ ...نفس الحقول... }}
+{topics_json}
 }}
 
-مهم: لو العناوين مافيهاش معلومة عن موضوع، حط null في حقوله. ماتخمّنش."""
-    return ai.ask_json(prompt, EXTRACT_SYSTEM)
+قواعد:
+- "الحالة" لازم تكون واحدة من: مفتوح / مغلق / منتظر / غير معروف
+- "آخر_تطور" جملة واحدة قصيرة
+- لو العناوين مافيهاش معلومة عن موضوع، حط null في حقوله. **ماتخمّنش**."""
+
+    return ai.ask_json(prompt, SYSTEM_JSON)
 
 
 def _clean(v):
     if v is None:
         return None
-    s = str(v).strip()
-    if s.lower() in ("null", "none", "غير معروف", "لا يوجد", ""):
+    s = re.sub(r"\s+", " ", str(v)).strip()
+    if s.lower() in ("null", "none", "غير معروف", "لا يوجد", "-", "—", ""):
         return None
     return s
 
 
+def _too_similar(a, b):
+    norm = re.sub(r"[^\w؀-ۿ]+", "", str(a)), re.sub(r"[^\w؀-ۿ]+", "", str(b))
+    na, nb = norm
+    if na == nb:
+        return True
+    if not na or not nb:
+        return False
+    shorter, longer = (na, nb) if len(na) <= len(nb) else (nb, na)
+    return shorter in longer and len(shorter) / len(longer) > 0.75
+
+
 def diff_and_update(state, facts):
-    """
-    يقارن الحالة الجديدة بالقديمة ويرجع قائمة بالتغييرات الحقيقية.
-    ده جوهر "فهم السوق" — نعرف إيه اللي اتغير مش إيه اللي اتقال.
-    """
-    if not facts:
+    """يقارن الحالة الجديدة بالقديمة ويرجع التغييرات الحقيقية."""
+    if not facts or not isinstance(facts, dict):
         return []
 
     changes = []
@@ -104,15 +114,11 @@ def diff_and_update(state, facts):
             old_val = old.get(field)
             if old_val == new_val:
                 continue
-            changes.append({
-                "topic": topic,
-                "field": field,
-                "from": old_val,
-                "to": new_val,
-                "when": now,
-            })
+            if old_val and _too_similar(old_val, new_val):
+                continue
+            changes.append({"topic": topic, "field": field,
+                            "from": old_val, "to": new_val, "when": now})
 
-        # دمج: الجديد يغلب، بس ما نمسحش القديم بـ null
         merged = dict(old)
         for k, v in new.items():
             if v is not None:
@@ -134,13 +140,15 @@ def format_changes(changes):
     for ch in changes:
         by_topic.setdefault(ch["topic"], []).append(ch)
     for topic, items in by_topic.items():
-        lines.append(f"<b>▸ {topic}</b>")
+        lines.append(f"<b>▸ {html.escape(topic)}</b>")
         for ch in items:
             field = ch["field"].replace("_", " ")
-            if ch["from"]:
-                lines.append(f"  • {field}: <s>{ch['from']}</s> ← <b>{ch['to']}</b>")
+            to = html.escape(str(ch["to"])[:180])
+            if ch.get("from"):
+                frm = html.escape(str(ch["from"])[:110])
+                lines.append(f"  • {field}: <s>{frm}</s> ← <b>{to}</b>")
             else:
-                lines.append(f"  • {field}: <b>{ch['to']}</b>")
+                lines.append(f"  • {field}: <b>{to}</b>")
         lines.append("")
     return "\n".join(lines).strip()
 

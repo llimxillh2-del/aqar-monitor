@@ -6,75 +6,129 @@
 بيرد على أوامرك بالمعلومة الحالية من آخر دورة للمرصد،
 وكمان بيسمحلك تسأل الذكاء الاصطناعي سؤال مفتوح.
 
-بيشتغل بالتوازي مع monitor.py:
-    python monitor.py     ← بيجمع ويحلل ويبعت التنبيهات
-    python bot.py         ← بيرد على أوامرك
+    python monitor.py --daemon   ← بيجمع ويحلل ويبعت التنبيهات
+    python bot.py                ← بيرد على أوامرك
 
 الأوامر:
-  /start   /مساعدة
-  /الحالة      حالة السوق الآن
-  /الملخص      الملخص التنفيذي
-  /التوقعات    قراءة السوق والأماكن
-  /عاجل        آخر الأخبار العاجلة
-  /الاهم       أهم الأخبار
-  /تحديث       تشغيل دورة جديدة فورًا
+  /الحالة /بيتالوطن /المواعيد /الخطوات /الناس /التوقعات
+  /الملخص /عاجل /الاهم /تحديث /مساعدة
   أي سؤال تكتبه عادي → يرد عليه الـ AI
+
+إصلاحات أمنية عن النسخة القديمة:
+  • كان أي شخص يلاقي البوت يقدر يستخدمه ويشغّل /تحديث على جهازك.
+    دلوقتي فيه قايمة سماح (config.TELEGRAM_ALLOWED).
+  • تقسيم الرسائل كان بيكسر وسوم HTML → تليجرام يرفض. اتظبط.
+  • مافيش تحقق من رد تليجرام أصلاً → دلوقتي بيتقرأ وفيه بديل نص عادي.
+  • getUpdates كان بيعيد معالجة الرسايل القديمة عند التشغيل.
 """
 
 import os
+import re
 import sys
 import json
 import time
 import html
+import signal
 import subprocess
-from datetime import datetime
-
-import requests
+from datetime import datetime, timezone
 
 import config
 from ai_engine import MultiAI, SYSTEM_AR
+from sources import session
 
 API = f"https://api.telegram.org/bot{config.TELEGRAM_TOKEN}"
+ROOT = os.path.dirname(os.path.abspath(__file__))
+_STOP = False
 
 HELP = """🏛️ <b>مرصد العقارات المصرية</b>
 
-<b>الأوامر:</b>
-/الحالة — حالة كل مشروع دلوقتي
+<b>رادار الإشارات المبكرة</b>
+/تسريبات — معلومات بيقولها الناس ومش في الأخبار 🔥
+/اشارات — كل الإشارات المرصودة بترتيب الثقة
+/اسئلة — أسئلة الناس اللي مالهاش إجابة
+/دقة — أداء الرادار: سبق الجمهور الأخبار بكام يوم
+
+<b>بيت الوطن</b>
+/بيتالوطن — البطاقة الكاملة للمرحلة
+/المواعيد — كل المواعيد والعدّ التنازلي
+/الخطوات — إيه اللي تعمله دلوقتي
+/الناس — خلاصة كلام الناس ومخاوفهم
+
+<b>عام</b>
+/الحالة — حالة كل الملفات المتابَعة
 /الملخص — الملخص التنفيذي
-/التوقعات — قراءة السوق والأماكن
+/التوقعات — القراءة الاستشرافية
 /عاجل — آخر الأخبار العاجلة
 /الاهم — أهم الأخبار
 /تحديث — تشغيل دورة فحص جديدة
 /مساعدة — الرسالة دي
 
-<b>كمان:</b> اكتب أي سؤال عادي عن العقارات والمصريين بالخارج والـ AI هيرد عليك بناءً على آخر بيانات موجودة."""
+<b>كمان:</b> اكتب أي سؤال عادي عن العقارات والمصريين بالخارج والـ AI هيرد عليك من آخر بيانات مرصودة."""
+
+
+def _handle_stop(signum, frame):
+    global _STOP
+    _STOP = True
 
 
 # ============================================================
-#  أدوات
+#  الإرسال
 # ============================================================
+
+def _split(text, limit=3600):
+    """تقسيم عند حدود السطور — ما بيكسرش وسوم HTML."""
+    text = text or ""
+    if len(text) <= limit:
+        return [text] if text.strip() else []
+    chunks, current = [], ""
+    for line in text.split("\n"):
+        while len(line) > limit:
+            cut = line.rfind(" ", 0, limit)
+            if cut <= 0:
+                cut = limit
+            chunks.append(line[:cut])
+            line = line[cut:].lstrip()
+        if len(current) + len(line) + 1 > limit:
+            if current.strip():
+                chunks.append(current.rstrip())
+            current = line
+        else:
+            current = f"{current}\n{line}" if current else line
+    if current.strip():
+        chunks.append(current.rstrip())
+    return chunks
+
+
+def _plain(text):
+    return html.unescape(re.sub(r"<[^>]+>", "", text or ""))
+
 
 def send(chat_id, text, preview=False):
-    for i in range(0, len(text), 3800):
+    for chunk in _split(text):
+        payload = {"chat_id": chat_id, "text": chunk, "parse_mode": "HTML",
+                   "disable_web_page_preview": "false" if preview else "true"}
         try:
-            requests.post(f"{API}/sendMessage", data={
-                "chat_id": chat_id,
-                "text": text[i:i + 3800],
-                "parse_mode": "HTML",
-                "disable_web_page_preview": "false" if preview else "true",
-            }, timeout=30)
-            time.sleep(0.6)
+            r = session().post(f"{API}/sendMessage", data=payload, timeout=30)
+            body = r.json() if r.content else {}
+            if not body.get("ok"):
+                print(f"[!] رفض: {str(body.get('description'))[:100]}")
+                payload.pop("parse_mode", None)
+                payload["text"] = _plain(chunk)
+                session().post(f"{API}/sendMessage", data=payload, timeout=30)
         except Exception as exc:
-            print(f"[!] فشل الإرسال: {exc}")
+            print(f"[!] فشل الإرسال: {str(exc)[:90]}")
+        time.sleep(0.5)
 
 
 def load_latest():
-    if os.path.exists(config.LATEST_JSON):
-        try:
-            with open(config.LATEST_JSON, encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            pass
+    path = os.path.join(ROOT, config.LATEST_JSON)
+    for candidate in (config.LATEST_JSON, path):
+        if os.path.exists(candidate):
+            try:
+                with open(candidate, encoding="utf-8") as f:
+                    return json.load(f)
+            except Exception:
+                continue
     return {}
 
 
@@ -83,26 +137,268 @@ def md_to_tg(text):
     if not text:
         return ""
     out = []
-    for line in text.split("\n"):
+    for line in str(text).split("\n"):
         s = line.strip()
         if not s:
             out.append("")
-        elif s.startswith("## "):
-            out.append(f"\n<b>▸ {html.escape(s[3:])}</b>")
         elif s.startswith("### "):
             out.append(f"<b>{html.escape(s[4:])}</b>")
+        elif s.startswith("## "):
+            out.append(f"\n<b>▸ {html.escape(s[3:])}</b>")
+        elif s.startswith("# "):
+            out.append(f"\n<b>▸ {html.escape(s[2:])}</b>")
         elif s.startswith(("- ", "* ", "• ")):
             out.append(f"• {html.escape(s[2:])}")
         else:
             out.append(html.escape(s))
-    txt = "\n".join(out)
-    # **عريض** → <b>
-    import re
-    return re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", txt)
+    return re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", "\n".join(out))
+
+
+def _stale_note(data):
+    upd = data.get("updated")
+    if not upd:
+        return ""
+    try:
+        d = datetime.fromisoformat(upd)
+        hours = (datetime.now(d.tzinfo or timezone.utc) - d).total_seconds() / 3600
+    except (TypeError, ValueError):
+        return ""
+    if hours < 6:
+        return ""
+    return f"\n\n<i>⚠️ آخر تحديث من {int(hours)} ساعة — شغّل /تحديث</i>"
 
 
 # ============================================================
-#  الردود
+#  ردود بيت الوطن
+# ============================================================
+
+def reply_beit(chat_id):
+    data = load_latest()
+    b = data.get("beit") or {}
+    if not any(b.get(k) for k in ("stage", "booking", "summary")):
+        send(chat_id, "لسه مفيش بيانات كافية عن بيت الوطن — شغّل <code>/تحديث</code>.")
+        return
+
+    lines = ["🏘️ <b>بيت الوطن — البطاقة الكاملة</b>", ""]
+    fields = [("المرحلة الحالية", "stage"), ("حالة الحجز", "booking"),
+              ("سعر المتر", "price"), ("المساحات المتاحة", "areas"),
+              ("قيمة الجدية", "deposit"), ("طريقة السداد", "payment"),
+              ("شروط التقديم", "conditions"), ("آخر تطور", "last")]
+    for label, key in fields:
+        if b.get(key):
+            lines.append(f"▸ <b>{label}:</b> {html.escape(str(b[key])[:300])}")
+
+    nxt = b.get("next")
+    if nxt:
+        lines += ["", f"⏰ <b>{html.escape(nxt['label'])}</b>: "
+                      f"{html.escape(nxt['raw'])} — خلال <b>{nxt['days_left']}</b> يوم"]
+
+    cities = b.get("cities") or {}
+    if cities:
+        top = "، ".join(list(cities)[:8])
+        lines += ["", f"📍 <b>المدن الأكثر ذكرًا:</b> {html.escape(top)}"]
+
+    lines += ["", f"<i>درجة الثقة في البيانات: {html.escape(str(b.get('confidence') or '—'))}</i>"]
+
+    if b.get("summary"):
+        lines += ["", "───────────", md_to_tg(b["summary"])]
+
+    send(chat_id, "\n".join(lines) + _stale_note(data))
+
+
+def reply_dates(chat_id):
+    data = load_latest()
+    dates = ((data.get("beit") or {}).get("dates")) or []
+    if not dates:
+        send(chat_id, "مفيش مواعيد معلنة مؤكدة لبيت الوطن حاليًا.\n"
+                      "أول ما يظهر إعلان رسمي هيوصلك تنبيه فورًا.")
+        return
+
+    icons = {"قادم": "🟢", "النهاردة": "🟡", "فات": "⚪",
+             "غير محدد بدقة": "⚪"}
+    lines = ["📅 <b>مواعيد بيت الوطن</b>", ""]
+    for d in dates:
+        icon = icons.get(d.get("status"), "⚪")
+        lines.append(f"{icon} <b>{html.escape(d['label'])}</b>")
+        lines.append(f"    {html.escape(d['raw'])}")
+        if d.get("days_left") is not None:
+            if d["days_left"] > 0:
+                lines.append(f"    ⏳ باقي <b>{d['days_left']}</b> يوم")
+            elif d["days_left"] == 0:
+                lines.append("    🔔 <b>النهاردة</b>")
+            else:
+                lines.append(f"    انتهى من {abs(d['days_left'])} يوم")
+        lines.append("")
+    lines.append("<i>راجع كراسة الشروط الرسمية قبل أي إجراء.</i>")
+    send(chat_id, "\n".join(lines) + _stale_note(data))
+
+
+def reply_steps(chat_id):
+    data = load_latest()
+    text = (data.get("beit") or {}).get("checklist")
+    if not text:
+        send(chat_id, "الخطوات لسه مش جاهزة — شغّل <code>/تحديث</code>.")
+        return
+    send(chat_id, "✅ <b>خطوات عملية — بيت الوطن</b>\n" + md_to_tg(text)
+         + _stale_note(data))
+
+
+def reply_people(chat_id):
+    data = load_latest()
+    text = (data.get("beit") or {}).get("people")
+    if not text:
+        send(chat_id, "مفيش تحليل تعليقات متاح دلوقتي.\n"
+                      "<i>محتاج YOUTUBE_API_KEY عشان يسحب الكومنتات.</i>")
+        return
+    send(chat_id, "💬 <b>كلام الناس — بيت الوطن</b>\n" + md_to_tg(text)
+         + "\n\n<i>⚠️ ده كلام أفراد على الإنترنت، مش مصدر رسمي.</i>")
+
+
+# ============================================================
+#  ردود رادار الإشارات
+# ============================================================
+
+TIER_ICON = {"مؤكدة رسميًا": "✅", "إشارة قوية": "🟠", "إشارة متقاطعة": "🟡",
+             "شهادة فردية": "🔵", "إشارة فردية": "⚪", "مكذّبة": "❌"}
+
+
+def _signal_lines(sig, with_quotes=True):
+    icon = TIER_ICON.get(sig.get("tier"), "🔍")
+    out = [f"{icon} <b>{html.escape(str(sig.get('statement', '')))}</b>"]
+
+    bits = [f"{sig.get('mentions', 0)} شخص",
+            f"{sig.get('independence', 0)} مصدر مستقل"]
+    if sig.get("firsthand"):
+        bits.append(f"{sig['firsthand']} تجربة شخصية 👁")
+    out.append(f"   <i>{html.escape(' · '.join(bits))}</i>")
+    out.append(f"   الثقة: {html.escape(str(sig.get('tier', '—')))}")
+
+    if sig.get("novel") and sig.get("status") != "مؤكدة رسميًا":
+        out.append("   ⚠️ <b>مش في الأخبار</b>")
+    if sig.get("lead_days") is not None:
+        out.append(f"   ✅ سبقت الأخبار بـ <b>{sig['lead_days']}</b> يوم")
+
+    if with_quotes:
+        for s in (sig.get("sources") or [])[:2]:
+            who = html.escape(str(s.get("author") or s.get("channel") or ""))
+            quote = html.escape(str(s.get("quote", ""))[:170])
+            eye = " 👁" if s.get("firsthand") else ""
+            if s.get("url"):
+                out.append(f'   • <a href="{html.escape(str(s["url"]))}">'
+                           f'{who}</a>{eye}: «{quote}»')
+            else:
+                out.append(f"   • {who}{eye}: «{quote}»")
+    return out
+
+
+def reply_leaks(chat_id):
+    """أهم أمر — اللي الناس بتقوله ومش في الأخبار."""
+    data = load_latest()
+    intel = data.get("intel") or {}
+    sigs = [s for s in (intel.get("signals") or [])
+            if s.get("novel") and s.get("status") != "مؤكدة رسميًا"]
+    if not sigs:
+        send(chat_id, "مفيش دلوقتي معلومات من الناس خارج الأخبار الرسمية.\n\n"
+                      "<i>الرادار بيشتغل كل دورة — أول ما يظهر حاجة هتوصلك "
+                      "فورًا من غير ما تسأل.</i>")
+        return
+
+    lines = ["🔥 <b>معلومات من الناس مش في الأخبار</b>", ""]
+    for sig in sigs[:10]:
+        lines += _signal_lines(sig)
+        lines.append("")
+    lines.append("<i>⚠️ ده كلام ناس على الإنترنت — مش مصدر رسمي. "
+                 "راجع كراسة الشروط قبل أي إجراء.</i>")
+    send(chat_id, "\n".join(lines) + _stale_note(data))
+
+
+def reply_signals(chat_id):
+    data = load_latest()
+    intel = data.get("intel") or {}
+    sigs = intel.get("signals") or []
+    if not sigs:
+        send(chat_id, "لسه مفيش إشارات مرصودة — شغّل <code>/تحديث</code>.")
+        return
+
+    counts = intel.get("counts") or {}
+    lines = ["📡 <b>رادار الإشارات المبكرة</b>",
+             f"<i>{counts.get('total', 0)} إشارة · "
+             f"{counts.get('novel', 0)} مش في الأخبار · "
+             f"{counts.get('confirmed', 0)} اتأكدت</i>", ""]
+    for sig in sigs[:12]:
+        lines += _signal_lines(sig, with_quotes=False)
+        lines.append("")
+    lines.append("<i>استخدم /تسريبات للتفاصيل والاقتباسات.</i>")
+    send(chat_id, "\n".join(lines) + _stale_note(data))
+
+
+def reply_questions(chat_id):
+    data = load_latest()
+    qs = (data.get("intel") or {}).get("questions") or []
+    if not qs:
+        send(chat_id, "مفيش أسئلة مرصودة دلوقتي.")
+        return
+    lines = ["❓ <b>أسئلة الناس اللي مالهاش إجابة</b>",
+             "<i>دي بتوضّح فين الغموض الرسمي</i>", ""]
+    for q in qs[:15]:
+        text = html.escape(str(q.get("text", "")))
+        if q.get("url"):
+            lines.append(f'• <a href="{html.escape(str(q["url"]))}">{text}</a>')
+        else:
+            lines.append(f"• {text}")
+    send(chat_id, "\n".join(lines))
+
+
+def reply_accuracy(chat_id):
+    """أداء الرادار — بيقولك تثق فيه قد إيه."""
+    data = load_latest()
+    intel = data.get("intel") or {}
+    stats = intel.get("stats") or {}
+    counts = intel.get("counts") or {}
+
+    if not stats.get("cycles"):
+        send(chat_id, "الرادار لسه ماشتغلش دورة كاملة.")
+        return
+
+    lines = ["🎯 <b>أداء الرادار</b>", ""]
+    lines.append(f"دورات: <b>{stats.get('cycles', 0)}</b>")
+    lines.append(f"كلام اتحلل: <b>{stats.get('utterances', 0)}</b>")
+    lines.append(f"إشارات مرصودة: <b>{counts.get('total', 0)}</b>")
+    lines.append(f"اتأكدت رسميًا: <b>{counts.get('confirmed', 0)}</b>")
+
+    if stats.get("avg_lead_days") is not None:
+        lines += ["", f"⏱️ <b>الجمهور سبق الأخبار بمتوسط "
+                      f"{stats['avg_lead_days']} يوم</b>"]
+        if stats.get("max_lead_days") is not None:
+            lines.append(f"أطول سبق: <b>{stats['max_lead_days']}</b> يوم")
+    else:
+        lines += ["", "<i>لسه مفيش إشارة اتأكدت رسميًا — "
+                      "المقياس ده بيظهر بعد أول تأكيد.</i>"]
+
+    confirmed = [s for s in (intel.get("signals") or [])
+                 if s.get("status") == "مؤكدة رسميًا"]
+    if confirmed:
+        lines += ["", "<b>إشارات اتأكدت:</b>"]
+        for s in confirmed[:5]:
+            lead = (f" (سبق {s['lead_days']} يوم)"
+                    if s.get("lead_days") is not None else "")
+            lines.append(f"✅ {html.escape(str(s.get('statement', '')))}{lead}")
+
+    send(chat_id, "\n".join(lines))
+
+
+def reply_radar_digest(chat_id):
+    data = load_latest()
+    digest = (data.get("intel") or {}).get("digest")
+    if not digest:
+        send(chat_id, "قراءة الرادار لسه مش جاهزة — شغّل <code>/تحديث</code>.")
+        return
+    send(chat_id, "📡 <b>قراءة الرادار</b>\n" + md_to_tg(digest)
+         + "\n\n<i>⚠️ مبني على كلام ناس، مش مصادر رسمية.</i>")
+
+
+# ============================================================
+#  ردود عامة
 # ============================================================
 
 def reply_status(chat_id):
@@ -111,38 +407,25 @@ def reply_status(chat_id):
     if not rows:
         send(chat_id, "لسه مفيش بيانات — شغّل <code>/تحديث</code> أو استنى أول دورة.")
         return
-    lines = ["📋 <b>حالة السوق الآن</b>", ""]
+    lines = ["📋 <b>حالة الملفات المتابَعة</b>", ""]
     for r in rows:
-        lines.append(f"<b>▸ {html.escape(r['topic'])}</b>")
-        if r.get("stage") and r["stage"] != "—":
-            lines.append(f"  المرحلة: {html.escape(r['stage'])}")
-        if r.get("status") and r["status"] != "—":
-            lines.append(f"  الحالة: {html.escape(r['status'])}")
-        if r.get("next") and r["next"] != "—":
-            lines.append(f"  ⏰ موعد قادم: <b>{html.escape(r['next'])}</b>")
-        if r.get("last") and r["last"] != "—":
-            lines.append(f"  ↳ {html.escape(r['last'])}")
+        lines.append(f"<b>▸ {html.escape(r.get('topic', ''))}</b>")
+        for label, key in (("المرحلة", "stage"), ("الحالة", "status"),
+                           ("⏰ موعد قادم", "next"), ("↳", "last")):
+            v = r.get(key)
+            if v and v != "—":
+                lines.append(f"  {label}: {html.escape(str(v))}")
         lines.append("")
-    upd = data.get("updated", "")
-    if upd:
-        lines.append(f"<i>آخر تحديث: {upd[:16].replace('T',' ')}</i>")
-    send(chat_id, "\n".join(lines))
+    send(chat_id, "\n".join(lines) + _stale_note(data))
 
 
-def reply_brief(chat_id):
+def reply_text_field(chat_id, key, title, icon):
     data = load_latest()
-    if not data.get("brief"):
-        send(chat_id, "الملخص لسه مش جاهز — شغّل <code>/تحديث</code>.")
+    if not data.get(key):
+        send(chat_id, f"{title} لسه مش جاهز — شغّل <code>/تحديث</code>.")
         return
-    send(chat_id, "🧭 <b>الملخص التنفيذي</b>\n" + md_to_tg(data["brief"]))
-
-
-def reply_forecast(chat_id):
-    data = load_latest()
-    if not data.get("forecast"):
-        send(chat_id, "التوقعات لسه مش جاهزة — شغّل <code>/تحديث</code>.")
-        return
-    send(chat_id, "🔮 <b>التوقعات وقراءة السوق</b>\n" + md_to_tg(data["forecast"]))
+    send(chat_id, f"{icon} <b>{title}</b>\n" + md_to_tg(data[key])
+         + _stale_note(data))
 
 
 def reply_list(chat_id, key, title, icon):
@@ -153,8 +436,10 @@ def reply_list(chat_id, key, title, icon):
         return
     lines = [f"{icon} <b>{title}</b>", ""]
     for it in items:
-        lines.append(f'• <a href="{html.escape(it["link"])}">'
-                     f'{html.escape(it["title"])}</a>')
+        link = it.get("link", "")
+        text = html.escape(it.get("title", "بدون عنوان"))
+        lines.append(f'• <a href="{html.escape(link)}">{text}</a>' if link
+                     else f"• {text}")
         if it.get("source"):
             lines.append(f'  <i>{html.escape(it["source"])}</i>')
     send(chat_id, "\n".join(lines))
@@ -163,8 +448,7 @@ def reply_list(chat_id, key, title, icon):
 def reply_refresh(chat_id):
     send(chat_id, "⏳ بشغّل دورة فحص جديدة... ممكن تاخد دقيقتين.")
     try:
-        subprocess.Popen([sys.executable, "monitor.py", "--once"],
-                         cwd=os.path.dirname(os.path.abspath(__file__)))
+        subprocess.Popen([sys.executable, "monitor.py", "--once"], cwd=ROOT)
     except Exception as exc:
         send(chat_id, f"تعذّر التشغيل: {html.escape(str(exc)[:120])}")
 
@@ -173,51 +457,95 @@ def reply_ai(chat_id, question, ai):
     if not ai.available:
         send(chat_id, "مفيش مفتاح AI مضبوط، فمش هقدر أرد على الأسئلة المفتوحة.")
         return
+
     data = load_latest()
-    ctx_parts = []
+    ctx = []
+    b = data.get("beit") or {}
+    if any(b.get(k) for k in ("stage", "booking", "price")):
+        facts = [f"{k}: {b[k]}" for k in
+                 ("stage", "booking", "price", "areas", "deposit",
+                  "payment", "conditions", "last") if b.get(k)]
+        ctx.append("حالة بيت الوطن:\n" + "\n".join(f"- {f}" for f in facts))
+    if b.get("dates"):
+        ctx.append("مواعيد بيت الوطن:\n" + "\n".join(
+            f"- {d['label']}: {d['raw']} ({d.get('status', '')})"
+            for d in b["dates"]))
+    intel = data.get("intel") or {}
+    novel = [s for s in (intel.get("signals") or [])
+             if s.get("novel") and s.get("status") != "مؤكدة رسميًا"]
+    if novel:
+        ctx.append("إشارات من كلام الناس (غير مؤكدة رسميًا — عاملها كذلك):\n"
+                   + "\n".join(
+                       f"- {s.get('statement')} "
+                       f"[{s.get('tier')}, {s.get('independence', 0)} مصدر مستقل]"
+                       for s in novel[:10]))
+    if intel.get("questions"):
+        ctx.append("أسئلة الناس بلا إجابة:\n" + "\n".join(
+            f"- {q.get('text')}" for q in intel["questions"][:8]))
     if data.get("brief"):
-        ctx_parts.append("الملخص الحالي:\n" + data["brief"][:1800])
-    rows = data.get("market") or []
-    if rows:
-        ctx_parts.append("حالة المشاريع:\n" + "\n".join(
-            f"- {r['topic']}: مرحلة {r['stage']}, حالة {r['status']}, "
-            f"موعد قادم {r['next']}" for r in rows))
+        ctx.append("الملخص الحالي:\n" + str(data["brief"])[:1600])
+    for r in (data.get("market") or []):
+        ctx.append(f"- {r.get('topic')}: مرحلة {r.get('stage')}, "
+                   f"حالة {r.get('status')}, موعد قادم {r.get('next')}")
     tops = data.get("top") or []
     if tops:
-        ctx_parts.append("أهم العناوين:\n" + "\n".join(
-            f"- {t['title']}" for t in tops[:12]))
+        ctx.append("أهم العناوين:\n" + "\n".join(
+            f"- {t.get('title', '')}" for t in tops[:12]))
 
-    ctx = "\n\n".join(ctx_parts) or "لا توجد بيانات محدّثة متاحة."
+    context = "\n\n".join(ctx) or "لا توجد بيانات محدّثة متاحة."
 
-    prompt = f"""دي أحدث المعلومات المتاحة عندنا عن السوق العقاري المصري:
+    prompt = f"""دي أحدث المعلومات المرصودة عندنا عن السوق العقاري المصري وبيت الوطن:
 
-{ctx}
+{context}
 
 سؤال المستخدم: {question}
 
-جاوب بالعربية المصرية باختصار (5 أسطر كحد أقصى).
+جاوب بالعربية المصرية باختصار (7 أسطر كحد أقصى).
 - اعتمد على المعلومات فوق. لو مش موجودة فيها، قول إنك مش متأكد واقترح مصدر رسمي يراجعه.
+- **فرّق بوضوح بين المؤكد رسميًا وبين "إشارات من كلام الناس"** — لو ردك مبني على
+  إشارة، قول صراحة "ده كلام ناس مش مؤكد رسميًا" واذكر قوة الإشارة.
 - ماتخترعش أرقام أو مواعيد.
 - ماتديش نصيحة استثمارية مباشرة."""
 
     send(chat_id, "🤔 لحظة...")
     answer = ai.ask(prompt, SYSTEM_AR)
-    send(chat_id, md_to_tg(answer) if answer else "معرفتش أوصل لرد دلوقتي، جرّب تاني.")
+    send(chat_id, md_to_tg(answer) if answer
+         else "معرفتش أوصل لرد دلوقتي، جرّب تاني.")
 
 
 # ============================================================
-#  الحلقة
+#  التوجيه
 # ============================================================
 
 ROUTES = {
     ("/start", "/مساعدة", "/help"): lambda cid, ai: send(cid, HELP),
+    ("/تسريبات", "/تسريب", "/leaks"): lambda cid, ai: reply_leaks(cid),
+    ("/اشارات", "/إشارات", "/signals", "/radar"):
+        lambda cid, ai: reply_signals(cid),
+    ("/اسئلة", "/أسئلة", "/questions"): lambda cid, ai: reply_questions(cid),
+    ("/دقة", "/الدقة", "/accuracy"): lambda cid, ai: reply_accuracy(cid),
+    ("/الرادار", "/digest"): lambda cid, ai: reply_radar_digest(cid),
+    ("/بيتالوطن", "/بيت_الوطن", "/beit"): lambda cid, ai: reply_beit(cid),
+    ("/المواعيد", "/مواعيد", "/dates"): lambda cid, ai: reply_dates(cid),
+    ("/الخطوات", "/خطوات", "/steps"): lambda cid, ai: reply_steps(cid),
+    ("/الناس", "/ناس", "/people"): lambda cid, ai: reply_people(cid),
     ("/الحالة", "/status"): lambda cid, ai: reply_status(cid),
-    ("/الملخص", "/brief"): lambda cid, ai: reply_brief(cid),
-    ("/التوقعات", "/forecast"): lambda cid, ai: reply_forecast(cid),
-    ("/عاجل", "/urgent"): lambda cid, ai: reply_list(cid, "urgent", "أخبار عاجلة", "🔴"),
-    ("/الاهم", "/الأهم", "/top"): lambda cid, ai: reply_list(cid, "top", "أهم الأخبار", "⭐"),
+    ("/الملخص", "/brief"): lambda cid, ai: reply_text_field(
+        cid, "brief", "الملخص التنفيذي", "🧭"),
+    ("/التوقعات", "/forecast"): lambda cid, ai: reply_text_field(
+        cid, "forecast", "القراءة الاستشرافية", "🔮"),
+    ("/عاجل", "/urgent"): lambda cid, ai: reply_list(
+        cid, "urgent", "أخبار عاجلة", "🔴"),
+    ("/الاهم", "/الأهم", "/top"): lambda cid, ai: reply_list(
+        cid, "top", "أهم الأخبار", "⭐"),
     ("/تحديث", "/refresh"): lambda cid, ai: reply_refresh(cid),
 }
+
+
+def allowed(chat_id):
+    if not config.TELEGRAM_ALLOWED:
+        return False
+    return str(chat_id) in config.TELEGRAM_ALLOWED
 
 
 def handle(chat_id, text, ai):
@@ -232,23 +560,45 @@ def handle(chat_id, text, ai):
     reply_ai(chat_id, text.strip(), ai)
 
 
+def _drop_backlog():
+    """يتخطى الرسايل القديمة عند التشغيل بدل ما يعيد الرد عليها."""
+    try:
+        r = session().get(f"{API}/getUpdates",
+                          params={"timeout": 0, "offset": -1}, timeout=20)
+        result = (r.json() or {}).get("result") or []
+        return result[-1]["update_id"] + 1 if result else None
+    except Exception:
+        return None
+
+
 def main():
     if not config.TELEGRAM_TOKEN:
         print("[!] لازم تضبط TELEGRAM_TOKEN الأول.")
         return
+    if not config.TELEGRAM_ALLOWED:
+        print("[!] TELEGRAM_CHAT_ID مش مضبوط — البوت هيرفض كل الرسايل.")
+        print("    ده مقصود: من غيره أي حد يلاقي البوت هيقدر يستخدمه.")
+        return
+
+    signal.signal(signal.SIGINT, _handle_stop)
+    try:
+        signal.signal(signal.SIGTERM, _handle_stop)
+    except (AttributeError, ValueError):
+        pass
 
     ai = MultiAI(verbose=False)
     print("[+] البوت شغال. اضغط Ctrl+C للإيقاف.")
+    print(f"[+] مسموح لـ: {', '.join(config.TELEGRAM_ALLOWED)}")
     if ai.available:
-        print(f"[+] محركات AI: {', '.join(n for n, _ in ai.providers)}")
+        print(f"[+] محركات AI: {', '.join(ai.names)}")
 
-    offset = None
-    while True:
+    offset = _drop_backlog()
+
+    while not _STOP:
         try:
-            r = requests.get(f"{API}/getUpdates", params={
-                "timeout": 50,
-                "offset": offset,
-            }, timeout=60)
+            r = session().get(f"{API}/getUpdates",
+                              params={"timeout": 50, "offset": offset},
+                              timeout=65)
             data = r.json()
         except Exception as exc:
             print(f"[!] {str(exc)[:90]}")
@@ -264,11 +614,19 @@ def main():
             text = msg.get("text", "")
             if not text:
                 continue
+
+            if not allowed(chat_id):
+                print(f"[✗] رفض من {chat_id}: {text[:40]}")
+                continue
+
             print(f"[>] {chat_id}: {text[:60]}")
             try:
                 handle(chat_id, text, ai)
             except Exception as exc:
                 print(f"[!] خطأ في المعالجة: {exc}")
+                send(chat_id, "حصل خطأ في تنفيذ الأمر، جرّب تاني.")
+
+    print("\n[i] تم الإيقاف.")
 
 
 if __name__ == "__main__":
