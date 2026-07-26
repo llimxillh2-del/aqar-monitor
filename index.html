@@ -3,429 +3,894 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>مرصد العقارات المصرية للمغتربين</title>
+<meta name="description" content="رصد وتحليل آلي لسوق العقارات المصري وفرص المصريين بالخارج">
+<meta name="robots" content="index,follow">
+<title>مرصد العقارات المصرية للمصريين بالخارج</title>
 <style>
-  :root{
-    --bg:#f0f2f5; --card:#ffffff; --text:#1c1e21; --muted:#65676b;
-    --line:#e4e6eb; --brand:#8a4b1f; --brand2:#a8632c;
-    --blue:#1877f2; --chip:#f0e6d8; --red:#d33b27;
-  }
-  *{box-sizing:border-box;}
-  body{margin:0;padding:0;background:var(--bg);color:var(--text);
-       font-family:"Segoe UI",Tahoma,Arial,sans-serif;font-size:15px;line-height:1.7;}
-  .shell{max-width:1120px;margin:0 auto;padding:16px;}
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
 
-  /* شريط علوي ثابت */
-  .nav{position:sticky;top:0;z-index:50;background:var(--card);
-       border-bottom:1px solid var(--line);box-shadow:0 1px 3px rgba(0,0,0,.06);}
-  .nav-in{max-width:1120px;margin:0 auto;padding:10px 16px;
-          display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-  .logo{width:40px;height:40px;border-radius:50%;flex:none;
-        background:linear-gradient(135deg,var(--brand),var(--brand2));
-        color:#fff;display:flex;align-items:center;justify-content:center;font-size:19px;}
-  .nav h1{font-size:17px;margin:0;}
-  .nav .when{font-size:12px;color:var(--muted);}
-  .tabs{display:flex;gap:6px;margin-inline-start:auto;flex-wrap:wrap;}
-  .tab{border:none;background:#f0f2f5;color:#050505;font-family:inherit;
-       font-size:13px;font-weight:600;padding:7px 14px;border-radius:18px;cursor:pointer;}
-  .tab:hover{background:#e4e6eb;}
-  .tab.on{background:var(--brand);color:#fff;}
+:root{
+  --ink:#15181c; --body:#2f3640; --muted:#69727e; --faint:#98a1ad;
+  --line:#e0e4ea; --line-soft:#eef1f5; --bg:#f2f4f7; --paper:#ffffff;
+  --navy:#0f3557; --navy-2:#1b4f7d; --gold:#96702c; --gold-soft:#f6f1e6;
+  --red:#a52820; --red-soft:#fbeeed; --green:#17603f; --green-soft:#ecf5f0;
+  --amber:#8a5a00; --amber-soft:#fdf4e3;
+  --radius:4px;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0; background:var(--bg); color:var(--body);
+  font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;
+  font-size:15.5px; line-height:1.85; -webkit-font-smoothing:antialiased;
+}
+a{color:var(--navy-2); text-decoration:none;}
+a:hover{text-decoration:underline;}
 
-  /* التخطيط */
-  .cols{display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start;}
-  @media(max-width:900px){.cols{grid-template-columns:1fr;} .side{order:-1;}}
+/* ---------- الترويسة ---------- */
+.masthead{background:var(--navy); color:#fff; border-bottom:4px solid var(--gold);}
+.masthead-in{max-width:1180px; margin:0 auto; padding:26px 24px 22px;}
+.eyebrow{font-size:11.5px; letter-spacing:2.6px; text-transform:uppercase;
+  color:#9fc0dd; margin-bottom:9px; font-weight:500;}
+.masthead h1{margin:0; font-size:27px; font-weight:700; letter-spacing:-.3px;}
+.masthead .lede{margin:7px 0 0; font-size:14px; color:#c6dbeb; font-weight:300;}
+.issue{margin-top:16px; padding-top:13px; border-top:1px solid rgba(255,255,255,.16);
+  display:flex; gap:22px; flex-wrap:wrap; font-size:12.5px; color:#b9d3e6;}
+.issue b{color:#fff; font-weight:600;}
 
-  /* البطاقات */
-  .card{background:var(--card);border-radius:12px;margin-bottom:14px;
-        box-shadow:0 1px 2px rgba(0,0,0,.1);overflow:hidden;}
-  .card-h{display:flex;gap:10px;padding:12px 14px 8px;align-items:flex-start;}
-  .ava{width:40px;height:40px;border-radius:50%;flex:none;color:#fff;
-       display:flex;align-items:center;justify-content:center;font-size:17px;
-       background:linear-gradient(135deg,#8a4b1f,#c07a3c);}
-  .ava.v{background:linear-gradient(135deg,#c0392b,#e74c3c);}
-  .ava.s{background:linear-gradient(135deg,#1877f2,#42a5f5);}
-  .who{font-weight:700;font-size:14px;}
-  .sub{font-size:12px;color:var(--muted);}
-  .card-b{padding:0 14px 12px;}
-  .card-b a.title{color:var(--text);text-decoration:none;font-size:15.5px;
-                  font-weight:600;display:block;margin-bottom:6px;}
-  .card-b a.title:hover{color:var(--blue);text-decoration:underline;}
-  .snip{font-size:13.5px;color:#3a3b3c;}
+/* ---------- شريط التنقل ---------- */
+.topbar{position:sticky; top:0; z-index:60; background:var(--paper);
+  border-bottom:1px solid var(--line); box-shadow:0 1px 4px rgba(15,53,87,.07);}
+.topbar-in{max-width:1180px; margin:0 auto; padding:0 24px;
+  display:flex; align-items:center; gap:4px; flex-wrap:wrap;}
+.topbar a{display:inline-block; padding:12px 13px; font-size:13.5px;
+  font-weight:500; color:var(--muted); border-bottom:2px solid transparent;}
+.topbar a:hover{color:var(--navy); border-bottom-color:var(--line); text-decoration:none;}
+.topbar a.cta{margin-inline-start:auto; color:var(--gold); font-weight:600;}
 
-  /* شارات */
-  .chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;}
-  .chip{font-size:11px;padding:2px 9px;border-radius:12px;background:var(--chip);color:var(--brand);}
-  .chip.new{background:#e7f3ff;color:#1877f2;}
-  .chip.top{background:#fff3cd;color:#8a6100;}
-  .chip.urgent{background:var(--red);color:#fff;}
+/* ---------- التخطيط ---------- */
+.wrap{max-width:1180px; margin:0 auto; padding:26px 24px 60px;
+  display:grid; grid-template-columns:1fr 268px; gap:26px; align-items:start;}
+@media(max-width:940px){ .wrap{grid-template-columns:1fr; padding:18px 15px 44px;} .rail{order:-1;} }
 
-  /* شريط الإحصائيات (زي فيسبوك) */
-  .stats{display:flex;gap:16px;padding:8px 14px;border-top:1px solid var(--line);
-         font-size:12.5px;color:var(--muted);}
-  .stats b{color:#3a3b3c;}
+/* ---------- المؤشرات ---------- */
+.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(132px,1fr));
+  gap:1px; background:var(--line); border:1px solid var(--line);
+  border-radius:var(--radius); overflow:hidden; margin-bottom:22px;}
+.kpi{background:var(--paper); padding:14px 16px;}
+.kpi .k-label{font-size:11.5px; color:var(--muted); letter-spacing:.4px;}
+.kpi .k-value{font-size:25px; font-weight:700; color:var(--navy); line-height:1.35;
+  font-variant-numeric:tabular-nums;}
+.kpi.alert .k-value{color:var(--red);}
+.kpi.good .k-value{color:var(--green);}
 
-  /* الملخص الذكي داخل البطاقة */
-  .ai{background:#f7f9fc;border-inline-start:3px solid var(--blue);
-      border-radius:8px;padding:10px 13px;margin-top:9px;font-size:13.5px;color:#3a3b3c;}
-  .ai .lab{font-size:11px;font-weight:700;color:var(--blue);
-           text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;}
-  .ai p{margin:5px 0;} .ai ul{margin:5px 0;padding-inline-start:19px;} .ai li{margin:3px 0;}
-  .ai h4{margin:9px 0 3px;font-size:13.5px;color:var(--brand);}
+/* ---------- الأقسام ---------- */
+.doc{counter-reset:sec;}
+section.block{background:var(--paper); border:1px solid var(--line);
+  border-radius:var(--radius); margin-bottom:22px; overflow:hidden;}
+section.block > h2{counter-increment:sec; margin:0; padding:15px 22px;
+  font-size:16.5px; font-weight:600; color:var(--navy);
+  background:linear-gradient(180deg,#fbfcfd,#f5f7fa);
+  border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:11px;}
+section.block > h2::before{content:counter(sec); font-size:12px; font-weight:700;
+  color:#fff; background:var(--navy); min-width:23px; height:23px; border-radius:3px;
+  display:inline-flex; align-items:center; justify-content:center; flex:none;
+  align-self:center; font-variant-numeric:tabular-nums;}
+.block-body{padding:19px 22px 22px;}
+.block-body > *:first-child{margin-top:0;}
+.block-body > *:last-child{margin-bottom:0;}
 
-  /* الكومنتات */
-  .cmts{background:#f7f8fa;border-radius:8px;padding:10px 12px;margin-top:9px;}
-  .cmts .lab{font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:7px;}
-  .cmt{display:flex;gap:8px;margin-bottom:8px;}
-  .cmt:last-child{margin-bottom:0;}
-  .cmt .cava{width:26px;height:26px;border-radius:50%;flex:none;background:#d8dadf;
-             color:#65676b;display:flex;align-items:center;justify-content:center;font-size:12px;}
-  .cmt .cbody{background:#fff;border-radius:14px;padding:7px 11px;font-size:13px;flex:1;}
-  .cmt .cname{font-weight:700;font-size:12.5px;}
-  .cmt .clikes{font-size:11px;color:var(--muted);margin-top:2px;}
+h3{font-size:15px; font-weight:600; color:var(--navy-2); margin:20px 0 7px;
+  padding-inline-start:11px; border-inline-start:3px solid var(--gold);}
+h4{font-size:14px; font-weight:600; color:var(--gold); margin:15px 0 5px;}
+h5{font-size:13.5px; font-weight:600; color:var(--body); margin:12px 0 4px;}
+p{margin:9px 0;}
+ul{margin:9px 0; padding-inline-start:21px;}
+li{margin:5px 0;}
 
-  /* التقارير الكبيرة */
-  .report{background:var(--card);border-radius:12px;padding:18px 22px;margin-bottom:14px;
-          box-shadow:0 1px 2px rgba(0,0,0,.1);}
-  .report h2{font-size:17px;margin:0 0 12px;color:var(--brand);
-             border-bottom:2px solid var(--chip);padding-bottom:9px;}
-  .report h3{font-size:14.5px;color:var(--brand2);margin:15px 0 5px;}
-  .report ul{padding-inline-start:20px;margin:6px 0;}
-  .report li{margin-bottom:5px;}
-  .report p{margin:7px 0;}
+/* ---------- الجداول ---------- */
+table{width:100%; border-collapse:collapse; font-size:14px; margin:12px 0;}
+th{background:#f6f8fa; text-align:start; padding:10px 12px; font-weight:600;
+  color:var(--navy); border-bottom:2px solid var(--line); font-size:13px;
+  white-space:nowrap;}
+td{padding:10px 12px; border-bottom:1px solid var(--line-soft); vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:#fafbfc;}
+td.k{font-weight:600; color:var(--ink); width:32%; white-space:nowrap;}
+.note-row td{background:#fbfcfd; color:var(--muted); font-size:13px; padding-top:0;}
 
-  /* العمود الجانبي */
-  .side .card{padding:14px 16px;}
-  .side h3{font-size:14px;margin:0 0 10px;color:var(--brand);}
-  .side .row{display:flex;justify-content:space-between;font-size:13px;
-             padding:6px 0;border-bottom:1px solid var(--line);}
-  .side .row:last-child{border:none;}
-  .side .row b{color:var(--brand);}
-  .srcline{font-size:12.5px;color:var(--muted);padding:4px 0;}
+/* ---------- الشارات ---------- */
+.tag{display:inline-block; font-size:11.5px; font-weight:600; padding:2px 9px;
+  border-radius:3px; white-space:nowrap; line-height:1.7;}
+.tag.red{background:var(--red-soft); color:var(--red);}
+.tag.green{background:var(--green-soft); color:var(--green);}
+.tag.amber{background:var(--amber-soft); color:var(--amber);}
+.tag.navy{background:#eaf1f7; color:var(--navy);}
+.tag.gold{background:var(--gold-soft); color:var(--gold);}
+.tag.gray{background:#eff1f4; color:var(--muted);}
 
-  .foot{background:#fff;border-radius:12px;padding:14px 18px;font-size:12.5px;
-        color:var(--muted);box-shadow:0 1px 2px rgba(0,0,0,.1);}
-  .hidden{display:none;}
+/* ---------- الفيد ---------- */
+.filters{display:flex; gap:7px; flex-wrap:wrap; padding:13px 22px;
+  border-bottom:1px solid var(--line); background:#fafbfc;}
+.filters button{font-family:inherit; font-size:13px; font-weight:500;
+  padding:6px 14px; border:1px solid var(--line); background:var(--paper);
+  color:var(--muted); border-radius:100px; cursor:pointer; transition:.12s;}
+.filters button:hover{border-color:var(--navy); color:var(--navy);}
+.filters button.on{background:var(--navy); border-color:var(--navy); color:#fff;}
+
+.entry{padding:16px 22px; border-bottom:1px solid var(--line-soft);}
+.entry:last-child{border-bottom:none;}
+.entry-meta{display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  font-size:12px; color:var(--faint); margin-bottom:5px;}
+.entry-meta .src{font-weight:600; color:var(--muted);}
+.entry h3.t{border:none; padding:0; margin:0 0 5px; font-size:15.5px;
+  font-weight:600; line-height:1.6;}
+.entry h3.t a{color:var(--ink);}
+.entry h3.t a:hover{color:var(--navy-2);}
+.snip{font-size:13.5px; color:var(--muted); margin:5px 0 0;}
+.metrics{display:flex; gap:15px; font-size:12px; color:var(--faint);
+  margin-top:8px; font-variant-numeric:tabular-nums;}
+
+.ai-box{background:#f8fafc; border:1px solid var(--line);
+  border-inline-start:3px solid var(--navy-2); border-radius:var(--radius);
+  padding:12px 15px; margin-top:11px; font-size:13.5px;}
+.ai-box .ai-label{font-size:11px; font-weight:700; letter-spacing:1.1px;
+  color:var(--navy-2); text-transform:uppercase; margin-bottom:5px;}
+.ai-box.people{border-inline-start-color:var(--gold); background:#fdfbf7;}
+.ai-box.people .ai-label{color:var(--gold);}
+.ai-box p{margin:5px 0;} .ai-box ul{margin:5px 0; padding-inline-start:18px;}
+.ai-box h4{margin:9px 0 3px; font-size:13px;}
+
+.quotes{margin-top:11px; border-top:1px dashed var(--line); padding-top:10px;}
+.quotes .q-label{font-size:11.5px; font-weight:600; color:var(--faint); margin-bottom:8px;}
+.quote{display:flex; gap:9px; margin-bottom:9px;}
+.quote .av{width:27px; height:27px; border-radius:50%; flex:none; background:#e8ebef;
+  color:var(--muted); display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:600;}
+.quote .qb{flex:1; background:#f7f8fa; border-radius:var(--radius);
+  padding:8px 12px; font-size:13px;}
+.quote .qn{font-weight:600; font-size:12.5px; color:var(--ink);}
+.quote .ql{font-size:11.5px; color:var(--faint); margin-top:3px;}
+
+/* ---------- العمود الجانبي ---------- */
+.rail{position:sticky; top:60px;}
+@media(max-width:940px){ .rail{position:static;} }
+.rail .box{background:var(--paper); border:1px solid var(--line);
+  border-radius:var(--radius); padding:15px 17px; margin-bottom:16px;}
+.rail h4{margin:0 0 11px; font-size:12px; letter-spacing:1.1px; color:var(--muted);
+  text-transform:uppercase; font-weight:700;}
+.rail .r{display:flex; justify-content:space-between; gap:10px; font-size:13.5px;
+  padding:7px 0; border-bottom:1px solid var(--line-soft);}
+.rail .r:last-child{border-bottom:none;}
+.rail .r b{color:var(--navy); font-variant-numeric:tabular-nums;}
+.rail .lnk{display:block; padding:6px 0; font-size:13.5px;
+  border-bottom:1px solid var(--line-soft);}
+.rail .lnk:last-child{border-bottom:none;}
+.rail .toc a{display:block; padding:5px 0; font-size:13.5px; color:var(--body);}
+.rail .toc a:hover{color:var(--navy); text-decoration:none;}
+
+/* ---------- بانر بيت الوطن ---------- */
+.spotlight{background:linear-gradient(135deg,var(--navy) 0%,#154572 100%);
+  color:#fff; border-radius:var(--radius); padding:22px 24px; margin-bottom:22px;
+  border-inline-start:4px solid var(--gold);}
+.spotlight .sp-eyebrow{font-size:11px; letter-spacing:2.2px; color:#9fc0dd;
+  text-transform:uppercase; font-weight:600;}
+.spotlight h2{margin:6px 0 12px; font-size:21px; font-weight:700; color:#fff;}
+.spotlight .sp-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(128px,1fr));
+  gap:14px; margin:15px 0;}
+.spotlight .sp-cell .l{font-size:11.5px; color:#9fc0dd;}
+.spotlight .sp-cell .v{font-size:15px; font-weight:600; color:#fff; line-height:1.55;}
+.spotlight .sp-cta{display:inline-block; margin-top:6px; background:var(--gold);
+  color:#fff; padding:8px 19px; border-radius:3px; font-size:14px; font-weight:600;}
+.spotlight .sp-cta:hover{background:#ab8034; text-decoration:none;}
+
+/* ---------- العدّاد ---------- */
+.countdown{background:var(--gold-soft); border:1px solid #e5d9c0;
+  border-radius:var(--radius); padding:17px 20px; margin:14px 0; text-align:center;}
+.countdown .cd-label{font-size:12.5px; color:var(--gold); font-weight:600;
+  letter-spacing:.5px;}
+.countdown .cd-when{font-size:16px; font-weight:700; color:var(--ink); margin:5px 0;}
+.countdown .cd-units{display:flex; justify-content:center; gap:22px; margin-top:10px;}
+.countdown .u{min-width:56px;}
+.countdown .u .n{font-size:27px; font-weight:700; color:var(--navy);
+  font-variant-numeric:tabular-nums; line-height:1.2;}
+.countdown .u .s{font-size:11.5px; color:var(--muted);}
+
+/* ---------- الخط الزمني ---------- */
+.timeline{position:relative; padding-inline-start:22px; margin:12px 0;}
+.timeline::before{content:''; position:absolute; inset-inline-start:5px; top:6px;
+  bottom:6px; width:2px; background:var(--line);}
+.tl-item{position:relative; padding-bottom:16px;}
+.tl-item::before{content:''; position:absolute; inset-inline-start:-21px; top:7px;
+  width:10px; height:10px; border-radius:50%; background:var(--paper);
+  border:2px solid var(--navy-2);}
+.tl-item.new::before{background:var(--gold); border-color:var(--gold);}
+.tl-when{font-size:11.5px; color:var(--faint); font-variant-numeric:tabular-nums;}
+.tl-what{font-size:14px; margin-top:1px;}
+.tl-what b{color:var(--navy);}
+.tl-what s{color:var(--faint);}
+
+/* ---------- تذييل ---------- */
+.disclaimer{background:#fffdf7; border:1px solid #e8ddc4;
+  border-radius:var(--radius); padding:16px 20px; font-size:13px;
+  color:#6b5c3c; line-height:1.8;}
+.disclaimer b{color:#8a6d2f;}
+.engines{margin-top:11px; padding-top:10px; border-top:1px solid #e8ddc4;
+  font-size:11.5px; color:#9a8a68; font-family:ui-monospace,Menlo,Consolas,monospace;
+  direction:ltr; text-align:end;}
+.empty{padding:30px 22px; text-align:center; color:var(--faint); font-size:14px;}
+.hidden{display:none !important;}
+
+/* ---------- رادار الإشارات ---------- */
+.radar-intro{background:#f7f9fb; border:1px solid var(--line);
+  border-radius:var(--radius); padding:13px 16px; font-size:13.5px;
+  color:var(--muted); margin-bottom:16px;}
+.radar-intro b{color:var(--navy);}
+
+.signal{border:1px solid var(--line); border-radius:var(--radius);
+  margin-bottom:13px; overflow:hidden; background:var(--paper);}
+.signal.novel{border-inline-start:4px solid var(--gold); background:#fffdf8;}
+.signal.confirmed{border-inline-start:4px solid var(--green); background:#f8fcfa;}
+.signal.weak{opacity:.86;}
+.sig-head{padding:12px 15px 9px; display:flex; gap:9px;
+  align-items:flex-start; flex-wrap:wrap;}
+.sig-statement{flex:1 1 260px; font-size:15px; font-weight:600;
+  color:var(--ink); line-height:1.65; min-width:200px;}
+.sig-evidence{display:flex; gap:14px; flex-wrap:wrap; padding:0 15px 10px;
+  font-size:12.5px; color:var(--muted); font-variant-numeric:tabular-nums;}
+.sig-evidence b{color:var(--navy); font-weight:600;}
+.sig-quotes{background:#f8f9fb; border-top:1px solid var(--line-soft);
+  padding:10px 15px;}
+.sig-quote{font-size:13px; color:var(--body); padding:5px 0;
+  border-bottom:1px dotted var(--line); line-height:1.7;}
+.sig-quote:last-child{border-bottom:none;}
+.sig-quote .who{font-weight:600; color:var(--navy-2); font-size:12.5px;}
+.sig-quote .eye{color:var(--gold); font-size:11.5px; font-weight:600;}
+.sig-lead{background:var(--green-soft); color:var(--green); font-size:12.5px;
+  font-weight:600; padding:7px 15px; border-top:1px solid #d5e8de;}
+
+.gauge{display:grid; grid-template-columns:repeat(auto-fit,minmax(118px,1fr));
+  gap:1px; background:var(--line); border:1px solid var(--line);
+  border-radius:var(--radius); overflow:hidden; margin-bottom:18px;}
+.gauge .g{background:var(--paper); padding:12px 14px; text-align:center;}
+.gauge .g .n{font-size:23px; font-weight:700; color:var(--navy);
+  font-variant-numeric:tabular-nums; line-height:1.3;}
+.gauge .g .l{font-size:11.5px; color:var(--muted);}
+.gauge .g.gold .n{color:var(--gold);}
+.gauge .g.green .n{color:var(--green);}
+
+.qlist{margin:0; padding:0; list-style:none;}
+.qlist li{padding:8px 0; border-bottom:1px solid var(--line-soft);
+  font-size:13.5px;}
+.qlist li:last-child{border-bottom:none;}
+.qlist .meta{font-size:11.5px; color:var(--faint); margin-top:2px;}
+
+/* ---------- طباعة ---------- */
+@media print{
+  body{background:#fff; font-size:11.5pt;}
+  .topbar,.filters,.rail,.sp-cta{display:none !important;}
+  .wrap{display:block; max-width:100%; padding:0;}
+  section.block{border:1px solid #ccc; break-inside:avoid; margin-bottom:14px;
+    box-shadow:none;}
+  .masthead{background:#fff !important; color:#000; border-bottom:3px solid #000;}
+  .masthead .eyebrow,.masthead .lede,.issue{color:#444 !important;}
+  .masthead h1,.issue b{color:#000 !important;}
+  .spotlight{background:#fff !important; color:#000; border:2px solid #000;}
+  .spotlight h2,.spotlight .v{color:#000 !important;}
+  .spotlight .sp-eyebrow,.spotlight .l{color:#444 !important;}
+  a{color:#000; text-decoration:underline;}
+  .entry{break-inside:avoid;}
+}
 </style>
 </head>
 <body>
-
-<div class="nav"><div class="nav-in">
-  <div class="logo">&#127963;</div>
-  <div>
-    <h1>مرصد العقارات المصرية للمغتربين</h1>
-    <div class="when">آخر تحديث: 2026-07-26 12:27</div>
+<header class="masthead"><div class="masthead-in">
+  <div class="eyebrow">تقرير دوري · رصد وتحليل</div>
+  <h1>مرصد العقارات المصرية للمصريين بالخارج</h1>
+  <p class="lede">رصد آلي للمصادر الرسمية والإعلامية · تحليل واستشراف مدعوم بالذكاء الاصطناعي</p>
+  <div class="issue">
+    <span>صدر في: <b>26 يوليو 2026 — 19:45 بتوقيت القاهرة</b></span>
+    <span>العناصر المرصودة: <b>62</b></span>
+    <span>مصادر رسمية عاملة: <b>4/6</b></span>
   </div>
-  <div class="tabs"><button class="tab on" data-filter="all">الكل</button>
-<button class="tab" data-filter="-">فيديوهات وتحليلات</button></div>
+</div></header>
+<nav class="topbar"><div class="topbar-in">
+  <a href="#summary">الملخص التنفيذي</a>
+  <a href="#status">حالة الملفات</a>
+  <a href="#radar">رادار الإشارات</a>
+  <a href="#outlook">الاستشراف</a>
+  <a href="#official">الرصد الرسمي</a>
+  <a href="#feed">الرصد الإخباري</a>
+  <a href="beit-alwatan.html" class="cta">ملف بيت الوطن ←</a>
+</div></nav>
+<div class="wrap">
+  <main class="doc">
+<div class="kpis">
+  <div class="kpi "><div class="k-label">إجمالي العناصر</div><div class="k-value">62</div></div>
+  <div class="kpi good"><div class="k-label">جديد هذه الدورة</div><div class="k-value">61</div></div>
+  <div class="kpi "><div class="k-label">عاجل</div><div class="k-value"></div></div>
+  <div class="kpi "><div class="k-label">تغييرات رسمية</div><div class="k-value"></div></div>
+  <div class="kpi alert"><div class="k-label">إشارات مش في الأخبار</div><div class="k-value">2</div></div>
+</div>
+<div class="spotlight">
+  <div class="sp-eyebrow">الملف المتابَع باستمرار</div>
+  <h2>بيت الوطن — أراضي المصريين بالخارج</h2>
+  <div class="sp-grid"><div class="sp-cell"><div class="l">المرحلة</div><div class="v">لم يُعلن بعد</div></div><div class="sp-cell"><div class="l">حالة الحجز</div><div class="v">لم يُعلن بعد</div></div><div class="sp-cell"><div class="l">سعر المتر</div><div class="v">لم يُعلن بعد</div></div><div class="sp-cell"><div class="l">المساحات</div><div class="v">لم يُعلن بعد</div></div></div>
+  
+  <a class="sp-cta" href="beit-alwatan.html">افتح الملف الكامل ←</a>
+</div>
+<section class="block" id="radar">
+  <h2>رادار الإشارات المبكرة — من كلام الناس</h2>
+  <div class="block-body">
+<div class="gauge"><div class="g "><div class="n">2</div><div class="l">إشارة مرصودة</div></div><div class="g gold"><div class="n">2</div><div class="l">مش في الأخبار</div></div><div class="g "><div class="n"></div><div class="l">قوية أو متقاطعة</div></div><div class="g green"><div class="n"></div><div class="l">اتأكدت رسميًا</div></div></div>
+<h3>معلومات من الناس مش موجودة في الأخبار</h3>
+<p style="font-size:13px;color:var(--muted);margin-top:0">دي أهم حاجة في الرادار — كلام بيتقال ومحدش نشره رسميًا. <b>كل واحدة محتاجة تأكيد قبل ما تتصرف عليها.</b></p>
+<div class="signal novel weak">
+  <div class="sig-head">
+    <div class="sig-statement">أقل مقدم حجز متاح على الموقع حالياً هو 8000 دولار في مدينة أخميم الجديدة</div>
+    <div><span class="tag gray">إشارة فردية</span><span class="tag gold">مش في الأخبار</span><span class="tag gray">شائعة</span></div>
+  </div>
+  <div class="sig-evidence">
+    <span>قالها <b>1</b> شخص</span>
+    <span>من <b>1</b> مصدر مستقل</span>
+    <span><b>1</b> تفاعل</span>
+    <span>يوتيوب</span>
+    <span>أول رصد: منذ دقائق</span>
+  </div>
+  <div class="sig-quotes">
+    <div class="sig-quote"><span class="who"><a href="https://www.youtube.com/watch?v=deNhseBhPF8&amp;lc=UgwAudnuo5IG0EZeAud4AaABAg" target="_blank" rel="noopener">@اخبارالاسكان</a></span><br>«أقل مقدم حجز متاح على الموقع حالياً هو 8000 دولار في مدينة أخميم الجديدة.. أي مبلغ أقل من مقدمات الأراضي المتاحة لن يسجل»</div>
+  </div>
+</div>
+<div class="signal novel weak">
+  <div class="sig-head">
+    <div class="sig-statement">مفيش المساحة ده من اول ٢٠٠ متر بسعر ٣٣ الف</div>
+    <div><span class="tag gray">إشارة فردية</span><span class="tag gold">مش في الأخبار</span><span class="tag gray">شائعة</span></div>
+  </div>
+  <div class="sig-evidence">
+    <span>قالها <b>1</b> شخص</span>
+    <span>من <b>1</b> مصدر مستقل</span>
+    <span>يوتيوب</span>
+    <span>أول رصد: منذ دقائق</span>
+  </div>
+  <div class="sig-quotes">
+    <div class="sig-quote"><span class="who"><a href="https://www.youtube.com/watch?v=ys3qjk2mK7Q&amp;lc=UgzyLQ3LBxGQmAns3tx4AaABAg.AZ5CUQ6PYw2AZ5en2xyX5n" target="_blank" rel="noopener">@RAOF-MOUSSArealestate</a></span><br>«مفيش المساحة ده من اول ٢٠٠ متر بسعر ٣٣ الف»</div>
+  </div>
+</div><p style="margin-top:16px"><a href="beit-alwatan.html#radar"><b>افتح الرادار الكامل في ملف بيت الوطن ←</b></a></p>
+  </div>
+</section>
+<section class="block" id="official">
+  <h2>الرصد الرسمي</h2>
+  <div class="block-body">
+<p style="color:var(--muted)">لا توجد تغييرات مرصودة في المصادر الرسمية خلال هذه الدورة.</p>
+<h3>حالة المصادر المراقَبة</h3>
+<table><thead><tr><th>المصدر</th><th>الحالة</th><th>سطور مرصودة</th><th>آخر فحص</th></tr></thead><tbody>
+<tr><td><a href="https://lands.nuca.gov.eg/ar/News.aspx" target="_blank" rel="noopener">هيئة المجتمعات العمرانية — الأخبار</a></td><td><span class="tag green">يعمل</span></td><td>8</td><td>منذ دقائق</td></tr>
+<tr><td><a href="https://lands.nuca.gov.eg/" target="_blank" rel="noopener">هيئة المجتمعات العمرانية — الرئيسية</a></td><td><span class="tag green">يعمل</span></td><td>30</td><td>منذ دقائق</td></tr>
+<tr><td><a href="http://www.newcities.gov.eg/" target="_blank" rel="noopener">بوابة هيئة المجتمعات العمرانية</a></td><td><span class="tag green">يعمل</span></td><td>41</td><td>منذ دقائق</td></tr>
+<tr><td><a href="https://reservations.realestate.gov.eg/ar" target="_blank" rel="noopener">منصة مصر العقارية</a> <span class="tag gray">JS</span></td><td><span class="tag red">متعذّر</span></td><td>0</td><td>منذ دقائق</td></tr>
+<tr class="note-row"><td colspan="4">تعذّر الوصول: 522 Server Error: &lt;none&gt; for url: https://reservations.realestate.gov.eg/ar</td></tr>
+<tr><td><a href="https://beitakfemisr.com/" target="_blank" rel="noopener">بيتك في مصر</a> <span class="tag gray">JS</span></td><td><span class="tag green">يعمل</span></td><td>1</td><td>منذ دقائق</td></tr>
+<tr><td><a href="http://www.mhuc.gov.eg/Media/News" target="_blank" rel="noopener">وزارة الإسكان — الأخبار</a></td><td><span class="tag red">متعذّر</span></td><td>0</td><td>منذ دقائق</td></tr>
+<tr class="note-row"><td colspan="4">تعذّر الوصول: 404 Client Error: Not Found for url: http://www.mhuc.gov.eg/Media/News</td></tr>
+</tbody></table>
+  </div>
+</section>
+<section class="block" id="feed">
+  <h2>الرصد الإخباري</h2>
+  <div class="filters" data-filters><button class="on" data-filter="all">الكل</button><button data-filter="beit">بيت الوطن ومبادرات المغتربين</button><button data-filter="offers">طروحات ومشروعات جديدة</button><button data-filter="market">تحليل السوق والأسعار</button><button data-filter="s483183">فيديوهات وتحليلات</button></div>
+    <article class="entry" data-sec="beit">
+      <div class="entry-meta">
+        <span class="src">الوطن</span>
+        <span>·</span><span>بيت الوطن ومبادرات المغتربين</span>
+        <span>·</span><span>منذ 2 يومًا</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMiXEFVX3lxTE1oWlo1d2xqN3ZzeUF2VjBodFd2Mkk4c0huZXMwWm1ITWlnc3hrV2tTTTl4c3BLNUY2cGdsNlU2Zm9FYjJtYmxNVjE0QkNKM0RldnBSa0JjNGJFSVJI?oc=5" target="_blank" rel="noopener">طرح أراضي مسكن 7.. اعرف الأماكن وخطوات الحجز وموعد التقديم</a></h3>
+      <p class="snip">طرح أراضي مسكن 7.. اعرف الأماكن وخطوات الحجز وموعد التقديم &amp;nbsp;&amp;nbsp; الوطن</p>
+    </article>
+    <article class="entry" data-sec="beit">
+      <div class="entry-meta">
+        <span class="src">الهيئة العامة للاستعلامات</span>
+        <span>·</span><span>بيت الوطن ومبادرات المغتربين</span>
+        <span>·</span><span>منذ 12 يومًا</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMixgRBVV95cUxNMl9jN29Ha0hpOE5wVTcxV3F5SWcwajJTVTgydE5Cc1RKaWQ0cDZnNV9wbFNfU3BkZ0tMWHFBdjVQaHNpbmVwX1N6VEotQTRtY29JdVRDN1ZGbW11dkNtd3hoRHduTnFUc0ZTemdXVlhqbHJYY0U2dEs0Q1M5RTE3M2ROTHpoVlh1LThnMUxDMjRjQVRkX3VfYjlWTTE2SDlwSU9sTnRlRWZYM3pSTmx3YWdmQW5vb3RubUFsbjdOZUlibXBGQkEtYlVSTmxNN3NaZ2JaUWo1aUFaX3hORHZOT0I2bDdta3NuZTQwWkRLWHJpS0ZwbzZUak9Rc2ZwWEI0aERmbEtFeUI3Y1MzN3VEODh1ajdqYUpuek8wajN5UmhYcERwY09hSXhRUk5leV9kVFp3Z1U5NXlYU1hQcmhLN0ZFbWhfcVNrblJaamI4SXIyQjM2eTk2VjlUTTVYa0tKZEN0WWs4TE1PSVl2SGVVcmJnZllRSWVWMXV1MTZFbEp4MG9BR25ScWFRMVR1ZGJvT2VhNTI2b2xrdlg2TlBDOWx4ZFBFQXJ4Q0hQZVFWWHhSdEQwWGRPNm1yRmtBR2hpVmZVUk1oOWJIdzVWUV9TejdwNVBaSEk3cmdqWDlVQ2F0NnZ4bnVwSHpKZlRpZVFDQ01WWVJBVUF3Qm5CSXZOaFpvcXpBb0tRUHI5NE8xLWhKSXpUOEY4NVlFUlg2OWgxbHpWY2xqUXhDbTBBNHl4SmJjeTlqREtveDJkV3lXQU0xZm92MkE?oc=5" target="_blank" rel="noopener">مبادرات للمصريين بالخارج</a></h3>
+      <p class="snip">مبادرات للمصريين بالخارج &amp;nbsp;&amp;nbsp; الهيئة العامة للاستعلامات</p>
+    </article>
+    <article class="entry" data-sec="beit">
+      <div class="entry-meta">
+        <span class="src">الهيئة العامة للاستعلامات</span>
+        <span>·</span><span>بيت الوطن ومبادرات المغتربين</span>
+        <span>·</span><span>منذ 16 يومًا</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMi9wRBVV95cUxPLWoybWg0blhGTkhTdHlVcFB0eHNvaHhUdzJNLU5vLTFhSUdFdG9Cd21LYTlVTTlHM2l3SzRvdWFoLXdNaTJWM05odWtOQWxnOTFjZDdSdmwtUlR0dUVlWk9KUWtiOXRkU1RPYjhkd1h6UktMWkEwaHAteFpna3FORVNxV0g3OTAxV0tIMUpGcmVjaGRyalN5bldsNE1fb0xaZWxnNGU0c2hlTHNZaVdGOGEzR0Z2emNQazlTOXJTWUJCYk1xQThWSUVqXzltVWxLVEJuX2wxaUtoUHpjbzdlMENMbmU3Y2VsdU55SHdiamVRQmJLM3ZVN01ER0ZSbjBxV1hzNWpjak9Db1FoaXZCQ3d1VlhiV3dPc1EzQ3BLTE5XbWphMW1kZGQ4aEY4U1JvclNOMHpDQUJqaDVxM3F3VE1DTnVFSnVabDlZU2I4dTRrQU9pMWNNRURZVm5pQ0ZvTHBWaWVYdVhmZko3MnFENWU3N3hyMGNGZXUyT3dnalJuajhxN080dS15ckw5RGJDZ19FNkpIRTFPVFYtWW9WSEVWMkpuT3ItMDNielNKeU1KX1F5YktsUjNMZHV0SVZNdnBTYWFGem8xaDVsb2Y2OTRVWlVsVTlKbnZGUGs1MFV4UEY0NkIwN2h3dnRLeGJuUGRIT3Zaa2VSN1ZHSHhQZ3BzTFZ3b1RiQ2FlUWlFaDJUem1VazVHOTZXNlNMTXUxV1RDbzdWODJPOGJGS3dpZzRKS2xEZXZidFUydzh5SWpYcU9RbDVnWTR1Z2kwYXc4WndTV2F1UUxSajdfa3JucUwzWHlWckN5ZU83Qi1UbWt4TzVndnhR?oc=5" target="_blank" rel="noopener">مبادرات الدولة للمصريين بالخارج</a></h3>
+      <p class="snip">مبادرات الدولة للمصريين بالخارج &amp;nbsp;&amp;nbsp; الهيئة العامة للاستعلامات</p>
+    </article>
+    <article class="entry" data-sec="offers">
+      <div class="entry-meta">
+        <span class="src">العين الإخبارية</span>
+        <span>·</span><span>طروحات ومشروعات جديدة</span>
+        <span>·</span><span>منذ 2 يومًا</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMifkFVX3lxTE1jSXFKcDNucmRUR19vQ2NfOUszNkI3bVMzTU9FN1pvY0lHNHhUMDdDTlhpYURCcFM5S0ozd0JfLTFiSVo3azhTelRpN0xVcmtNOGFvN2JfdmxKTWdLVzIxSzhNRlQtRjZPeFA4cVNhX25ZelA2dUlWOUlqY0hudw?oc=5" target="_blank" rel="noopener">طرح أراضي مسكن 7 في مصر.. المدن وموعد الحجز وخطوات التقديم</a></h3>
+      <p class="snip">طرح أراضي مسكن 7 في مصر.. المدن وموعد الحجز وخطوات التقديم &amp;nbsp;&amp;nbsp; العين الإخبارية</p>
+    </article>
+    <article class="entry" data-sec="offers">
+      <div class="entry-meta">
+        <span class="src">بانكير</span>
+        <span>·</span><span>طروحات ومشروعات جديدة</span>
+        <span>·</span><span>منذ 2 يومًا</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMiREFVX3lxTE4tbFM5UnZ3QmY4bjZ2S3lucXpEdUllSVVGd05GWW9vdkdvdkEzVUhKZy1KRVpUQXRGRjlxY2FxZHo2YkFW?oc=5" target="_blank" rel="noopener">طرح 2898 قطعة من أراضي مسكن.. اعرف المدن وموعد شراء كراسة الشروط</a></h3>
+      <p class="snip">طرح 2898 قطعة من أراضي مسكن.. اعرف المدن وموعد شراء كراسة الشروط &amp;nbsp;&amp;nbsp; بانكير</p>
+    </article>
+    <article class="entry" data-sec="offers">
+      <div class="entry-meta">
+        <span class="src">صدى البلد</span>
+        <span>·</span><span>طروحات ومشروعات جديدة</span>
+        <span>·</span><span>منذ 2 يومًا</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMiR0FVX3lxTE1SLUxWaVRwWlZMZlZrMjlib3hnUmI4S2hRMjRtT0w0emxxQlZJVXRQWDExTmNKZ1FHcndRMDNUekJPRGdqcm5Z?oc=5" target="_blank" rel="noopener">طرح أراضي مسكن 7 .. موعد الحجز وخطوات التقديم</a></h3>
+      <p class="snip">طرح أراضي مسكن 7 .. موعد الحجز وخطوات التقديم &amp;nbsp;&amp;nbsp; صدى البلد</p>
+    </article>
+    <article class="entry" data-sec="offers">
+      <div class="entry-meta">
+        <span class="src">الوطن</span>
+        <span>·</span><span>طروحات ومشروعات جديدة</span>
+        <span>·</span><span>منذ 2 يومًا</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMiXEFVX3lxTE1oWlo1d2xqN3ZzeUF2VjBodFd2Mkk4c0huZXMwWm1ITWlnc3hrV2tTTTl4c3BLNUY2cGdsNlU2Zm9FYjJtYmxNVjE0QkNKM0RldnBSa0JjNGJFSVJI?oc=5" target="_blank" rel="noopener">طرح أراضي مسكن 7.. اعرف الأماكن وخطوات الحجز وموعد التقديم</a></h3>
+      <p class="snip">طرح أراضي مسكن 7.. اعرف الأماكن وخطوات الحجز وموعد التقديم &amp;nbsp;&amp;nbsp; الوطن</p>
+    </article>
+    <article class="entry" data-sec="offers">
+      <div class="entry-meta">
+        <span class="src">الوطن</span>
+        <span>·</span><span>طروحات ومشروعات جديدة</span>
+        <span>·</span><span>منذ 11 ساعة</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMiXEFVX3lxTE9ESGJTMXNsMEZsZmJ4MXFmYjhwTjU2NTdMVFd6MXAyOHo1Nk14Vi05Mno1MHJMNG1jRWFaLW96WmEzcmlpblg1ZTAzRDN3LV9pLVB6S1NoM1prN25H?oc=5" target="_blank" rel="noopener">طرح جديد للإسكان المتميز والمتوسط.. التفاصيل ورابط الحجز</a></h3>
+      <p class="snip">طرح جديد للإسكان المتميز والمتوسط.. التفاصيل ورابط الحجز &amp;nbsp;&amp;nbsp; الوطن</p>
+    </article>
+    <article class="entry" data-sec="offers">
+      <div class="entry-meta">
+        <span class="src">Masrawy</span>
+        <span>·</span><span>طروحات ومشروعات جديدة</span>
+        <span>·</span><span>منذ 2 يومًا</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMiugRBVV95cUxPdURpT1dDLU1uTk4zX0k2V0JTN3NSUUE5T3Examo3N1JRc0xJa3FkZk1oZUFaVEtOdmljam1pd0p4Z2JnRWhWQW9UMkhmWnFmaEpLR0taMmdNRmhIWXlOTzRoM1ViYjBoQTlWZ0w1OGRlMTJNbkpLQmNINjJpYXBWaURlMDd4dDlkT2VpZ3Voazd1a2VVY3NIM1pXN2hmNldFd19LR1Q2OUdkWkJCY29BTlJ4TDFldUMyUlVxck01SE1FcndpVWZYYTNha0d3RkV6S183VWNySWM5V1RKc3ZMa1hTUm4xbEJ2LVJHNGpFOFYwZkVidm1WazNyS0xNSzlON293eUJ5X21jOGtIWXUyX081b1hpemRQWFJVUGx5UnA3cHoxaU0ycms1YUpQdDhuMEpTWlBKb01XRWlfUVZUSkw5ZjBiNTdaZ2NISFlhb0NtN0JkVVFkNFFBYUhIaGpSRFV1Z21yTk9VeUVPUWxxV3JPSUhDX2pSWmdGek1VZk5pOTdpSmdCcHlHak1MbzlFbUs4MUl6NkVTcFFIUElkb1N4STFPVmMyWEVueEhSeWFyTGdTcWN4Z3NEWTVScG5xc21LYmNTekg1aDFJNnlUUWIzOWJkeW1qemVVNTlfM2FUSU5jOGVNTndqUkdYc0hOcFZrdG9YNkkxb3ZFeXlKT2ljQlRndmtsVkdSczF2Y3I5UThFeXo2M0JYc3A0cnBlLVZLNVpjUHpZeFpSX09PQmxyeHlBbWVNd2fSAb8EQVVfeXFMTldCa0RZVVRaYXhkcUVpRlJJRTRpVHdNQzVxdWpIbzA0SmU1cHVLX1Rla21pd1FRQTRDdGNLc2ViMUtEak1adEtudUFnT1R0THhESWpZLVNVY1JyZVdIcXg1UmpHczM1R1JGRmJkeGhKZjlvS2JUVXY0YklYd0t3US1LNGt6U0hOZ1NLYm9ual9UZFdYdV9BTk04S25OZXFWSXRVZm5la3A4cHVub1BycHlad3paRXVqTERCaEUyXy1xQzJyamY4QjlwQ1Bsb0lmRm0zOUJQMzBTS1B0R25nd2FOQXJ5MVN1UWlwUGlTcm8ybjUtcGZFOW1INEFjU2JROXp3bjdWMWtVZlVXTFVUYVVTVnc3cHVfbEw0TVN5U1oxc1hYNWNtbGF3TmdLUnJhc1ltRjFLQ2ZjSWhuZ1l2RnFvZTdEaUJxbmwzcm5RMzlCa21rbHdGSVRjS0U3LTZKZHNVNlVtM1RsSUo5MDlDTENaSy1LTGJ4Zzk5dGEyTERHYUZDanNHcmdtQ1c1dDFTTk9idWxSSFprcjVUYlNJazJHeVBORm5vdjNVY1ZUTElKUmNRVW9zTEVkMGYwVmhDRHJYODgxTkZPS0hsM3ltVzdDT3VrNXROWDh1ZWRyLVI2VTduNHRBZDBKbjd6LWtWTm1SaFQ1OWZqdWk3TEhZTm9kLVJLUDJ1aU0xSl94a0h4QzJNN2NNZ0UxVDlrMDVLbkZ6VlNQRnFxZlItc3REeWVUR1Z2UFhhcHUwRUFEejA?oc=5" target="_blank" rel="noopener">الإسكان تطرح 2898 قطعة أرض سكنية بـ17 مدينة جديدة.. الموعد ورابط التقديم</a></h3>
+      <p class="snip">الإسكان تطرح 2898 قطعة أرض سكنية بـ17 مدينة جديدة.. الموعد ورابط التقديم &amp;nbsp;&amp;nbsp; Masrawy</p>
+    </article>
+    <article class="entry" data-sec="offers">
+      <div class="entry-meta">
+        <span class="src">العين الإخبارية</span>
+        <span>·</span><span>طروحات ومشروعات جديدة</span>
+        <span>·</span><span>منذ 4 ساعة</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMifkFVX3lxTE04TTdmWHN5ejdUTlFqWGpObXBIQnZmZFhWd0dHMzZ3Sm1wLWU2WkxhbGpua05SUDdjUDBlWFdBYmRyUzhaQXJ2b0p2R21aOTh6QmxEUHNSMUd4Nng3UlViM2h0Mkpxek9NOVlOM1Y5SDZpcHpxVlBYWkhPWHlPQQ?oc=5" target="_blank" rel="noopener">2898 قطعة أرض سكنية.. تفاصيل طرح هيئة المجتمعات العمرانية في مصر</a></h3>
+      <p class="snip">2898 قطعة أرض سكنية.. تفاصيل طرح هيئة المجتمعات العمرانية في مصر &amp;nbsp;&amp;nbsp; العين الإخبارية</p>
+    </article>
+    <article class="entry" data-sec="offers">
+      <div class="entry-meta">
+        <span class="src">Masrawy</span>
+        <span>·</span><span>طروحات ومشروعات جديدة</span>
+        <span>·</span><span>منذ 5 ساعة</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMihARBVV95cUxOV0dBNHYteXljVXpLam04NjlUUzRmejczT3BidVFfT3FnYjlmMUlERllwbDVmX1ZhLUg5WGFsREJEQ1ZCMVp1dklheVZhS3ZfcG1xS1pjRGsxYjRuZUNWMzU2VmEtTGtnWEJ1bjVCWVl3ckc1Qm4zdEhzRkVjT0YzYUpQakV5eUZ1MWxxNGhyUkUzQUJTT1dXLThiVEdlOEZad0E5ZXhkcnFyVEtYWV9pVXNmTnVteW1xcjdXTW96ZFJyMHByd21qQXRhUUJyN1l4VTlWcFk3Nkwzdzgyb09wU2dCSVFRTW45VHQzbENybWYzZzY4M1EtcUFqam40NFNWalg3Y1RUXy1CS3h6U2gyWk1JRnU0XzVYd3d0QWVENGJ4VTgyTHJTYWhFa3RKR2xBVHNLSDQ4SDZDd1pFZGN2UU9KazVuQWdadUZZYjhkX0R2UHFaSnhkT1JkcG9GYnQ0QVpQV0k1N0tvZGlHMTNWd1ZIQlU5amJ4SnlfZXA2bWlYS1VCRGJLaFZoUl81cTV6MU04U0JBMlNwVnhnY19BLVFFQTZQYlVKZEtmWUpaMUk0Q0U2U2hyX0Y5YU5DYkczcnFzR0M3M2htUWdMMWpwT0xyWWlWTlBPaGpVb1lnemdwM0ZPcFVzRUFjMEVTZU5hZEl6dEJaVzFSRUhiZTFvQVhJWG7SAYQEQVVfeXFMTldHQTR2LXl5Y1V6S2ptODY5VFM0Zno3M09wYnVRX09xZ2I5ZjFJREZZcGw1Zl9WYS1IOVhhbERCRENWQjFadXZJYXlWYUt2X3BtcUtaY0RrMWI0bmVDVjM1NlZhLUxrZ1hCdW41QllZd3JHNUJuM3RIc0ZFY09GM2FKUGpFeXlGdTFscTRoclJFM0FCU09XVy04YlRHZThGWndBOWV4ZHJxclRLWFlfaVVzZk51bXltcXI3V01vemRScjBwcndtakF0YVFCcjdZeFU5VnBZNzZMM3c4Mm9PcFNnQklRUU1uOVR0M2xDcm1mM2c2ODNRLXFBampuNDRTVmpYN2NUVF8tQkt4elNoMlpNSUZ1NF81WHd3dEFlRDRieFU4MkxyU2FoRWt0SkdsQVRzS0g0OEg2Q3daRWRjdlFPSms1bkFnWnVGWWI4ZF9EdlBxWkp4ZE9SZHBvRmJ0NEFaUFdJNTdLb2RpRzEzVndWSEJVOWpieEp5X2VwNm1pWEtVQkRiS2hWaFJfNXE1ejFNOFNCQTJTcFZ4Z2NfQS1RRUE2UGJVSmRLZllKWjFJNENFNlNocl9GOWFOQ2JHM3Jxc0dDNzNobVFnTDFqcE9McllpVk5QT2hqVW9ZZ3pncDNGT3BVc0VBYzBFU2VOYWRJenRCWlcxUkVIYmUxb0FYSVhu?oc=5" target="_blank" rel="noopener">بـ17 مدينة.. موعد فتح باب حجز 2898 قطعة أرض سكنية ضمن برنامج &quot;مسكن&quot;</a></h3>
+      <p class="snip">بـ17 مدينة.. موعد فتح باب حجز 2898 قطعة أرض سكنية ضمن برنامج &quot;مسكن&quot; &amp;nbsp;&amp;nbsp; Masrawy</p>
+    </article>
+    <article class="entry" data-sec="offers">
+      <div class="entry-meta">
+        <span class="src">جريدة الاستثمار العربى</span>
+        <span>·</span><span>طروحات ومشروعات جديدة</span>
+        <span>·</span><span>منذ 6 ساعة</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMiuAJBVV95cUxQQ0FnX015WklTRmpBRHFWZDkwTzdSMVM1c0tUMkQ4ZmlrbTFhTGw5YktZSFRZVjFabi0tMEtUYmxjb1NTRzFhMkRUbU9YQzdXcEdPcTJIaDNHWHdyNmhJV1M4SzNnR2Z0Y1hjSmZtZ0NjMldnWFljeWhoZEwzdjFUZVo5U3puWmR6dTRnWTBPYmdudWlvbG0xbTE5S0ZpVTg1ZUdvLVU3UjI2UHNBWXNacFFOcWtwbmd3SnAxTWNNNzBoaVZEWTFjcEg1U0FFZnJMQUdmN3FMM0k5UU5VMDRMYnM4Vml5Z0ZqZy1ISDViSS1LVWlGZGdSTFQ2ZmZkQWNrYko3UmJ1U3pCaXRvOW53S2w0blgyYkdUUExxWER6MFB4MXYxWENRZ0tIXzhzYnRqSFJySzhJNFA?oc=5" target="_blank" rel="noopener">«الإسكان» تطرح 2898 قطعة أرض سكنية بـ17 مدينة</a></h3>
+      <p class="snip">«الإسكان» تطرح 2898 قطعة أرض سكنية بـ17 مدينة &amp;nbsp;&amp;nbsp; جريدة الاستثمار العربى</p>
+    </article>
+    <article class="entry" data-sec="offers">
+      <div class="entry-meta">
+        <span class="src">صدى البلد</span>
+        <span>·</span><span>طروحات ومشروعات جديدة</span>
+        <span>·</span><span>منذ 9 ساعة</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMiR0FVX3lxTE9RV3VaS3paaDJHSzNyMXF2bXRzQnRPd3VEbGdULVlkX0ZTQjdMc1dIbVB3RWk5bVpETkpmSjE2TldmWjFEWnlJ?oc=5" target="_blank" rel="noopener">موعد حجز الأراضي المتوسطة بـ 17 مدينة جديدة في مشروع مسكن7</a></h3>
+      <p class="snip">موعد حجز الأراضي المتوسطة بـ 17 مدينة جديدة في مشروع مسكن7 &amp;nbsp;&amp;nbsp; صدى البلد</p>
+    </article>
+    <article class="entry" data-sec="offers">
+      <div class="entry-meta">
+        <span class="src">الوطن</span>
+        <span>·</span><span>طروحات ومشروعات جديدة</span>
+        <span>·</span><span>منذ 10 ساعة</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMiXEFVX3lxTE5ZVVh4N18xcGszQnV3eXh2RzJRUGNZM2hibEc3TUNkRWtCR0dTRkpWT1ZwSWE1Um1sM0M1UVd4alcwOUdUZVVldXBLcnpFNDhqQlZ3UzA4a0VHMjBx?oc=5" target="_blank" rel="noopener">فرصة للمستثمرين.. طرح محلات ووحدات تجارية بمدينة بورسعيد الجديدة بالمزاد</a></h3>
+      <p class="snip">فرصة للمستثمرين.. طرح محلات ووحدات تجارية بمدينة بورسعيد الجديدة بالمزاد &amp;nbsp;&amp;nbsp; الوطن</p>
+    </article>
+    <article class="entry" data-sec="offers">
+      <div class="entry-meta">
+        <span class="src">بوابة الأهرام</span>
+        <span>·</span><span>طروحات ومشروعات جديدة</span>
+        <span>·</span><span>منذ 21 ساعة</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMiigNBVV95cUxNMGFRYUJZRzR1dW1ENXNFb2ttZlgyeEpDZTg3dmhfUWYtcXlwN21wYlB0c1d4YkVJMHdyZnFUS3pCeDA4VnIxZlZCWEFLcVZ1dHBzXzNpb3ppQkVTSDlCZUpDUUJHczFHa0dHNmVPcUFvblpGRFRsWEdCOVZRR2ZJc2ItQlMya1ZTc3VfQVhDR2tFbFd6Y2lhNllpWXJMSlVhOHFKd1ZuSU45RlUwVHFWZWluV1lmd3p3aU5iRE1STlNkUFB1eUZFNmtkZmZRVFczRnhlbFRQTkZWQTNoeW5lZTlzNG9sYV9pT2hlc3ZwVkhpdlJpblIwdjdZckx6X01MY3I1T1EzX1RJcXczbEhLLWhWU0R0NnJnNFl1UUFtZXoyT3QzVU84VEhkZ3pVd1BmbVNYSm9vaUNEODVnS0o5YW1JNEwxLXRQTENqNmtkWXd0X1pQcVhTaHdxT3Z2ZDNPZVhEOFlsSGJOR3J4dDc3UnV6MXBQUUZDa1NLZktJVUhRYmJ4NVB6Z3RB?oc=5" target="_blank" rel="noopener">طرح 2898 قطعة أرض سكنية فى 17 مدينة جديدة</a></h3>
+      <p class="snip">طرح 2898 قطعة أرض سكنية فى 17 مدينة جديدة &amp;nbsp;&amp;nbsp; بوابة الأهرام</p>
+    </article>
+    <article class="entry" data-sec="offers">
+      <div class="entry-meta">
+        <span class="src">اليوم السابع</span>
+        <span>·</span><span>طروحات ومشروعات جديدة</span>
+        <span>·</span><span>منذ 21 ساعة</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMi8ANBVV95cUxPbFVpaG10aFVkNjRZS1EzTzZpM0tPalhkWDlONzVQRUlNU1pBeElMeGVISFZVUnMzU094NVRyQVN4MEtuM21QRXpKeExLcXVJMF9URUFRR1R1RVRISENGN3ItUnQzQjVRTjNOc2hfZGdvV1ZlMkI3UTduUUU4TU1KQXlYbUowT0djOGc0aUdvVmxOOGUwTmVBWnhWaFJvSXdVcFZrUW1fbUtHb1BFQW80VUUtaGZ5S1p6aWhrSTZwU1lsejM1RmVaYlFvbVlRa1RyQmpuSGx2WEFQb0pqakhWd0wwZEVfamIwRDVmOUJiQ0Q3ZExWY1JjRGlTU0x1bS1Kc1AyR2RhcC1tMG83ZnpwaHdoV2NxRE8wZUpHdU03ZmFIbDBjLUhLUXNmdktScTZscjRNOHVBbS04YVhNOS1nT29SYnZ0XzB5OVZmdHJPTEZocFFYbk1iekJ2akpoX21kN1BvNEplZS1qSkh4bUFEeU5lX2dzYWluWTMzWS1pSmdLRkVqdnpyVk1vNlN3amRTdXF1SDFTLU5fVVY1WjBCYnkxMjhQVlVQMU9xRi1xMGFic1JYejVhdkZocnhGeXI0REZNVnUzNzcyYmxxcHJTM2VhLVBMTzNraGhhUDN5Mk1MbGlhdzZxUV9uOUozNGYt0gHrA0FVX3lxTE1XRUwzbTZaSFR1YXRNNFNsLVBZMU92R3lOdmVobmFJaEJRNjJrWUl3eF9fcmx0c0xrNHpWMi1OOFFmOEdvamd2MWp5QjdCc1gxU3hIOXoyU0xzdjRad1Q1eVBMQUV5bGl5enV3SFBlX2pBSllXVEVIYUtXT2pLRDl4ZlQyTklmZjc0TVJJaWZYeFpBYWtWSGkxWTZDNDZDanNiNUtzN0tFNEVPUHZPQXdmWElmSFAta1ZIb1RZbEpQS19ocWp6c3FtZ19kb2p5dDlYR2xrWktKVGxBeDFmUnVxM2dDUU11Y1o5WldUYVJNc2pXM3RWLWwyMTBDY0piUnFsejBJdTBtSlZRQTNEOWVqel91UXlGR1BqZDFWWGR2emdTdVA5bGJoTTl5ZlJVVXZuSVR1ZnFGUWQyQng0V2lvNnhSTmlOZGxDS293azVQZVZYMklObURUUzA2Ty1jYy14TVhaVVgxMTdPVk9wMmpPaGdPNlFMVU4zcXlzQUNrNnZ6clh0VFBwZFRxc29PeWlRSzdMRVloNFVOZkJCclRKeFowVUItamI4YjdKQzFCZW5lb0dTazJlOTAzYmVGcjk5YndNSGdRNnVQYUppdGNDekJ2MFBULW5kWHpobkFha3p3YVB0QmNydzNr?oc=5" target="_blank" rel="noopener">كراسة شروط حجز الأراضى المتوسطة بـ10 مدن جديدة.. وزيرة الإسكان: طرح 2263 قطعة.. حدائق أكتوبر 5 والسادات 249 وحدائق العاشر 604 والسويس 86 وبرج العرب الجديدة 400 والفيوم الجديدة 108 وبني سويف 321 وأسيوط 145 قطعة</a></h3>
+      <p class="snip">كراسة شروط حجز الأراضى المتوسطة بـ10 مدن جديدة.. وزيرة الإسكان: طرح 2263 قطعة.. حدائق أكتوبر 5 والسادات 249 وحدائق العاشر 604 والسويس 86 وبرج العرب الجديدة 400 والفيوم الجديدة 108 وبني سويف 321 وأسيوط 145 قطعة &amp;nbsp;&amp;nbsp; اليوم ا</p>
+    </article>
+    <article class="entry" data-sec="offers">
+      <div class="entry-meta">
+        <span class="src">followict</span>
+        <span>·</span><span>طروحات ومشروعات جديدة</span>
+        <span>·</span><span>أمس</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMiugJBVV95cUxPaWpubVN3REZOcldTUlJPNFZ2OVRneVJiUHJrdFFTRkRHZEcwbHM5T2JwamR4LV9QZVdKY3hMemRuNVNOWUxrNjlGTzdXX01aWGg3VWpQN1ppMTl0cG0yenlDUTRLb1VvLUFpU2VSXzJSbWFmdGtZeWxCM3B2MHJYMUpOeXBTRUpPN3lma1E4ME9pRGd5MXFIYmE2MTNqSGNuNVJPVU9Xd0RWRHh1SGFwdzF2NmVYUWVoSlBmcWRPQ3d3MGlKeUZtWUtkcWxzeG1QY1FxMFUxWXVLY2tqaVZyWjJrWjhaYzB4QnpVbktTNjRnTngwYTZaVVVGXzQ5NjNPNEZCZ3lRZGFvalRyTzUxOXBUWEN2S0g1THBFMHp2YlVpVmdjTG1zc0dlVGYtenJWbms2VzZtNnRkZw?oc=5" target="_blank" rel="noopener">11 شركة تفوز بقطع أراضٍ ضمن شراكة «سكن لكل المصريين».. وطرح وحدات لمحدودي الدخل بتمويل مدعوم</a></h3>
+      <p class="snip">11 شركة تفوز بقطع أراضٍ ضمن شراكة «سكن لكل المصريين».. وطرح وحدات لمحدودي الدخل بتمويل مدعوم &amp;nbsp;&amp;nbsp; followict</p>
+    </article>
+    <article class="entry" data-sec="offers">
+      <div class="entry-meta">
+        <span class="src">اليوم السابع</span>
+        <span>·</span><span>طروحات ومشروعات جديدة</span>
+        <span>·</span><span>منذ 2 يومًا</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMiswNBVV95cUxOYzRQdEt0Y1FtZlc5THJyRzJrN3lRb1hUTFo4UUdTNFRHZFZpLVMxWE54X19UeWZHdm53Z2xxMk0tZFc2aWNjRFA5NnJYWVplSl8ySEIwY2VHR0lsbjR1TFdrR0pEbU15LXI5Y3lkNHA0dlR0eDBhRVFVVXl6YmNtcU5XVWhOTWtJal80Z1RISVg4VjFfSE5XVE13ck5KSTYyaUlYTlNhRHh5WkpaVFV3WmxpbjVsQVFGbE5lNHFacTRHcVR2RjJrQmxBdXRETmNFc1lvVm9FeF9MQVZEY2w5dHZBbHMwSF81Vk5LRWlXNE41b1ZsYVFycGpqMzNMWnREMVFKZmNJZC1RZHdyQzNQMTJJSU9GbzdkRWZTclhqY0I2VW8zM01VVUZKS2VBUzhhQkUtd1M0SGtyUmNRQnRacTFVZ1IyWmR5R2dsc1ROT3EwNDVBRGFLeHprS3pkajBVVE5seXZBWlVKYzlpVUQ1UWFFaWdQanJ0R0Y3LVFWc3BJaVJrT0dpRXIzREtPSU56dlFfaFJFOVpHT1NIeW9fUG40R194ckpWWmE3WDByS1BYTTjSAa4DQVVfeXFMTXVkRW16bldCNlNDVjFPN3U2LURmeEJVZ0trTUxDSFUzQkVKVWFvVjYtZ1pYbG1wTWJ1cUpTbWk1Wmo0YlpXdUgwejM5ckJCSHdoOGRTR3BmUHB1WFU3eUhVbkt0ZTVpM055VnpERVVia1VHdFdwWXlKbTlEMmVZWTc4NzRaM1NjM3FiSlpuUGF6Tzg2U2dZQUtXWGgwNnBpZzgzcGF0Z0k1a2pNRDRnMmlSNDdmSEwtZVZLVm1wOVg5cGF2aFF0VnA0Wk91eWJXV3B6LXhjcHpEeUNfZTFSWS13Mk9jc3VWaWhSakhfY0xmMmxtS3B6M21RaWZKUm9LeDJtSkpEaENUQzlTbGNmY1ZjdC1heGtFMXl2bFN1dk84MUF4TXJJYVN4TzhRUHdCeVpuUEZnQ1hEUVVmY1QtS0liNnVLQWJzdnZwVms1YW1BQTIyVk5WOXo3NzBtdklCbHpZRE9xZC1uTlFIUUl0Y0hQNzY5bkZVM2FyajJiUmpqWWVFQ1B3OE5lbzdMa1paU3p0MnVadWpCWWYzR2NuSlNGTUVvYkVZMDdfYnMzUQ?oc=5" target="_blank" rel="noopener">الإسكان تطرح 2898 قطعة أرض سكنية ضمن برنامج “مسكن” في 17 مدينة جديدة</a></h3>
+      <p class="snip">الإسكان تطرح 2898 قطعة أرض سكنية ضمن برنامج “مسكن” في 17 مدينة جديدة &amp;nbsp;&amp;nbsp; اليوم السابع</p>
+    </article>
+    <article class="entry" data-sec="offers">
+      <div class="entry-meta">
+        <span class="src">جريدة البورصة</span>
+        <span>·</span><span>طروحات ومشروعات جديدة</span>
+        <span>·</span><span>منذ 2 يومًا</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMiW0FVX3lxTE9vc0RVQ2N6b194TkhJOVM5VUdYT2Z6QWNENlJZeUhfUUFuTmFKR2NtU3QwNlA2TUwxNWVCb3hXbTh1SlNXcXdSOXBuTnlvS2FKd1dFUzZjaktjVFU?oc=5" target="_blank" rel="noopener">&quot;الإسكان&quot; تعلن موعد بدء حجز أراضي سكنية في 17 مدينة</a></h3>
+      <p class="snip">&quot;الإسكان&quot; تعلن موعد بدء حجز أراضي سكنية في 17 مدينة &amp;nbsp;&amp;nbsp; جريدة البورصة</p>
+    </article>
+    <article class="entry" data-sec="offers">
+      <div class="entry-meta">
+        <span class="src">جريدة المال</span>
+        <span>·</span><span>طروحات ومشروعات جديدة</span>
+        <span>·</span><span>منذ 3 يومًا</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMirgJBVV95cUxPbEZPVnJRSVEyR0tfWk1fX3lySzNMNFc0M1VPQjczWFhTWnVNWExkeV9nOHpUd2c1TmlFd2RLN3hFOFRzai1JT3Q4a0hXUGgyVlBkYnhpV044Z09odG1udEFZTlVDY2dSdGo2TkJoM3RHQkNHLUZHY1N3aW8xMXNvcEdKYTkyT3MzcFJFMnpnRjlZVTlSOWs0ZTRoM0ZfQ1J1RVZmc3U1azFmRDI0TWE5cmlPUTJGVDdNN2s5VS1LeDJrLUgzLTBXRUJ0V0k2VU5LZnh3ZmFJdW1jUjlPaEE5NGtpQXJiSVJES0RwV0hFNEkyTzdGeFJadVo2T29MNW4zYi0yNUM2ZXZZX0xJSmowT2swV2Y2UjZmX255cTZlRUxuM2p1eVR1a2xHOXVkQQ?oc=5" target="_blank" rel="noopener">«الإسكان» تطرح 2898 قطعة أرض سكنية بـ17 مدينة جديدة</a></h3>
+      <p class="snip">«الإسكان» تطرح 2898 قطعة أرض سكنية بـ17 مدينة جديدة &amp;nbsp;&amp;nbsp; جريدة المال</p>
+    </article>
+    <article class="entry" data-sec="offers">
+      <div class="entry-meta">
+        <span class="src">facebook.com</span>
+        <span>·</span><span>طروحات ومشروعات جديدة</span>
+        <span>·</span><span>منذ 9 يومًا</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMisgVBVV95cUxPUHlSZXNKTzlSQmtldmx6NlBSb0ZMZ3ByV3c3dnZ5YmNVdDNKaDBpNjJSZ0EybXYtcExRLVY1T3FZcDA0OGwtRDhhbWRubWFpQUZPRnBlZ192UlhtUDVDamYtUDZtMnFsbUVOS0E4bTgwY2hLcW8wTlJSbUFkUlhzcC1WVlV6YXM2dGp1Y1c4OWV6WDFJaGs2aWZ0cGFaa3J0UlZLdkVOaTU2MDg1eUczQzdybi1UMlJhZUlvLU16Y3BLUWduR0lxMDlURkdMSEwtRHRoZk5oNHpUMVo2ZkN3QVJQcVY2SGd5X252MEZOeEdXLWt4UEhFbEZnZUFDNzA2ZTZDaTFmaXM1X0ZQYUlJNWlaVUZQZExKc1dKOExIWlZKbXZFQTBnUUc5WWhyTmtpSmVCRERLRTRaaDczY0lFVnphWkxnNEpxOWV6WDZTZzVHRGRDbjQ2T3ZqYkRIUFdUaGRpRll2Y1lsNjc2c3p0NGotQUgxVFhOdURHd0VGNE1ycXAydC10MXQ3LVI5ei1QQzZPZ3dzM196emt1XzBmQWgxSWZ1T3lkQk5GanhmcW80M3dwZWxEbVlMU3BqcVpINmc3aS1sYzlMcjVwRno2RFBia3FHQlR4WFFsX0JlMmdXbURvT2g2bHpmS3ZjcnFEd0VCS3BLR05uOVJqSGwtRWZScmNqaGtLZFZzU3JIQjFjRlpFUWJjel9kUmtBMnBlc0FLRk9zTFlkT211REVCMlRLNWJhcTNBeFFyNHh5cEd4Y1NnV2c0eHFteVFhTC05eDVmU1UzT3dPbW9GSndwWjY5a1VFcllGS1BfbXJLWTBsRzJiVUJZdXN6NTJNSWhqVEU1UEVUWjlfRzJqNlIzTTNsTl9DTzBMNnY4dXhEcUd4VVFmU1psamJvelRWdG0zb0E?oc=5" target="_blank" rel="noopener">فيديو صادر عن وزارة الإسكان والمرافق والمجتمعات العمرانية: تواصل وزارة الإسكان والمرافق والمجتمعات العمرانية تنفيذ مراحل المبادرة الرئاسية &quot;سكن لكل المصريين&quot;، بما يعكس جهود الدولة في توفير السكن الملائم للمواطنين، والعمل على التوسع في طرح الوحدات السكنية بمخت</a></h3>
+      <p class="snip">فيديو صادر عن وزارة الإسكان والمرافق والمجتمعات العمرانية: تواصل وزارة الإسكان والمرافق والمجتمعات العمرانية تنفيذ مراحل المبادرة الرئاسية &quot;سكن لكل المصريين&quot;، بما يعكس جهود الدولة في توفير السكن الملائم للمواطنين، والعمل على التوس</p>
+    </article>
+    <article class="entry" data-sec="market">
+      <div class="entry-meta">
+        <span class="src">إرم بزنس</span>
+        <span>·</span><span>تحليل السوق والأسعار</span>
+        <span>·</span><span>منذ 2 يومًا</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMiW0FVX3lxTFBERk9hbzBaa3ZENzhBcTVoZkpXak9aWVhvSGtuNjRjNlB5MTdUM21IdGFRZ3UxeW1tV1dsTGtaem5BMHJYQVJxeXVSX0czWEFVYzlLNHhvM3IxSUE?oc=5" target="_blank" rel="noopener">رغم استقرار الطلب وثبات الفائدة.. أسعار العقارات تواصل الارتفاع في مصر</a></h3>
+      <p class="snip">رغم استقرار الطلب وثبات الفائدة.. أسعار العقارات تواصل الارتفاع في مصر &amp;nbsp;&amp;nbsp; إرم بزنس</p>
+    </article>
+    <article class="entry" data-sec="market">
+      <div class="entry-meta">
+        <span class="src">Zawya</span>
+        <span>·</span><span>تحليل السوق والأسعار</span>
+        <span>·</span><span>منذ 5 يومًا</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMiswRBVV95cUxPZ0g5SVpXUE94bnRlamFMNGJpY2pnd1VXUm1lNVYySkhDZlIweXpkcGhiLTgxMHJHVXRnUzFVRTZ3YmpEZUd3MXhWVXRBejJ5Vm5mdFVBUzJaQV9ZbDRtNndrQmotN2VBeDZDY0ZmVnlnSExaNmZWeWxuRGR2MmhScWx1U1g0NHFQdTdqU2hJblM5dnd4cXRPR3lLRXZkSGpKcmZfN3VDNFcyMlhyV3FHRnA2a29GYjB3ODZNWmZROW9zQ1M2emE4VDFaNG8yWDFFQ2FTUGFIb0JwUGdKT1dVbTQ5YjY5X1JJeVk5REVnMzNuOXZEczVZTEdQTUtuNjVkeW1LbWFPWmhYUmRUNG1paGtsbTFKUTJ3RlotMHZDcnRvNmxiVHRpVktva1BHMmdNbDdtVHhHQ2xLNW5RR3Q1cnZmMC1tZUpuakZqc21GMkppYXNtcEpZVHA1X0VNYXpQX0hKcGpiOTB5WjZaS2Nqd1dBc0JNVU5Fa0dWQ3gwUF9YTmhjdG9ZSkh3cXZabnZvR1RoaXFrS3JuaFhOc0Y5emFONFUxYnFXRWlMWndaR0dHcHRWQndEbzBrenE0TlJoSG9KeVpKVnpqVVdJX3lqMnMwOVhVeDg4WGhtdzkyWTk0ZWUwOVEwOUVxY1NBTEg2M0FvelgwdHBXYVFDWWpXem1IYVhWelVLVGd0OFlQX0NWWURBOGpEa25tNzAxdUZqeS1qLVp3VDJxeDQ5V3Y2RTF5VQ?oc=5" target="_blank" rel="noopener">تحليل: لماذا استبق المركزي المصري اجتماعه لرفع أسعار الفائدة؟</a></h3>
+      <p class="snip">تحليل: لماذا استبق المركزي المصري اجتماعه لرفع أسعار الفائدة؟ &amp;nbsp;&amp;nbsp; Zawya</p>
+    </article>
+    <article class="entry" data-sec="market">
+      <div class="entry-meta">
+        <span class="src">العين الإخبارية</span>
+        <span>·</span><span>تحليل السوق والأسعار</span>
+        <span>·</span><span>منذ 19 يومًا</span>
+        <span class="tag green">جديد</span>
+      </div>
+      <h3 class="t"><a href="https://news.google.com/rss/articles/CBMiekFVX3lxTFBibDk5a1ZMcWlfRUpnZFJ0T2o5bEZ5NW9adkR4QWdoeWdWVUZKS2VnQjFkNjBBRFhvczNqY3BZaWRaUnhMaFZuWU9NV3pSUXlFc09ydjMydl9LSVdSN3V3cVFMZ2t4TFhQLTRxbURyamJpTmZIUmtCcGZR?oc=5" target="_blank" rel="noopener">مشهد صامت في سوق العقارات المصري.. الأعين نحو البنك المركزي</a></h3>
+      <p class="snip">مشهد صامت في سوق العقارات المصري.. الأعين نحو البنك المركزي &amp;nbsp;&amp;nbsp; العين الإخبارية</p>
+    </article>
+    <article class="entry" data-sec="s483183">
+      <div class="entry-meta">
+        <span class="src">RAOF - MOUSSA REALESTATE </span>
+        <span>·</span><span>فيديوهات وتحليلات</span>
+        <span>·</span><span>منذ 16 يومًا</span>
+        <span class="tag green">جديد</span><span class="tag gold">فيديو</span>
+      </div>
+      <h3 class="t"><a href="https://www.youtube.com/watch?v=ys3qjk2mK7Q" target="_blank" rel="noopener">بيت الوطن | كما لم تراه من قبل | متوسط الاسعار و اخر التطورات</a></h3>
+      <p class="snip">في هذا الفيديو ياخذنا رؤوف موسي في جوله مختلفه عن كل الجولات في منطقه بيت الوطن القاهره الجديده و يوضح اخر انجازات جهاز المدينه في ...</p>
+      <div class="metrics"><span>7.8K مشاهدة</span><span>198 إعجاب</span><span>115 تعليق</span></div>
+    </article>
+    <article class="entry" data-sec="s483183">
+      <div class="entry-meta">
+        <span class="src">الاسكان لحظه بلحظه  </span>
+        <span>·</span><span>فيديوهات وتحليلات</span>
+        <span>·</span><span>منذ 13 يومًا</span>
+        <span class="tag green">جديد</span><span class="tag gold">فيديو</span>
+      </div>
+      <h3 class="t"><a href="https://www.youtube.com/watch?v=deNhseBhPF8" target="_blank" rel="noopener">عاجل تسريبات بيت الوطن.. دخول شمال الرحاب واللوتس ومناطق جديدة لأول مرة! آخر معاد 25 يوليو</a></h3>
+      <p class="snip">كيف تنقل حجزك للقطع والمربعات الجديدة في بيت الوطن؟ القاهرة الجديدة تفاجئ الجميع في المرحلة 11! كواليس وتحديثات حصرية عن قطع ...</p>
+      <div class="metrics"><span>266 مشاهدة</span><span>9 إعجاب</span><span>8 تعليق</span></div>
+    </article>
+    <article class="entry" data-sec="s483183">
+      <div class="entry-meta">
+        <span class="src">عقارات 6أكتوبر حدائق اكتوبر واكتوبر الجديدة</span>
+        <span>·</span><span>فيديوهات وتحليلات</span>
+        <span>·</span><span>منذ 2 يومًا</span>
+        <span class="tag green">جديد</span><span class="tag gold">فيديو</span>
+      </div>
+      <h3 class="t"><a href="https://www.youtube.com/watch?v=zZWiViPWPHE" target="_blank" rel="noopener">اراضي للبيع اكتوبر الجديده شمال المطار قرعه 2018 واراضي بيت الوطن اكتوبر الجديده 01000989933</a></h3>
+      <p class="snip">شركه بدايه للتسويق العقاري متخصصون في بيع وشراء الاراضي باكتوبر للتواصل أ مصطفى جمال 01000989933.</p>
+      <div class="metrics"><span>20 مشاهدة</span><span>0 إعجاب</span><span>0 تعليق</span></div>
+    </article>
+    <article class="entry" data-sec="s483183">
+      <div class="entry-meta">
+        <span class="src">الإسكان مع عمرو زكي</span>
+        <span>·</span><span>فيديوهات وتحليلات</span>
+        <span>·</span><span>منذ 2 يومًا</span>
+        <span class="tag green">جديد</span><span class="tag gold">فيديو</span>
+      </div>
+      <h3 class="t"><a href="https://www.youtube.com/watch?v=ywU3DpcsbbQ" target="_blank" rel="noopener">فرصه امتلاك بيتك طرح اراضي مسكن ٧ ، خد قطعه ارض ٢٠٩ متر بمقدم ٢٥ الف جنيه بالبطاقه بس</a></h3>
+      <p class="snip">#اراضي_الاسكان #اراضي_للبيع #مسكن_٧ #مسكن #اراضي_الاسكان #طروحات_اراضي_الاسكان #وزاره_الاسكان #هيئه_المجتمعات_العمرانيه_الجديده #بنك_التعمير_والاسكان #اراضي_مسكن #طرح_اراضي_الاسكان</p>
+      <div class="metrics"><span>6.7K مشاهدة</span><span>373 إعجاب</span><span>30 تعليق</span></div>
+    </article>
+    <article class="entry" data-sec="s483183">
+      <div class="entry-meta">
+        <span class="src">الإسكان مع عمرو زكي</span>
+        <span>·</span><span>فيديوهات وتحليلات</span>
+        <span>·</span><span>أمس</span>
+        <span class="tag green">جديد</span><span class="tag gold">فيديو</span>
+      </div>
+      <h3 class="t"><a href="https://www.youtube.com/watch?v=j9oid6bCg7o" target="_blank" rel="noopener">طرح أميز وارخص قطع اراضي ، بمقدم ١٠٠ الف ، بالبطاقه بس ، مساحه تصل ١٠٠٠ متر</a></h3>
+      <p class="snip">#طرح_اراضي_الاسكان #مسكن_٧ #اراضي_الاسكان #طرح_الاراضي #اراضي_مسكن #وزاره_الاسكان #هيئه_المجتمعات_العمرانيه_الجديده #اراضي_للبيع #اراضي #ارض_مسكن</p>
+      <div class="metrics"><span>2.4K مشاهدة</span><span>171 إعجاب</span><span>21 تعليق</span></div>
+    </article>
+    <article class="entry" data-sec="s483183">
+      <div class="entry-meta">
+        <span class="src">الإسكان مع عمرو زكي</span>
+        <span>·</span><span>فيديوهات وتحليلات</span>
+        <span>·</span><span>منذ 7 يومًا</span>
+        <span class="tag green">جديد</span><span class="tag gold">فيديو</span>
+      </div>
+      <h3 class="t"><a href="https://www.youtube.com/shorts/BbV9mLCMPJM" target="_blank" rel="noopener">مازال الطرح شغال حتي ٣٠ / ٧ / ٢٠٢٦ ، بدون شروط واوراق ، بالبطاقه بسسس 👏</a></h3>
+      <p class="snip">#وزاره_الاسكان #هيئه_تعاونيات_البناء_والاسكان #هيئه_المجتمعات_العمرانيه_الجديده #مشروع_اللؤلؤه #لؤلؤه_بدر #لؤلؤه_القاهره_الجديده #لؤلؤه_اكتوبر #لؤلؤه_العاشر_من_رمضان #شقق_الاسكان_والتعمير #شقق_الاسكان_الاجتماعي #شقق_الاسكان_٢٠٢٦ #</p>
+      <div class="metrics"><span>7.8K مشاهدة</span><span>303 إعجاب</span><span>19 تعليق</span></div>
+    </article>
+    <article class="entry" data-sec="s483183">
+      <div class="entry-meta">
+        <span class="src">الإسكان مع عمرو زكي</span>
+        <span>·</span><span>فيديوهات وتحليلات</span>
+        <span>·</span><span>منذ 3 يومًا</span>
+        <span class="tag green">جديد</span><span class="tag gold">فيديو</span>
+      </div>
+      <h3 class="t"><a href="https://www.youtube.com/shorts/skkCkOUsndM" target="_blank" rel="noopener">طرح ٢٨٩٨ قطعه ارض مسكن٧، بمقدم يبدء من ٢٥ الف حدائق اكتوبر-السادات-العبور-الشروق-بدر ومدن تانيه كتير</a></h3>
+      <p class="snip">#طرح_اراضي_الاسكان #طرح_شقق_الاسكان #اراضي_مسكن #مسكن_٧ #طروحات_اراضي_مسكن #اراضي_الاسكان_الاجتماعي #طروحات_الاراضي #تقديمات_الاراضي</p>
+      <div class="metrics"><span>3.1K مشاهدة</span><span>179 إعجاب</span><span>53 تعليق</span></div>
+    </article>
+    <article class="entry" data-sec="s483183">
+      <div class="entry-meta">
+        <span class="src">الإسكان مع عمرو زكي</span>
+        <span>·</span><span>فيديوهات وتحليلات</span>
+        <span>·</span><span>منذ 3 يومًا</span>
+        <span class="tag green">جديد</span><span class="tag gold">فيديو</span>
+      </div>
+      <h3 class="t"><a href="https://www.youtube.com/shorts/wMfxg3Allmc" target="_blank" rel="noopener">طرح شقق بديل الايجار القديم شقق ( سكنيه - تجاريه - إداريه ) حتي ١٢ / ١٠ / ٢٠٢٦</a></h3>
+      <p class="snip">#بديل_الايجار_القديم #شقق_للبيع #شقق_الاسكان_والتعمير #شقق_الاسكان_الاجتماعي #شقق_الاسكان_٢٠٢٦ #وزاره_الاسكان #هيئه_المجتمعات_العمرانيه_الجديده #الاسكان_الاجتماعي #شقق_الاسكان #بديل_الايجار_القديم #الإيجار_القديم #شقق_الايجار_القد</p>
+      <div class="metrics"><span>3.0K مشاهدة</span><span>165 إعجاب</span><span>20 تعليق</span></div>
+    </article>
+    <article class="entry" data-sec="s483183">
+      <div class="entry-meta">
+        <span class="src">الإسكان مع عمرو زكي</span>
+        <span>·</span><span>فيديوهات وتحليلات</span>
+        <span>·</span><span>منذ 4 يومًا</span>
+        <span class="tag green">جديد</span><span class="tag gold">فيديو</span>
+      </div>
+      <h3 class="t"><a href="https://www.youtube.com/shorts/HI0Pf8QM4Rw" target="_blank" rel="noopener">معلومه مهمه جدا لطرح الايجار و محدود الدخل اللي هينزل خلال ايام 👌</a></h3>
+      <p class="snip">#محدودي_الدخل #صندوق_الاسكان_الاجتماعي_ودعم_التمويل_العقاري #صندوق_التمويل_العقاري #وزاره_الاسكان #بنك_التعمير_والاسكان #هيئه_المجتمعات_العمرانيه_الجديده #متوسطي_الدخل #شقق_الاسكان_والتعمير #شقق_الاسكان_الاجتماعي #شقق_الاسكان_٢٠٢٦</p>
+      <div class="metrics"><span>2.8K مشاهدة</span><span>219 إعجاب</span><span>23 تعليق</span></div>
+    </article>
+    <article class="entry" data-sec="s483183">
+      <div class="entry-meta">
+        <span class="src">الإسكان مع عمرو زكي</span>
+        <span>·</span><span>فيديوهات وتحليلات</span>
+        <span>·</span><span>منذ 10 يومًا</span>
+        <span class="tag green">جديد</span><span class="tag gold">فيديو</span>
+      </div>
+      <h3 class="t"><a href="https://www.youtube.com/watch?v=0FPnJak-w9M" target="_blank" rel="noopener">حقيقه طرح شقق الايجار التمليكي وبعد تفاصيه بعد تصريحات امبارح 🚫</a></h3>
+      <p class="snip">#وزاره_الاسكان #صندوق_الاسكان_الاجتماعي_ودعم_التمويل_العقاري #هيئه_المجتمعات_العمرانيه_الجديده #شقق_الاسكان_الاجتماعي #الايجار_التمليكي #شقق_محدود_الدخل #محدود_الدخل #متوسط_الدخل #طروحات_الاسكان #تقديمات_الاسكان</p>
+      <div class="metrics"><span>3.0K مشاهدة</span><span>218 إعجاب</span><span>10 تعليق</span></div>
+    </article>
+    <article class="entry" data-sec="s483183">
+      <div class="entry-meta">
+        <span class="src">الإسكان مع عمرو زكي</span>
+        <span>·</span><span>فيديوهات وتحليلات</span>
+        <span>·</span><span>منذ 12 يومًا</span>
+        <span class="tag green">جديد</span><span class="tag gold">فيديو</span>
+      </div>
+      <h3 class="t"><a href="https://www.youtube.com/shorts/LLjK2ovCcjE" target="_blank" rel="noopener">افهم الاول : الفرق بين طرح الايجار التمليكي وطرح محدود الدخل اللي هينزل خلال ايام .</a></h3>
+      <p class="snip">#وزاره_الاسكان #صندوق_الضمان_الاجتماعي #صندوق_الاسكان_الاجتماعي_ودعم_التمويل_العقاري #صندوق_التمويل_العقاري #هيئه_المجتمعات_العمرانيه_الجديده #محدودي_الدخل #الايجار_التمليكي #شقق_الاسكان_والتعمير #شقق_الاسكان_الاجتماعي #الاسكان_ال</p>
+      <div class="metrics"><span>3.2K مشاهدة</span><span>186 إعجاب</span><span>31 تعليق</span></div>
+    </article>
+    <article class="entry" data-sec="s483183">
+      <div class="entry-meta">
+        <span class="src">الإسكان مع عمرو زكي</span>
+        <span>·</span><span>فيديوهات وتحليلات</span>
+        <span>·</span><span>منذ 9 يومًا</span>
+        <span class="tag green">جديد</span><span class="tag gold">فيديو</span>
+      </div>
+      <h3 class="t"><a href="https://www.youtube.com/shorts/pT6MviJwdDs" target="_blank" rel="noopener">مشروع &quot; سكن لكل المصريين&quot; محدود ومتوسط الدخل، تابعونا لتفاصيل طروحات شقق الاسكان الطرح شهر ١٠ / ٢٠٢٦</a></h3>
+      <p class="snip">#سكن_لكل_المصريين #محدودي_الدخل #متوسطي_الدخل #صندوق_الاسكان_الاجتماعي_ودعم_التمويل_العقاري #صندوق_التمويل_العقاري #وزاره_الاسكان #هيئه_المجتمعات_العمرانيه_الجديده #بنك_التعمير_والاسكان #شقق_الاسكان_٢٠٢٦ #شقق_الاسكان_والتعمير #شقق</p>
+      <div class="metrics"><span>1.9K مشاهدة</span><span>53 إعجاب</span><span>2 تعليق</span></div>
+    </article>
+    <article class="entry" data-sec="s483183">
+      <div class="entry-meta">
+        <span class="src">الإسكان مع عمرو زكي</span>
+        <span>·</span><span>فيديوهات وتحليلات</span>
+        <span>·</span><span>منذ 5 يومًا</span>
+        <span class="tag green">جديد</span><span class="tag gold">فيديو</span>
+      </div>
+      <h3 class="t"><a href="https://www.youtube.com/shorts/6rwnAre2w7U" target="_blank" rel="noopener">محدود الدخل شهر ١٠ / ٢٠٢٦ ، اهم ورقه في التقديم هي شهاده الدخل لازم تعملها صح ✔️ عشن متخدش رفض</a></h3>
+      <p class="snip">#محدود_الدخل #طروحات_شقق_الاسكان #شقق_الاسكان_والتعمير #شقق_الاسكان_الاجتماعي #شقق_الاسكان_٢٠٢٦ #شقق_الاسكان #الاعلان_العاشر #الاعلان_العاشر #الاعلان_الخامس_عشر #الاعلان_الرابع_عشر #الاعلان_السادس_عشر #سكن_لكل_المصريين #صندوق_الضم</p>
+      <div class="metrics"><span>5.5K مشاهدة</span><span>245 إعجاب</span><span>9 تعليق</span></div>
+    </article>
+    <article class="entry" data-sec="s483183">
+      <div class="entry-meta">
+        <span class="src">الإسكان مع عمرو زكي</span>
+        <span>·</span><span>فيديوهات وتحليلات</span>
+        <span>·</span><span>منذ 8 ساعة</span>
+        <span class="tag green">جديد</span><span class="tag gold">فيديو</span>
+      </div>
+      <h3 class="t"><a href="https://www.youtube.com/watch?v=SWFMVN-5UqU" target="_blank" rel="noopener">عشن تاخد شقه اسكان محدود الدخل او متوسط الدخل لازم تكون مطابق لشروط الدخل ☝️اعرف الشروط قبل التقديم</a></h3>
+      <p class="snip">#سكن_لكل_المصريين #سكن_اقتصادي ##شقق_الاسكان_والتعمير #شقق_الاسكان_الاجتماعي #شقق_الاسكان_٢٠٢٦ #طروحات_الاسكان #الاسكان_الاجتماعي #صندوق_الضمان_الاجتماعي #صندوق_الاسكان_الاجتماعي_ودعم_التمويل_العقاري #صندوق_التمويل_العقاري #وزاره_</p>
+      <div class="metrics"><span>869 مشاهدة</span><span>139 إعجاب</span><span>12 تعليق</span></div>
+    </article>
+    <article class="entry" data-sec="s483183">
+      <div class="entry-meta">
+        <span class="src">الإسكان مع عمرو زكي</span>
+        <span>·</span><span>فيديوهات وتحليلات</span>
+        <span>·</span><span>منذ 8 يومًا</span>
+        <span class="tag green">جديد</span><span class="tag gold">فيديو</span>
+      </div>
+      <h3 class="t"><a href="https://www.youtube.com/watch?v=dyTIZfnRQ_M" target="_blank" rel="noopener">شقق الإسكان في ٢٠٢٦ مشروعات كتير ، الرد علي استفسارتكم</a></h3>
+      <p class="snip">#شقق_الاسكان_الاجتماعي. #الاسكان_الاجتماعي. #شقق_الاسكان_والتعمير. #تقديمات_شقق_الاسكان #مبادره_البنك_المركزي_للتمويل_العقاري. #مبادره_التمويل_العقاري ٣٪؜. #التمويل_العقاري_٣٪؜. #شقق_تصلح_تمويل_عقاري #شقق_تمويل_عقاري #محدود_الدخل.</p>
+      <div class="metrics"><span>1.6K مشاهدة</span><span>95 إعجاب</span><span>0 تعليق</span></div>
+    </article>
+    <article class="entry" data-sec="s483183">
+      <div class="entry-meta">
+        <span class="src">كلام في المفيد — هاني الخميسي</span>
+        <span>·</span><span>فيديوهات وتحليلات</span>
+        <span>·</span><span>منذ 11 يومًا</span>
+        <span class="tag green">جديد</span><span class="tag gold">فيديو</span>
+      </div>
+      <h3 class="t"><a href="https://www.youtube.com/shorts/-nQtiEc-7VE" target="_blank" rel="noopener">ليه المهندسين بيختلفوا؟ وهل ده معناه إن حد غلط؟</a></h3>
+      <p class="snip">🚨 الانتقاد البناء يطور الشغل... أما الاختلاف فطبيعي في أي مجال. وفي النهاية، جودة التنفيذ هي اللي تحسم أي نقاش. #Shorts #هندسة #عقارات #بناء #إنجاز</p>
+      <div class="metrics"><span>1.4K مشاهدة</span><span>18 إعجاب</span><span>1 تعليق</span></div>
+    </article>
+    <article class="entry" data-sec="s483183">
+      <div class="entry-meta">
+        <span class="src">كلام في المفيد — هاني الخميسي</span>
+        <span>·</span><span>فيديوهات وتحليلات</span>
+        <span>·</span><span>منذ 12 يومًا</span>
+        <span class="tag green">جديد</span><span class="tag gold">فيديو</span>
+      </div>
+      <h3 class="t"><a href="https://www.youtube.com/shorts/SPK8XMdlIDw" target="_blank" rel="noopener">السر الحقيقي ورا قوة المبنى؟ الكانة!</a></h3>
+      <p class="snip">🚨 **ليه المهندسين بيدققوا جدًا في الكانة؟** لأنها من أهم التفاصيل اللي بتساهم في قوة المبنى وطول عمره. #Shorts #الكانة #هندسة #بناء #عقارات</p>
+      <div class="metrics"><span>1.2K مشاهدة</span><span>15 إعجاب</span><span>2 تعليق</span></div>
+    </article>
+    <article class="entry" data-sec="s483183">
+      <div class="entry-meta">
+        <span class="src">كلام في المفيد — هاني الخميسي</span>
+        <span>·</span><span>فيديوهات وتحليلات</span>
+        <span>·</span><span>منذ 14 يومًا</span>
+        <span class="tag green">جديد</span><span class="tag gold">فيديو</span>
+      </div>
+      <h3 class="t"><a href="https://www.youtube.com/shorts/E2JLHXR_Nxw" target="_blank" rel="noopener">رغم إنهم صح ليه مهندسين بيختلفوا؟</a></h3>
+      <p class="snip">🤔 **ليه مهندسين مختلفين يقدروا يوصلوا لحلين مختلفين... والاتنين صح؟** تعرف على السبب الحقيقي وراء الاختلافات الهندسية. #Shorts #هندسة #مهندسين #عقارات</p>
+      <div class="metrics"><span>1.2K مشاهدة</span><span>14 إعجاب</span><span>2 تعليق</span></div>
+    </article>
+</section>
+<div class="disclaimer">
+  <b>تنويه منهجي.</b> تُجمَع المصادر آليًا وتُلخَّص بالذكاء الاصطناعي.
+  الملخصات والتحليلات <b>قابلة للخطأ</b> — يُرجع إلى المصدر الأصلي دائمًا.
+  المحتوى للاطلاع فقط وليس استشارة مالية أو قانونية. راجع كراسة الشروط الرسمية
+  ومنصة مصر العقارية قبل أي التزام مالي.
+  <div class="engines">محركات التحليل — Gemini: 0✓/1✗ (موقوف)</div>
+</div>
+  </main>
+  <aside class="rail">
+<div class="box"><h4>محتويات التقرير</h4><div class="toc">
+<a href="#summary">الملخص التنفيذي</a>
+<a href="#status">حالة الملفات</a>
+<a href="#radar">رادار الإشارات المبكرة</a>
+<a href="#outlook">الاستشراف وقراءة السوق</a>
+<a href="#official">الرصد الرسمي</a>
+<a href="#feed">الرصد الإخباري</a>
+<a href="beit-alwatan.html"><b>ملف بيت الوطن</b></a>
 </div></div>
-
-<div class="shell"><div class="cols">
-  <div class="feed">
-
-<div class="card" data-sec="-">
-  <div class="card-h">
-    <div class="ava v">&#9654;</div>
-    <div>
-      <div class="who">الإسكان مع عمرو زكي</div>
-      <div class="sub">فيديوهات وتحليلات · امبارح</div>
-    </div>
-  </div>
-  <div class="card-b">
-    <a class="title" href="https://www.youtube.com/watch?v=ywU3DpcsbbQ" target="_blank">فرصه امتلاك بيتك طرح اراضي مسكن ٧ ، خد قطعه ارض ٢٠٩ متر بمقدم ٢٥ الف جنيه بالبطاقه بس</a>
-    <div class="snip">#اراضي_الاسكان #اراضي_للبيع #مسكن_٧ #مسكن #اراضي_الاسكان #طروحات_اراضي_الاسكان #وزاره_الاسكان #هيئه_المجتمعات_العمرانيه_الجديده #بنك_التعمير_والاسكان #اراضي_مسكن #طرح_اراضي_الاسكان</div>
-    <div class="cmts"><div class="lab">أكتر التعليقات تفاعلًا</div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@mhmoudkhaled6444</div>مش كانت المفروض تنزل تقسيط علي ٢٠ سنه زي ماكانو بيقولو<div class="clikes">&#128077; 2 · 1 رد</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@محمداحمد-د8ث6و</div>ممكن اعرف طرق الدفع ازاي لو رست عليا وانا هدفع 50٪<div class="clikes">&#128077; 1 · 6 رد</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@ramysamy-xy4es</div>لو انا واخد شقه من الاسكان الاجتماعى ينفع اقدم ؟<div class="clikes">&#128077; 1 · 1 رد</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@fatmahesham243</div>طيب هي الارض دي لازم يتم بناؤها ولا ممكن تتساب كم سنه بدون بنى<div class="clikes">&#128077; 1 · 1 رد</div></div></div>
-    </div>
-  </div>
-  <div class="stats"><span>&#128065; <b>6.2K</b> مشاهدة</span><span>&#128077; <b>348</b></span><span>&#128172; <b>29</b> تعليق</span></div>
+<div class="box" style="border-color:#e5d9c0;background:#fffdf8">
+  <h4 style="color:var(--gold)">تنبيه الرادار</h4>
+  <div style="font-size:26px;font-weight:700;color:var(--gold);line-height:1.3">
+    2</div>
+  <div style="font-size:13px;color:var(--muted)">معلومة بيقولها الناس
+    ولسه منزلتش في الأخبار</div>
+  <a href="#radar" style="display:inline-block;margin-top:8px;font-size:13.5px">
+    شوفها ←</a>
 </div>
-<div class="card" data-sec="-">
-  <div class="card-h">
-    <div class="ava v">&#9654;</div>
-    <div>
-      <div class="who">الإسكان مع عمرو زكي</div>
-      <div class="sub">فيديوهات وتحليلات · من 22 ساعة</div>
-    </div>
-  </div>
-  <div class="card-b">
-    <a class="title" href="https://www.youtube.com/watch?v=j9oid6bCg7o" target="_blank">طرح أميز وارخص قطع اراضي ، بمقدم ١٠٠ الف ، بالبطاقه بس ، مساحه تصل ١٠٠٠ متر</a>
-    <div class="snip">#طرح_اراضي_الاسكان #مسكن_٧ #اراضي_الاسكان #طرح_الاراضي #اراضي_مسكن #وزاره_الاسكان #هيئه_المجتمعات_العمرانيه_الجديده #اراضي_للبيع #اراضي #ارض_مسكن</div>
-    <div class="cmts"><div class="lab">أكتر التعليقات تفاعلًا</div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@nargesslabib4291</div>جهد مشكور بس نفسي اعرف ليه تخلو عن مشروع سكن لكل المصريين وخلوه تجاره وفلوس هما للدرجه دى فلسوا مش قادريين على البناء باعوا الاراضى للمواطنين يعنى كنا موافقين بعدم الاحقيه بالارض فى السكن كمان بطلو بناء<div class="clikes">&#128077; 2</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@smile-co2hh</div>نازلة شقق او اراضى ف اسيوط الجديدة؟<div class="clikes">&#128077; 1 · 1 رد</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@MohamedHosny-p1w</div>مفيش اراضي نزله في مدينة ١٥مايو<div class="clikes">&#128077; 1 · 1 رد</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@sherif9252</div>ايه شروط البناء ؟<div class="clikes">&#128077; 1 · 1 رد</div></div></div>
-    </div>
-  </div>
-  <div class="stats"><span>&#128065; <b>2.2K</b> مشاهدة</span><span>&#128077; <b>153</b></span><span>&#128172; <b>17</b> تعليق</span></div>
+<div class="box"><h4>توزيع العناصر</h4>
+<div class="r"><span>بيت الوطن ومبادرات المغتربين</span><b>3</b></div>
+<div class="r"><span>طروحات ومشروعات جديدة</span><b>27</b></div>
+<div class="r"><span>تحليل السوق والأسعار</span><b>3</b></div>
+<div class="r"><span>فيديوهات وتحليلات</span><b>29</b></div>
 </div>
-<div class="card" data-sec="-">
-  <div class="card-h">
-    <div class="ava v">&#9654;</div>
-    <div>
-      <div class="who">الإسكان مع عمرو زكي</div>
-      <div class="sub">فيديوهات وتحليلات · من 2 يوم</div>
-    </div>
-  </div>
-  <div class="card-b">
-    <a class="title" href="https://www.youtube.com/shorts/skkCkOUsndM" target="_blank">طرح ٢٨٩٨ قطعه ارض مسكن٧، بمقدم يبدء من ٢٥ الف حدائق اكتوبر-السادات-العبور-الشروق-بدر ومدن تانيه كتير</a>
-    <div class="snip">#طرح_اراضي_الاسكان #طرح_شقق_الاسكان #اراضي_مسكن #مسكن_٧ #طروحات_اراضي_مسكن #اراضي_الاسكان_الاجتماعي #طروحات_الاراضي #تقديمات_الاراضي</div>
-    <div class="cmts"><div class="lab">أكتر التعليقات تفاعلًا</div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@منوعاتعائلةديدي</div>مسكن سبعه<div class="clikes">&#128077; 2</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@TitoSoliman-t4i</div>هى دى بتبقى بالقرعة ولا اسبقية الحجز<div class="clikes">&#128077; 1 · 2 رد</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@ايمناسماعيل-ز1ش</div>ممكن تفاصيل اكتر<div class="clikes">&#128077; 1 · 1 رد</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@hudaabobakr9844</div>المقدم كام والقاهرة نازلة فين<div class="clikes">&#128077; 1 · 1 رد</div></div></div>
-    </div>
-  </div>
-  <div class="stats"><span>&#128065; <b>3.1K</b> مشاهدة</span><span>&#128077; <b>179</b></span><span>&#128172; <b>53</b> تعليق</span></div>
+<div class="box"><h4>مصادر رسمية</h4>
+  <a class="lnk" href="https://lands.nuca.gov.eg/" target="_blank" rel="noopener">هيئة المجتمعات العمرانية</a>
+  <a class="lnk" href="https://reservations.realestate.gov.eg/ar" target="_blank" rel="noopener">منصة مصر العقارية</a>
+  <a class="lnk" href="https://beitakfemisr.com/" target="_blank" rel="noopener">بيتك في مصر</a>
 </div>
-<div class="card" data-sec="-">
-  <div class="card-h">
-    <div class="ava v">&#9654;</div>
-    <div>
-      <div class="who">الإسكان مع عمرو زكي</div>
-      <div class="sub">فيديوهات وتحليلات · من 7 يوم</div>
-    </div>
-  </div>
-  <div class="card-b">
-    <a class="title" href="https://www.youtube.com/shorts/BbV9mLCMPJM" target="_blank">مازال الطرح شغال حتي ٣٠ / ٧ / ٢٠٢٦ ، بدون شروط واوراق ، بالبطاقه بسسس 👏</a>
-    <div class="snip">#وزاره_الاسكان #هيئه_تعاونيات_البناء_والاسكان #هيئه_المجتمعات_العمرانيه_الجديده #مشروع_اللؤلؤه #لؤلؤه_بدر #لؤلؤه_القاهره_الجديده #لؤلؤه_اكتوبر #لؤلؤه_العاشر_من_رمضان #شقق_الاسكان_والتعمير #شقق_الاسكان_الاجتماعي #شقق_الاس</div>
-    <div class="cmts"><div class="lab">أكتر التعليقات تفاعلًا</div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@monakhaled4842</div>جزاك الله خيرا 
-هي نظام قرعه ولا اسبقيه حجز ولا إيه<div class="clikes">&#128077; 2 · 1 رد</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@amrrashed3668</div>كام شقة في اكتوبر<div class="clikes">&#128077; 2 · 1 رد</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@mahmoudakmal9168</div>لو دفعت 10‎%‎ مقدم الباقى ؏ كم سنه وبفوايد ولا بدون فوايد<div class="clikes">&#128077; 1 · 1 رد</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@foxfox5384</div>هل الي عايز يقدم في لؤلؤه اكتوبر لازم يببقا ف البطاقه من سكان اكتوبر ولا عادي من اي محافظه<div class="clikes">&#128077; 1 · 1 رد</div></div></div>
-    </div>
-  </div>
-  <div class="stats"><span>&#128065; <b>7.8K</b> مشاهدة</span><span>&#128077; <b>302</b></span><span>&#128172; <b>19</b> تعليق</span></div>
+  </aside>
 </div>
-<div class="card" data-sec="-">
-  <div class="card-h">
-    <div class="ava v">&#9654;</div>
-    <div>
-      <div class="who">الإسكان مع عمرو زكي</div>
-      <div class="sub">فيديوهات وتحليلات · من 3 يوم</div>
-    </div>
-  </div>
-  <div class="card-b">
-    <a class="title" href="https://www.youtube.com/shorts/wMfxg3Allmc" target="_blank">طرح شقق بديل الايجار القديم شقق ( سكنيه - تجاريه - إداريه ) حتي ١٢ / ١٠ / ٢٠٢٦</a>
-    <div class="snip">#بديل_الايجار_القديم #شقق_للبيع #شقق_الاسكان_والتعمير #شقق_الاسكان_الاجتماعي #شقق_الاسكان_٢٠٢٦ #وزاره_الاسكان #هيئه_المجتمعات_العمرانيه_الجديده #الاسكان_الاجتماعي #شقق_الاسكان #بديل_الايجار_القديم #الإيجار_القديم #شقق_ال</div>
-    <div class="cmts"><div class="lab">أكتر التعليقات تفاعلًا</div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@sehamahmed3260</div>ربنا يبارك لك كنت بكلم ربنا اليوم بقول يارب فاتنى التقديم يارب يمدوها .. الحمدلله ربنا يبشرك بالخير .. بس فى مشكلة والدى بطاقته كانت قديمة جدا وعدد الارقام غير دلوقت اعمل ايه هل ممكن  تواصل اعرف اعمل ايه<div class="clikes">&#128077; 3 · 3 رد</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@معاذمحمد-ي4ف</div>ايه التفاصيل لو بديل شقه إيجار قديم لو سمحت<div class="clikes">&#128077; 2 · 1 رد</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@samaribrahem-u5c</div>مش فاهمه يعني بقدم على الإيجار التمليكي من دلوقتي ولا اي وبقدم ازاي<div class="clikes">&#128077; 2 · 1 رد</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@cartoonsketchkingdom</div>يعنى ٩٩ الف على الشقق السكنى ايجار بديل والدوله عامله ٣٠ الف شقه يعنى مش هنللقي حاجه<div class="clikes">&#128077; 2</div></div></div>
-    </div>
-  </div>
-  <div class="stats"><span>&#128065; <b>2.9K</b> مشاهدة</span><span>&#128077; <b>162</b></span><span>&#128172; <b>20</b> تعليق</span></div>
-</div>
-<div class="card" data-sec="-">
-  <div class="card-h">
-    <div class="ava v">&#9654;</div>
-    <div>
-      <div class="who">الإسكان مع عمرو زكي</div>
-      <div class="sub">فيديوهات وتحليلات · من 3 يوم</div>
-    </div>
-  </div>
-  <div class="card-b">
-    <a class="title" href="https://www.youtube.com/shorts/HI0Pf8QM4Rw" target="_blank">معلومه مهمه جدا لطرح الايجار و محدود الدخل اللي هينزل خلال ايام 👌</a>
-    <div class="snip">#محدودي_الدخل #صندوق_الاسكان_الاجتماعي_ودعم_التمويل_العقاري #صندوق_التمويل_العقاري #وزاره_الاسكان #بنك_التعمير_والاسكان #هيئه_المجتمعات_العمرانيه_الجديده #متوسطي_الدخل #شقق_الاسكان_والتعمير #شقق_الاسكان_الاجتماعي #شقق_ال</div>
-    <div class="cmts"><div class="lab">أكتر التعليقات تفاعلًا</div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@yuyyyyyymmmmmmm</div>السن لحد ٣٥ فقط محدش بيكلم في القصه دي<div class="clikes">&#128077; 2 · 1 رد</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@logynalogy2337</div>طب لو انا عايزه اقدم على الايجار العادى وجوزى مسافر ينفع لأن إلى عرفته انو مينفعش للمغترب اخدت تمليك تقريبا ممكن حضرتك تعمل فديو للمغتربين ايه إلى ينفع يقدمو عليه<div class="clikes">&#128077; 2 · 1 رد</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@cartoonsketchkingdom</div>هو الايجار التمليكى لما ينزل هيستتمر لوقت اد ايه يعنى لو اانا عايز اقدمم عالايجار ده شهرر ١٠ ههيينفع<div class="clikes">&#128077; 1 · 1 رد</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@fatmaabdelaty46</div>وهل لازم نعمل قيد عائلي مميكن للمتزوجين 
-وشهادة إثبات دخل للعمل الحر 
-وإيصال المرافق ينفع من احنا ساكنين ايجار<div class="clikes">&#128077; 1 · 1 رد</div></div></div>
-    </div>
-  </div>
-  <div class="stats"><span>&#128065; <b>2.8K</b> مشاهدة</span><span>&#128077; <b>217</b></span><span>&#128172; <b>24</b> تعليق</span></div>
-</div>
-<div class="card" data-sec="-">
-  <div class="card-h">
-    <div class="ava v">&#9654;</div>
-    <div>
-      <div class="who">الإسكان مع عمرو زكي</div>
-      <div class="sub">فيديوهات وتحليلات · من 8 يوم</div>
-    </div>
-  </div>
-  <div class="card-b">
-    <a class="title" href="https://www.youtube.com/shorts/pT6MviJwdDs" target="_blank">مشروع &quot; سكن لكل المصريين&quot; محدود ومتوسط الدخل، تابعونا لتفاصيل طروحات شقق الاسكان الطرح شهر ١٠ / ٢٠٢٦</a>
-    <div class="snip">#سكن_لكل_المصريين #محدودي_الدخل #متوسطي_الدخل #صندوق_الاسكان_الاجتماعي_ودعم_التمويل_العقاري #صندوق_التمويل_العقاري #وزاره_الاسكان #هيئه_المجتمعات_العمرانيه_الجديده #بنك_التعمير_والاسكان #شقق_الاسكان_٢٠٢٦ #شقق_الاسكان_وال</div>
-    <div class="cmts"><div class="lab">أكتر التعليقات تفاعلًا</div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@روماوالعلوم</div>لو سمحت الطرح الجاي نازل فيه محافظات الصعيد. زي الاقصر وقنا<div class="clikes">&#128077; 1 · 1 رد</div></div></div>
-    </div>
-  </div>
-  <div class="stats"><span>&#128065; <b>1.9K</b> مشاهدة</span><span>&#128077; <b>53</b></span><span>&#128172; <b>2</b> تعليق</span></div>
-</div>
-<div class="card" data-sec="-">
-  <div class="card-h">
-    <div class="ava v">&#9654;</div>
-    <div>
-      <div class="who">الإسكان مع عمرو زكي</div>
-      <div class="sub">فيديوهات وتحليلات · من 5 يوم</div>
-    </div>
-  </div>
-  <div class="card-b">
-    <a class="title" href="https://www.youtube.com/shorts/6rwnAre2w7U" target="_blank">محدود الدخل شهر ١٠ / ٢٠٢٦ ، اهم ورقه في التقديم هي شهاده الدخل لازم تعملها صح ✔️ عشن متخدش رفض</a>
-    <div class="snip">#محدود_الدخل #طروحات_شقق_الاسكان #شقق_الاسكان_والتعمير #شقق_الاسكان_الاجتماعي #شقق_الاسكان_٢٠٢٦ #شقق_الاسكان #الاعلان_العاشر #الاعلان_العاشر #الاعلان_الخامس_عشر #الاعلان_الرابع_عشر #الاعلان_السادس_عشر #سكن_لكل_المصريين #</div>
-    <div class="cmts"><div class="lab">أكتر التعليقات تفاعلًا</div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@trezaibrahim3735</div>شكرا جزيلا<div class="clikes">&#128077; 1 · 4 رد</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@amelKandel</div>طيب لو ماجر شقه فى الاسكان وده ممنوع احط عنوان ايه<div class="clikes">&#128077; 1 · 2 رد</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@redaawad1755</div>صح حصل معايا<div class="clikes">&#128077; 1</div></div></div>
-    </div>
-  </div>
-  <div class="stats"><span>&#128065; <b>5.5K</b> مشاهدة</span><span>&#128077; <b>244</b></span><span>&#128172; <b>9</b> تعليق</span></div>
-</div>
-<div class="card" data-sec="-">
-  <div class="card-h">
-    <div class="ava v">&#9654;</div>
-    <div>
-      <div class="who">الإسكان مع عمرو زكي</div>
-      <div class="sub">فيديوهات وتحليلات · من 3 ساعة</div>
-    </div>
-  </div>
-  <div class="card-b">
-    <a class="title" href="https://www.youtube.com/watch?v=SWFMVN-5UqU" target="_blank">عشن تاخد شقه اسكان محدود الدخل او متوسط الدخل لازم تكون مطابق لشروط الدخل ☝️اعرف الشروط قبل التقديم</a>
-    <div class="snip">#سكن_لكل_المصريين #سكن_اقتصادي ##شقق_الاسكان_والتعمير #شقق_الاسكان_الاجتماعي #شقق_الاسكان_٢٠٢٦ #طروحات_الاسكان #الاسكان_الاجتماعي #صندوق_الضمان_الاجتماعي #صندوق_الاسكان_الاجتماعي_ودعم_التمويل_العقاري #صندوق_التمويل_العقا</div>
-    <div class="cmts"><div class="lab">أكتر التعليقات تفاعلًا</div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@روماوالعلوم</div>القسط بيكون كام لمحدودي الدخل<div class="clikes">&#128077; 1 · 2 رد</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@SgdaAsam-z2p</div>حضرتك ليه ما عدتش الاسعار مقدمه ايه اسعار ايه<div class="clikes">&#128077; 1 · 1 رد</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@mostfatalaat8662</div>بصراحة استاذ محترم جدا جدا<div class="clikes">&#128077; 0 · 1 رد</div></div></div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@mustafaattia8506</div>محترم ٠محترم٠محترم<div class="clikes">&#128077; 0 · 1 رد</div></div></div>
-    </div>
-  </div>
-  <div class="stats"><span>&#128065; <b>355</b> مشاهدة</span><span>&#128077; <b>81</b></span><span>&#128172; <b>9</b> تعليق</span></div>
-</div>
-<div class="card" data-sec="-">
-  <div class="card-h">
-    <div class="ava v">&#9654;</div>
-    <div>
-      <div class="who">الإسكان مع عمرو زكي</div>
-      <div class="sub">فيديوهات وتحليلات · من 8 يوم</div>
-    </div>
-  </div>
-  <div class="card-b">
-    <a class="title" href="https://www.youtube.com/watch?v=dyTIZfnRQ_M" target="_blank">شقق الإسكان في ٢٠٢٦ مشروعات كتير ، الرد علي استفسارتكم</a>
-    <div class="snip">#شقق_الاسكان_الاجتماعي. #الاسكان_الاجتماعي. #شقق_الاسكان_والتعمير. #تقديمات_شقق_الاسكان #مبادره_البنك_المركزي_للتمويل_العقاري. #مبادره_التمويل_العقاري ٣٪؜. #التمويل_العقاري_٣٪؜. #شقق_تصلح_تمويل_عقاري #شقق_تمويل_عقاري #مح</div>
-  </div>
-  <div class="stats"><span>&#128065; <b>1.6K</b> مشاهدة</span><span>&#128077; <b>95</b></span><span>&#128172; <b>0</b> تعليق</span></div>
-</div>
-<div class="card" data-sec="-">
-  <div class="card-h">
-    <div class="ava v">&#9654;</div>
-    <div>
-      <div class="who">كلام في المفيد — هاني الخميسي</div>
-      <div class="sub">فيديوهات وتحليلات · من 11 يوم</div>
-    </div>
-  </div>
-  <div class="card-b">
-    <a class="title" href="https://www.youtube.com/shorts/-nQtiEc-7VE" target="_blank">ليه المهندسين بيختلفوا؟ وهل ده معناه إن حد غلط؟</a>
-    <div class="snip">🚨 الانتقاد البناء يطور الشغل... أما الاختلاف فطبيعي في أي مجال. وفي النهاية، جودة التنفيذ هي اللي تحسم أي نقاش. #Shorts #هندسة #عقارات #بناء #إنجاز</div>
-  </div>
-  <div class="stats"><span>&#128065; <b>1.4K</b> مشاهدة</span><span>&#128077; <b>18</b></span><span>&#128172; <b>1</b> تعليق</span></div>
-</div>
-<div class="card" data-sec="-">
-  <div class="card-h">
-    <div class="ava v">&#9654;</div>
-    <div>
-      <div class="who">كلام في المفيد — هاني الخميسي</div>
-      <div class="sub">فيديوهات وتحليلات · من 12 يوم</div>
-    </div>
-  </div>
-  <div class="card-b">
-    <a class="title" href="https://www.youtube.com/shorts/SPK8XMdlIDw" target="_blank">السر الحقيقي ورا قوة المبنى؟ الكانة!</a>
-    <div class="snip">🚨 **ليه المهندسين بيدققوا جدًا في الكانة؟** لأنها من أهم التفاصيل اللي بتساهم في قوة المبنى وطول عمره. #Shorts #الكانة #هندسة #بناء #عقارات</div>
-    <div class="cmts"><div class="lab">أكتر التعليقات تفاعلًا</div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@alx970</div>السلام عليكم يا هندسة
-مفيش شقق في اسكندرية او برج العرب<div class="clikes">&#128077; 0 · 1 رد</div></div></div>
-    </div>
-  </div>
-  <div class="stats"><span>&#128065; <b>1.2K</b> مشاهدة</span><span>&#128077; <b>15</b></span><span>&#128172; <b>2</b> تعليق</span></div>
-</div>
-<div class="card" data-sec="-">
-  <div class="card-h">
-    <div class="ava v">&#9654;</div>
-    <div>
-      <div class="who">كلام في المفيد — هاني الخميسي</div>
-      <div class="sub">فيديوهات وتحليلات · من 14 يوم</div>
-    </div>
-  </div>
-  <div class="card-b">
-    <a class="title" href="https://www.youtube.com/shorts/E2JLHXR_Nxw" target="_blank">رغم إنهم صح ليه مهندسين بيختلفوا؟</a>
-    <div class="snip">🤔 **ليه مهندسين مختلفين يقدروا يوصلوا لحلين مختلفين... والاتنين صح؟** تعرف على السبب الحقيقي وراء الاختلافات الهندسية. #Shorts #هندسة #مهندسين #عقارات</div>
-    <div class="cmts"><div class="lab">أكتر التعليقات تفاعلًا</div>
-      <div class="cmt"><div class="cava">@</div><div class="cbody"><div class="cname">@أبوسفيان.المصري</div>الله يصلح لكم الحال<div class="clikes">&#128077; 0 · 1 رد</div></div></div>
-    </div>
-  </div>
-  <div class="stats"><span>&#128065; <b>1.2K</b> مشاهدة</span><span>&#128077; <b>14</b></span><span>&#128172; <b>2</b> تعليق</span></div>
-</div>
-<div class="card" data-sec="-">
-  <div class="card-h">
-    <div class="ava v">&#9654;</div>
-    <div>
-      <div class="who">كلام في المفيد — هاني الخميسي</div>
-      <div class="sub">فيديوهات وتحليلات · من 15 يوم</div>
-    </div>
-  </div>
-  <div class="card-b">
-    <a class="title" href="https://www.youtube.com/shorts/x6Ho247nD9M" target="_blank">فاكرين الجدل على تلوين القواعد؟ دي النتيجة!</a>
-    <div class="snip">🚨 بعد كل الانتقادات... شوف المشروع وصل لفين! الواقع هو أفضل دليل على أي شغل بيتعمل بإتقان. #Shorts #عقارات #هندسة #إنجاز</div>
-  </div>
-  <div class="stats"><span>&#128065; <b>1.3K</b> مشاهدة</span><span>&#128077; <b>8</b></span><span>&#128172; <b>0</b> تعليق</span></div>
-</div>
-<div class="card" data-sec="-">
-  <div class="card-h">
-    <div class="ava v">&#9654;</div>
-    <div>
-      <div class="who">كلام في المفيد — هاني الخميسي</div>
-      <div class="sub">فيديوهات وتحليلات · من 5 يوم</div>
-    </div>
-  </div>
-  <div class="card-b">
-    <a class="title" href="https://www.youtube.com/shorts/oENbuj0cXxw" target="_blank">🚨 اتحادات الملاك مبتنفذش وعودها؟ الدليل قدامك!</a>
-    <div class="snip">🚨 **مش كل اللي بيتقال بيكون حقيقة... والواقع هو الحكم.** لما الوعد يبقى مبنى متسلم بالكامل، ميبقاش محتاج كلام كتير. #Shorts #اتحاد_ملاك #شقة_بسعر_التكلفة #عقارات</div>
-  </div>
-  <div class="stats"><span>&#128065; <b>506</b> مشاهدة</span><span>&#128077; <b>0</b></span><span>&#128172; <b>0</b> تعليق</span></div>
-</div>
-    <div class="foot">
-      تُجمَع المصادر آليًا وتُلخَّص بالذكاء الاصطناعي — <b>الملخصات والتحليلات قابلة للخطأ</b>،
-      ارجع للمصدر الأصلي دائمًا. المحتوى للاطلاع فقط وليس استشارة مالية أو قانونية.
-      راجع كراسة الشروط الرسمية ومنصة مصر العقارية قبل أي التزام مالي.
-      <div style="margin-top:8px;font-size:11.5px;">محركات التحليل — Gemini: 0✓/0✗</div>
-    </div>
-  </div>
-
-  <div class="side">
-    <div class="card"><h3>&#128202; نظرة سريعة</h3>
-      <div class="row"><span>إجمالي العناصر</span><b>20</b></div>
-      <div class="row"><span>جديد هذه الدورة</span><b>0</b></div>
-      <div class="row"><span>عاجل</span><b>0</b></div>
-      <div class="row"><span>فيديوهات وتحليلات</span><b>20</b></div>
-    </div>
-    <div class="card"><h3>&#128279; روابط رسمية</h3>
-      <div class="srcline">· <a href="https://lands.nuca.gov.eg/" target="_blank">هيئة المجتمعات العمرانية</a></div>
-      <div class="srcline">· <a href="https://reservations.realestate.gov.eg/ar" target="_blank">منصة مصر العقارية</a></div>
-      <div class="srcline">· <a href="https://beitakfemisr.com/" target="_blank">بيتك في مصر</a></div>
-    </div>
-  </div>
-</div></div>
-
 <script>
-  const tabs = document.querySelectorAll('.tab');
-  const cards = document.querySelectorAll('[data-sec]');
-  tabs.forEach(t => t.addEventListener('click', () => {
-    tabs.forEach(x => x.classList.remove('on'));
-    t.classList.add('on');
-    const want = t.dataset.filter;
-    cards.forEach(c => {
-      c.classList.toggle('hidden', want !== 'all' && c.dataset.sec !== want);
+document.querySelectorAll('[data-filters]').forEach(function(bar){
+  var scope = bar.closest('section');
+  var btns = bar.querySelectorAll('button');
+  btns.forEach(function(b){
+    b.addEventListener('click', function(){
+      btns.forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on');
+      var want = b.dataset.filter;
+      scope.querySelectorAll('[data-sec]').forEach(function(card){
+        card.classList.toggle('hidden', want !== 'all' && card.dataset.sec !== want);
+      });
     });
-  }));
+  });
+});
+
+(function(){
+  var el = document.getElementById('countdown');
+  if(!el || !el.dataset.deadline) return;
+  var target = new Date(el.dataset.deadline + 'T00:00:00+03:00').getTime();
+  var slots = el.querySelectorAll('.u .n');
+  function tick(){
+    var diff = target - Date.now();
+    if(diff < 0){ el.querySelector('.cd-units').innerHTML =
+      '<div style="font-size:16px;font-weight:600;color:#a52820">حلّ الموعد</div>'; return; }
+    var d = Math.floor(diff/86400000),
+        h = Math.floor(diff/3600000)%24,
+        m = Math.floor(diff/60000)%60,
+        s = Math.floor(diff/1000)%60;
+    [d,h,m,s].forEach(function(v,i){ if(slots[i]) slots[i].textContent = v; });
+    setTimeout(tick, 1000);
+  }
+  tick();
+})();
 </script>
 </body>
 </html>

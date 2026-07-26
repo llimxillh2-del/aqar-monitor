@@ -1,8 +1,96 @@
 {
- "updated": "2026-07-26T12:27:27.634007",
+ "updated": "2026-07-26T16:45:34.412985+00:00",
  "brief": null,
  "forecast": null,
  "market": [],
+ "beit": {
+  "stage": null,
+  "booking": null,
+  "price": null,
+  "areas": null,
+  "deposit": null,
+  "conditions": null,
+  "payment": null,
+  "last": null,
+  "confidence": "غير محددة",
+  "dates": [],
+  "next": null,
+  "cities": {},
+  "summary": null,
+  "people": null,
+  "forecast": null,
+  "checklist": null,
+  "timeline": []
+ },
+ "intel": {
+  "counts": {
+   "total": 2,
+   "strong": 0,
+   "novel": 2,
+   "confirmed": 0
+  },
+  "stats": {
+   "cycles": 1,
+   "utterances": 121,
+   "confirmed": 0,
+   "avg_lead_days": null
+  },
+  "digest": null,
+  "signals": [
+   {
+    "statement": "أقل مقدم حجز متاح على الموقع حالياً هو 8000 دولار في مدينة أخميم الجديدة",
+    "type": "شائعة",
+    "tier": "إشارة فردية",
+    "status": "جديدة",
+    "novel": true,
+    "mentions": 1,
+    "independence": 1,
+    "firsthand": 0,
+    "weight": 7.6,
+    "lead_days": null,
+    "first_seen": "2026-07-26T16:45:34.407706+00:00",
+    "total_likes": 1,
+    "sources": [
+     {
+      "channel": "yt:عاجل تسريبات بيت الوطن.. دخول شمال الرحا",
+      "author": "@اخبارالاسكان",
+      "url": "https://www.youtube.com/watch?v=deNhseBhPF8&lc=UgwAudnuo5IG0EZeAud4AaABAg",
+      "quote": "أقل مقدم حجز متاح على الموقع حالياً هو 8000 دولار في مدينة أخميم الجديدة.. أي مبلغ أقل من مقدمات الأراضي المتاحة لن يسجل",
+      "firsthand": false
+     }
+    ]
+   },
+   {
+    "statement": "مفيش المساحة ده من اول ٢٠٠ متر بسعر ٣٣ الف",
+    "type": "شائعة",
+    "tier": "إشارة فردية",
+    "status": "جديدة",
+    "novel": true,
+    "mentions": 1,
+    "independence": 1,
+    "firsthand": 0,
+    "weight": 7,
+    "lead_days": null,
+    "first_seen": "2026-07-26T16:45:34.407706+00:00",
+    "total_likes": 0,
+    "sources": [
+     {
+      "channel": "yt:بيت الوطن | كما لم تراه من قبل | متوسط ا",
+      "author": "@RAOF-MOUSSArealestate",
+      "url": "https://www.youtube.com/watch?v=ys3qjk2mK7Q&lc=UgzyLQ3LBxGQmAns3tx4AaABAg.AZ5CUQ6PYw2AZ5en2xyX5n",
+      "quote": "مفيش المساحة ده من اول ٢٠٠ متر بسعر ٣٣ الف",
+      "firsthand": false
+     }
+    ]
+   }
+  ],
+  "questions": []
+ },
  "urgent": [],
- "top": []
+ "top": [],
+ "counts": {
+  "total": 62,
+  "new": 62,
+  "beit": 5
+ }
 }
