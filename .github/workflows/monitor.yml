@@ -1,22 +1,27 @@
-name: دورة كاملة — تحليل ونشر
+name: متابعة بيت الوطن
 
 on:
   schedule:
-    - cron: '0 */4 * * *'      # كل 4 ساعات
+    - cron: '*/30 * * * *'      # كل 30 دقيقة
   workflow_dispatch:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
-# يمنع تشغيلين في نفس الوقت — ده كان بيسبب تعارض في git push
 concurrency:
-  group: aqar-full
-  cancel-in-progress: false
+  group: beit-alwatan
+  cancel-in-progress: true
 
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 10
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - uses: actions/checkout@v4
@@ -24,32 +29,35 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: pip
 
-      - run: pip install -r requirements.txt
+      - run: pip install requests feedparser
 
-      - name: تشغيل الدورة
-        run: python monitor.py --once
+      - name: فحص بيت الوطن
+        run: python beit_alwatan_simple.py --once
         env:
-          TELEGRAM_TOKEN:     ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
-          GROQ_API_KEY:       ${{ secrets.GROQ_API_KEY }}
-          GEMINI_API_KEY:     ${{ secrets.GEMINI_API_KEY }}
-          CEREBRAS_API_KEY:   ${{ secrets.CEREBRAS_API_KEY }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          YOUTUBE_API_KEY:    ${{ secrets.YOUTUBE_API_KEY }}
+          TELEGRAM_TOKEN:   ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          YOUTUBE_API_KEY:  ${{ secrets.YOUTUBE_API_KEY }}
 
-      - name: حفظ النتائج
+      - name: حفظ الحالة
         run: |
-          git config user.name  "monitor-bot"
+          git config user.name  "beit-alwatan-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add -A state latest.json index.html beit-alwatan.html
+          git add -A state/beit_seen_simple.json state/beit_log_simple.json
           git diff --staged --quiet && exit 0
-          git commit -m "تحديث تلقائي — $(date -u '+%Y-%m-%d %H:%M UTC')"
-          # إعادة المحاولة لو حد عمل push في نفس اللحظة
+          git commit -m "تحديث الحالة"
           for i in 1 2 3; do
             git pull --rebase --autostash origin ${{ github.ref_name }} && \
             git push && exit 0
             sleep 5
           done
           exit 1
+
+      - name: تجهيز الموقع للنشر
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: نشر الموقع
+        id: deployment
+        uses: actions/deploy-pages@v4
