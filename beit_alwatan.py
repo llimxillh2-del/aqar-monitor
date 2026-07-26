@@ -1,604 +1,765 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-وحدة "بيت الوطن" — المتابعة المخصّصة
-=====================================
-دي الوحدة اللي بتخلي النظام "فاهم" ملف بيت الوطن مش بس قارئ عناوينه.
+متابعة بيت الوطن — نسخة مبسّطة
+================================
+ملف واحد، مفيش رادار ولا تحليل عام ولا "كلام ناس". بس:
 
-بتعمل إيه:
-  1. تفلتر كل العناصر (أخبار + فيديو + مصادر رسمية) وتطلع اللي يخص بيت الوطن.
-  2. تستخرج بالـ AI حقائق منظّمة: المرحلة، حالة الحجز، المواعيد، الأسعار،
-     المساحات، المدن، الجدية، الشروط.
-  3. تحوّل المواعيد لتواريخ حقيقية (ISO) عشان نحسب عدّاد تنازلي.
-  4. تقارن بالحالة المحفوظة وتطلع **إيه اللي اتغير فعلًا** فقط.
-  5. تبني خط زمني تراكمي للملف كله.
-  6. تلخّص كلام الناس (كومنتات) وتطلع المخاوف والمعلومات العملية.
-  7. تكتب توقّع للمرحلة الجاية + خطوات عملية.
+  1. يدور على أخبار وفيديوهات فيها كلمات مفتاحية عن بيت الوطن
+     (حجز / قرعة / ترتيب / مواعيد / كراسة شروط)
+  2. يقارن باللي بعته قبل كده
+  3. أي حاجة جديدة → يبعتها فورًا على تليجرام: العنوان + المصدر + الرابط
+
+مفيش "إشارات" ولا "درجة ثقة" ولا تحليل AI معقد. خبر جديد = رسالة.
+هدفه إنه يجيبلك أي إعلان عن فتح الحجز أو نتيجة القرعة أو الترتيب
+أسرع من إنك تفتح فيسبوك بنفسك، مش إنه "يفهم السوق".
+
+التشغيل:
+    python beit_alwatan_simple.py --once     دورة واحدة
+    python beit_alwatan_simple.py --daemon   يشتغل كل 30 دقيقة لوحده
 """
 
 import os
 import re
+import sys
 import json
+import time
+import argparse
+import urllib.parse
 from datetime import datetime, timezone, timedelta
 
-import config
-from ai_engine import SYSTEM_AR, SYSTEM_JSON
+import requests
+import feedparser
 
-BEIT = config.BEIT_ALWATAN
+# ============================================================
+#  الإعدادات — عدّل هنا بس
+# ============================================================
+
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "").strip()
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", "").strip()
+
+# كل عبارة هنا بتترصد في Google News منفصلة
+SEARCH_QUERIES = [
+    "بيت الوطن حجز",
+    "بيت الوطن قرعة",
+    "بيت الوطن ترتيب المتقدمين",
+    "بيت الوطن كراسة الشروط",
+    "بيت الوطن موعد",
+    "بيت الوطن المرحلة",
+    "بيت الوطن تخصيص",
+    "بيت الوطن المصريين بالخارج",
+]
+
+# لازم العنوان يحتوي على كلمة من دول عشان يتحسب "يخص بيت الوطن" فعلًا
+MUST_CONTAIN = ["بيت الوطن", "بيتك في مصر"]
+
+# كلمات لو ظهرت في العنوان = عاجل (🔴 بدل 🔵)
+URGENT_WORDS = ["حجز", "قرعة", "ترتيب", "فتح", "موعد", "كراسة الشروط",
+                "تخصيص", "نتيجة", "إعلان"]
+
+# كومنتات الفيديوهات — بنقرا الأعلى تفاعلًا بس، ونبعت اللي فيها معلومة حقيقية
+# (مش رأي أو دعاء). محتاج YOUTUBE_API_KEY.
+COMMENTS_ENABLED = True
+MAX_COMMENTS_PER_VIDEO = 40      # كام كومنت نقرا من كل فيديو
+MIN_LIKES_TO_REPORT = 15         # أقل عدد إعجابات عشان الكومنت "يستاهل"
+MAX_VIDEOS_FOR_COMMENTS = 6      # كام فيديو (الأحدث) نقرا كومنتاته كل دورة
+
+# كومنت "يستاهل" لازم يحتوي على كلمة من دول — علامة إنه معلومة مش كلام عام
+COMMENT_INFO_WORDS = [
+    "حجز", "قرعة", "ترتيب", "موعد", "كراسة", "شروط", "سعر", "جنيه",
+    "دولار", "متر", "تحويل", "بنك", "مساحة", "مرحلة", "تخصيص", "كلمت",
+    "اتصلت", "الهيئة", "رد عليا", "قالولي", "استلمت", "جاني", "رقمي",
+]
+
+# كلمات فاضية بتترمي حتى لو فيها إعجابات كتير
+COMMENT_NOISE_WORDS = ["ربنا يوفق", "الله يكرمك", "جزاك الله", "تسلم",
+                       "اشتركوا", "لايك للفيديو", "ما شاء الله"]
+
+YOUTUBE_QUERIES = [
+    "بيت الوطن حجز",
+    "بيت الوطن قرعة ترتيب",
+]
+
+# قنوات يوتيوب بعينها بنتابعها بالكامل — أي فيديو جديد منها عن بيت الوطن
+# (فيديوهاتهم التانية بتتفلتر بنفس شرط MUST_CONTAIN، فمش كل حاجة بتاعتهم
+# هتوصلك، بس اللي يخص بيت الوطن بس)
+YOUTUBE_CHANNELS = [
+    ("الاسكان مع عمر مخلوف", "UCTRxog2J5dFMIiDqDvc4DYw"),
+    ("الإسكان مع عمرو زكي", "UC68MAMp5g8Lft48Knm3pheg"),
+    ("كلام في المفيد — هاني الخميسي", "UCl3L_aO3A1-nqQhBRFtbcnw"),
+    ("عقارات", "UCGiEiZDpqoyfXUcWmTrLfWw"),
+]
+
+MAX_AGE_DAYS = 14           # يتجاهل الأخبار الأقدم من كده
+CHECK_INTERVAL_MINUTES = 30  # في وضع --daemon
+
+SEEN_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                         "state", "beit_seen_simple.json")
+
+# سجل كل العناصر اللي اتبعتت (للموقع) — بيحتفظ بآخر عناصر بس
+LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                        "state", "beit_log_simple.json")
+MAX_LOG_ITEMS = 500
+
+# مجلد الموقع الثابت اللي بينشر على GitHub Pages
+SITE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "site")
+
+UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+      "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
 
 
 # ============================================================
-#  الحالة المحفوظة
+#  أدوات
 # ============================================================
 
-def _blank():
-    return {
-        "facts": {},         # حقل → {"value","since","source_title","source_link"}
-        "timeline": [],      # الأحداث بالترتيب الزمني
-        "dates": [],         # المواعيد المستخرجة بصيغة قابلة للحساب
-        "cities": {},        # مدينة → عدد مرات الذكر
-        "people": None,      # تحليل كلام الناس
-        "forecast": None,    # توقع المرحلة الجاية
-        "checklist": None,   # خطوات عملية
-        "summary": None,     # ملخص تنفيذي مخصّص للملف
-        "sources": [],       # آخر المصادر اللي البيانات اتبنت عليها
-        "updated": None,
-    }
+def log(msg):
+    now = datetime.now().strftime("%H:%M:%S")
+    print(f"[{now}] {msg}", flush=True)
 
 
-def load():
-    path = config.BEIT_STATE
-    if os.path.exists(path):
+def load_seen():
+    if os.path.exists(SEEN_FILE):
         try:
-            with open(path, encoding="utf-8") as f:
-                data = json.load(f)
-            base = _blank()
-            base.update(data or {})
-            return base
+            with open(SEEN_FILE, encoding="utf-8") as f:
+                return set(json.load(f))
         except Exception:
             pass
-    return _blank()
+    return set()
 
 
-def save(state):
-    state["updated"] = datetime.now(timezone.utc).isoformat()
-    state["timeline"] = (state.get("timeline") or [])[-300:]
-    path = config.BEIT_STATE
-    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
-    tmp = path + ".tmp"
+def save_seen(seen):
+    os.makedirs(os.path.dirname(SEEN_FILE), exist_ok=True)
+    tmp = SEEN_FILE + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(state, f, ensure_ascii=False, indent=1)
-    os.replace(tmp, path)
+        json.dump(sorted(seen)[-3000:], f, ensure_ascii=False, indent=1)
+    os.replace(tmp, SEEN_FILE)
+
+
+def load_log():
+    if os.path.exists(LOG_FILE):
+        try:
+            with open(LOG_FILE, encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return []
+
+
+def save_log(items):
+    os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
+    tmp = LOG_FILE + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(items[-MAX_LOG_ITEMS:], f, ensure_ascii=False, indent=1)
+    os.replace(tmp, LOG_FILE)
+
+
+def is_relevant(title, snippet=""):
+    blob = f"{title} {snippet}"
+    return any(w in blob for w in MUST_CONTAIN)
+
+
+def is_urgent(title):
+    return any(w in title for w in URGENT_WORDS)
+
+
+def clean_title(title):
+    return re.sub(r"\s+-\s+[^-]+$", "", title).strip()
 
 
 # ============================================================
-#  الفلترة
+#  جلب الأخبار
 # ============================================================
 
-def matches(item):
-    """هل العنصر ده يخص بيت الوطن؟"""
-    blob = f"{item.get('title', '')} {item.get('snippet', '')}"
-    return any(w in blob for w in BEIT["match_words"])
+def fetch_news():
+    """يدور في Google News على كل عبارة، ويرجّع عناصر موحّدة."""
+    items = []
+    seen_links = set()
+    cutoff = datetime.now(timezone.utc) - timedelta(days=MAX_AGE_DAYS)
 
+    for query in SEARCH_QUERIES:
+        log(f"  بدور: {query}")
+        q = urllib.parse.quote(query)
+        url = f"https://news.google.com/rss/search?q={q}&hl=ar&gl=EG&ceid=EG:ar"
 
-def filter_items(all_items):
-    """يرجّع عناصر بيت الوطن مرتبة من الأحدث."""
-    hits = [it for it in all_items if matches(it)]
-    hits.sort(key=lambda x: x.get("published_ts", 0), reverse=True)
-    return hits
-
-
-def mentioned_cities(items):
-    """عدّ المدن المذكورة — يدي فكرة عن الأماكن المطروحة."""
-    counts = {}
-    for it in items:
-        blob = f"{it.get('title', '')} {it.get('snippet', '')}"
-        for city in BEIT["cities"]:
-            if city in blob:
-                counts[city] = counts.get(city, 0) + 1
-    return dict(sorted(counts.items(), key=lambda kv: kv[1], reverse=True))
-
-
-# ============================================================
-#  تحويل المواعيد العربية لتواريخ حقيقية
-# ============================================================
-
-AR_MONTHS = {
-    "يناير": 1, "فبراير": 2, "مارس": 3, "أبريل": 4, "ابريل": 4, "مايو": 5,
-    "يونيو": 6, "يونية": 6, "يوليو": 7, "يوليه": 7, "يولية": 7, "أغسطس": 8,
-    "اغسطس": 8, "سبتمبر": 9, "أكتوبر": 10, "اكتوبر": 10, "نوفمبر": 11,
-    "ديسمبر": 12,
-    "كانون الثاني": 1, "شباط": 2, "آذار": 3, "نيسان": 4, "أيار": 5,
-    "حزيران": 6, "تموز": 7, "آب": 8, "أيلول": 9, "تشرين الأول": 10,
-    "تشرين الثاني": 11, "كانون الأول": 12,
-}
-
-_AR_DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩", "0123456789")
-
-
-def parse_date(text, ref=None):
-    """
-    يحاول يطلع تاريخ حقيقي من نص عربي.
-    بيرجع ISO ("2026-08-15") أو None.
-    """
-    if not text:
-        return None
-    s = str(text).translate(_AR_DIGITS).strip()
-    ref = ref or datetime.now(timezone.utc)
-
-    # 2026-08-15 أو 2026/8/15
-    m = re.search(r"\b(20\d{2})[-/](\d{1,2})[-/](\d{1,2})\b", s)
-    if m:
-        y, mo, d = map(int, m.groups())
-        return _safe_iso(y, mo, d)
-
-    # 15/8/2026 أو 15-8-2026
-    m = re.search(r"\b(\d{1,2})[-/](\d{1,2})[-/](20\d{2})\b", s)
-    if m:
-        d, mo, y = map(int, m.groups())
-        return _safe_iso(y, mo, d)
-
-    # 15 أغسطس 2026  /  15 أغسطس
-    month_names = "|".join(sorted(AR_MONTHS, key=len, reverse=True))
-    m = re.search(rf"\b(\d{{1,2}})\s+({month_names})\s*(20\d{{2}})?", s)
-    if m:
-        d = int(m.group(1))
-        mo = AR_MONTHS[m.group(2)]
-        y = int(m.group(3)) if m.group(3) else ref.year
-        iso = _safe_iso(y, mo, d)
-        # لو الشهر عدّى بأكتر من 6 شهور والسنة مش مكتوبة → غالبًا السنة الجاية
-        if iso and not m.group(3):
-            dt = datetime.fromisoformat(iso).replace(tzinfo=timezone.utc)
-            if dt < ref - timedelta(days=180):
-                iso = _safe_iso(y + 1, mo, d)
-        return iso
-
-    # أغسطس 2026 (شهر بس)
-    m = re.search(rf"\b({month_names})\s+(20\d{{2}})\b", s)
-    if m:
-        return _safe_iso(int(m.group(2)), AR_MONTHS[m.group(1)], 1)
-
-    return None
-
-
-def _safe_iso(y, mo, d):
-    try:
-        return datetime(y, mo, d).date().isoformat()
-    except ValueError:
-        return None
-
-
-def build_dates(facts):
-    """
-    يطلع قائمة المواعيد من الحقائق مع حالتها (قادم / اليوم / فات).
-    """
-    labels = {
-        "موعد_فتح_الحجز": ("فتح باب الحجز", "open"),
-        "موعد_غلق_الحجز": ("غلق باب الحجز", "close"),
-        "موعد_السداد": ("سداد الجدية / المقدم", "pay"),
-        "موعد_القرعة": ("القرعة / إعلان النتيجة", "draw"),
-    }
-    today = datetime.now(timezone.utc).date()
-    out = []
-
-    for field, (label, kind) in labels.items():
-        raw = (facts.get(field) or {}).get("value")
-        if not raw:
+        try:
+            r = requests.get(url, headers={"User-Agent": UA}, timeout=20)
+            r.raise_for_status()
+            feed = feedparser.parse(r.content)
+        except Exception as exc:
+            log(f"    ! فشل: {str(exc)[:70]}")
             continue
-        iso = parse_date(raw)
-        entry = {"label": label, "kind": kind, "raw": raw, "iso": iso}
-        if iso:
-            d = datetime.fromisoformat(iso).date()
-            delta = (d - today).days
-            entry["days_left"] = delta
-            entry["status"] = ("فات" if delta < 0
-                               else "النهاردة" if delta == 0
-                               else "قادم")
-        else:
-            entry["days_left"] = None
-            entry["status"] = "غير محدد بدقة"
-        out.append(entry)
 
-    out.sort(key=lambda e: (e["days_left"] is None,
-                            e["days_left"] if e["days_left"] is not None else 0))
-    return out
+        for entry in feed.entries[:15]:
+            link = entry.get("link", "")
+            if not link or link in seen_links:
+                continue
 
+            title = clean_title(entry.get("title", ""))
+            if not title or not is_relevant(title):
+                continue
 
-def next_deadline(dates):
-    """أقرب موعد قادم — ده اللي بيظهر في العدّاد التنازلي."""
-    upcoming = [d for d in dates
-                if d.get("days_left") is not None and d["days_left"] >= 0]
-    return upcoming[0] if upcoming else None
+            published = None
+            if getattr(entry, "published_parsed", None):
+                published = datetime(*entry.published_parsed[:6],
+                                     tzinfo=timezone.utc)
+            if published and published < cutoff:
+                continue
 
+            source = ""
+            src_obj = getattr(entry, "source", None)
+            if src_obj is not None:
+                source = getattr(src_obj, "title", "") or ""
 
-# ============================================================
-#  الاستخراج بالـ AI
-# ============================================================
+            seen_links.add(link)
+            items.append({
+                "title": title,
+                "link": link,
+                "source": source or "خبر",
+                "kind": "news",
+                "when": published.isoformat() if published else "",
+            })
+        time.sleep(0.8)
 
-def extract(ai, items, video_summaries=None, official_lines=None):
-    """يستخرج حقائق بيت الوطن من العناوين والملخصات والمصادر الرسمية."""
-    if not ai.available or not items:
-        return None
-
-    news = "\n".join(
-        f"- {it['title']}" + (f" | {it['snippet'][:160]}" if it.get("snippet") else "")
-        for it in items[:35]
-    )
-    vids = "\n".join(f"- {t}: {s[:500]}" for t, s in (video_summaries or [])[:3])
-    official = "\n".join(f"- {ln}" for ln in (official_lines or [])[:25])
-
-    prompt = f"""دي كل المعلومات المتاحة عن مشروع **بيت الوطن** (أراضي المصريين بالخارج) من آخر فترة:
-
-### عناوين وأخبار:
-{news}
-
-{"### ملخصات فيديوهات تحليلية:" if vids else ""}
-{vids}
-
-{"### نصوص من صفحات رسمية (أعلى موثوقية — قدّمها على غيرها عند التعارض):" if official else ""}
-{official}
-
-استخرج الحقائق دي بالظبط. رجّع JSON فقط:
-
-{{
-  "المرحلة_الحالية": "اسم/رقم المرحلة المطروحة دلوقتي أو null",
-  "حالة_الحجز": "مفتوح / مغلق / لم يُفتح بعد / منتهي / غير معروف",
-  "موعد_فتح_الحجز": "التاريخ كما ورد نصًا أو null",
-  "موعد_غلق_الحجز": "التاريخ كما ورد نصًا أو null",
-  "موعد_السداد": "موعد سداد الجدية أو المقدم أو null",
-  "موعد_القرعة": "موعد القرعة أو إعلان النتائج أو null",
-  "سعر_المتر": "السعر بالجنيه أو الدولار كما ورد أو null",
-  "المساحات_المتاحة": "المساحات المطروحة أو null",
-  "المدن_المطروحة": "المدن المذكورة مفصولة بفاصلة أو null",
-  "قيمة_الجدية": "قيمة جدية الحجز أو null",
-  "شروط_التقديم": "أهم الشروط في جملة أو جملتين أو null",
-  "طريقة_السداد": "بالدولار / بالجنيه / تحويل بنكي... أو null",
-  "آخر_تطور": "أحدث تطور في جملة واحدة أو null",
-  "درجة_الثقة": "عالية / متوسطة / منخفضة — حسب وضوح المصادر"
-}}
-
-قواعد صارمة:
-- لو المعلومة مش موجودة صراحة في النص، حط null. **ماتخمّنش وماتفترضش**.
-- المصادر الرسمية تغلب الأخبار عند التعارض.
-- انقل التواريخ والأرقام كما وردت بالظبط بدون تقريب."""
-
-    return ai.ask_json(prompt, SYSTEM_JSON)
+    log(f"  → {len(items)} خبر يخص بيت الوطن")
+    return items
 
 
-def _clean(v):
-    if v is None:
-        return None
-    s = re.sub(r"\s+", " ", str(v)).strip()
-    if s.lower() in ("null", "none", "n/a", "-", "—", "", "غير معروف",
-                     "غير محدد", "لا يوجد", "لم يذكر", "لم يُذكر"):
-        return None
-    return s
-
-
-def diff_and_update(state, facts, items):
-    """
-    يقارن الحقائق الجديدة بالمحفوظة ويرجّع التغييرات الحقيقية فقط،
-    ويضيفها للخط الزمني.
-    """
-    if not facts or not isinstance(facts, dict):
+def fetch_youtube():
+    """يدور في يوتيوب لو فيه مفتاح — عناوين فيديوهات بس، من غير كومنتات."""
+    if not YOUTUBE_API_KEY:
         return []
 
-    now = datetime.now(timezone.utc).isoformat()
-    stored = state.setdefault("facts", {})
-    changes = []
+    items = []
+    seen_links = set()
+    cutoff = datetime.now(timezone.utc) - timedelta(days=MAX_AGE_DAYS)
 
-    # أحدث مصدر — بنربط بيه أي تغيير
-    src = items[0] if items else {}
-    src_title = src.get("title", "")
-    src_link = src.get("link", "")
-
-    for field in BEIT["tracked_fields"] + ["طريقة_السداد", "درجة_الثقة"]:
-        new_val = _clean(facts.get(field))
-        if new_val is None:
+    for query in YOUTUBE_QUERIES:
+        log(f"  يوتيوب: {query}")
+        try:
+            r = requests.get(
+                "https://www.googleapis.com/youtube/v3/search",
+                params={"key": YOUTUBE_API_KEY, "q": query, "part": "snippet",
+                       "type": "video", "order": "date", "maxResults": 8,
+                       "relevanceLanguage": "ar"},
+                timeout=20)
+            r.raise_for_status()
+        except Exception as exc:
+            log(f"    ! فشل: {str(exc)[:70]}")
             continue
 
-        old_rec = stored.get(field) or {}
-        old_val = old_rec.get("value")
+        for entry in r.json().get("items", []):
+            sn = entry.get("snippet", {})
+            vid = (entry.get("id") or {}).get("videoId")
+            if not vid:
+                continue
+            link = f"https://www.youtube.com/watch?v={vid}"
+            if link in seen_links:
+                continue
 
-        if old_val == new_val:
+            title = sn.get("title", "")
+            if not is_relevant(title, sn.get("description", "")):
+                continue
+
+            published = None
+            try:
+                published = datetime.fromisoformat(
+                    (sn.get("publishedAt") or "").replace("Z", "+00:00"))
+            except (TypeError, ValueError):
+                pass
+            if published and published < cutoff:
+                continue
+
+            seen_links.add(link)
+            items.append({
+                "title": title,
+                "link": link,
+                "source": sn.get("channelTitle", "قناة يوتيوب"),
+                "kind": "video",
+                "when": published.isoformat() if published else "",
+            })
+        time.sleep(0.5)
+
+    log(f"  → {len(items)} فيديو يخص بيت الوطن")
+    return items
+
+
+def fetch_youtube_channels():
+    """
+    RSS رسمي مجاني لكل قناة من YOUTUBE_CHANNELS — بيرجّع آخر ١٥ فيديو
+    منها من غير أي مفتاح API ومن غير حصة (quota). بيتفلتر بعدين على
+    اللي يخص بيت الوطن بس.
+    """
+    if not YOUTUBE_CHANNELS:
+        return []
+
+    items = []
+    cutoff = datetime.now(timezone.utc) - timedelta(days=MAX_AGE_DAYS)
+
+    for name, channel_id in YOUTUBE_CHANNELS:
+        log(f"  قناة: {name}")
+        url = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
+        try:
+            r = requests.get(url, headers={"User-Agent": UA}, timeout=20)
+            r.raise_for_status()
+            feed = feedparser.parse(r.content)
+        except Exception as exc:
+            log(f"    ! فشل: {str(exc)[:70]}")
             continue
 
-        # تجاهل التغييرات التافهة (نفس المعنى بصياغة مختلفة)
-        if old_val and _too_similar(old_val, new_val):
-            stored[field] = {**old_rec, "value": new_val, "seen": now}
-            continue
+        for entry in feed.entries[:15]:
+            title = entry.get("title", "")
+            link = entry.get("link", "")
+            if not link or not is_relevant(title):
+                continue
 
-        changes.append({
-            "field": field,
-            "from": old_val,
-            "to": new_val,
-            "when": now,
-            "source_title": src_title,
-            "source_link": src_link,
-        })
-        stored[field] = {
-            "value": new_val,
-            "since": now,
-            "source_title": src_title,
-            "source_link": src_link,
-        }
+            published = None
+            if getattr(entry, "published_parsed", None):
+                published = datetime(*entry.published_parsed[:6],
+                                     tzinfo=timezone.utc)
+            if published and published < cutoff:
+                continue
 
-    if changes:
-        state.setdefault("timeline", []).extend(changes)
+            items.append({
+                "title": title,
+                "link": link,
+                "source": name,
+                "kind": "video",
+                "when": published.isoformat() if published else "",
+            })
+        time.sleep(0.4)
 
-    state["dates"] = build_dates(stored)
-    state["cities"] = mentioned_cities(items)
-    state["sources"] = [
-        {"title": it["title"], "link": it["link"],
-         "source": it.get("source", ""), "published": it.get("published", "")}
-        for it in items[:12]
-    ]
-    return changes
+    log(f"  → {len(items)} فيديو من القنوات المتابَعة يخص بيت الوطن")
+    return items
 
 
-def _too_similar(a, b):
-    """صياغة مختلفة لنفس المعلومة → مش تغيير حقيقي."""
-    norm = lambda s: re.sub(r"[^\w؀-ۿ]+", "", str(s))
-    na, nb = norm(a), norm(b)
-    if na == nb:
+QUESTION_STARTERS = ("هل ", "حد عارف", "حد يعرف", "في حد", "فيه حد",
+                     "ياريت حد", "محتاج اعرف", "محتاجة اعرف")
+
+# سؤال شائع محتاج لايكات أعلى بكتير عشان يستاهل يتبعت (فرق عن معلومة عادية)
+MIN_LIKES_FOR_TRENDING_QUESTION = 60
+
+
+def _is_question(text):
+    if "؟" in text or text.strip().endswith("?"):
         return True
-    if not na or not nb:
+    return any(text.startswith(w) for w in QUESTION_STARTERS)
+
+
+def _is_worthy_comment(text):
+    """
+    كومنت يستاهل التقرير كـ"معلومة": فيه كلمة معلومة، مش كلام فاضي معروف،
+    ومش سؤال (سؤال ≠ معلومة حتى لو فيه نفس الكلمات وإعجابات كتير).
+    """
+    if len(text) < 20:
         return False
-    shorter, longer = (na, nb) if len(na) <= len(nb) else (nb, na)
-    return shorter in longer and len(shorter) / len(longer) > 0.75
+    if any(n in text for n in COMMENT_NOISE_WORDS):
+        return False
+    if _is_question(text):
+        return False
+    return any(w in text for w in COMMENT_INFO_WORDS)
 
 
-# ============================================================
-#  كلام الناس
-# ============================================================
-
-def people_pulse(ai, comments, extra_context=""):
-    """
-    تحليل مجمّع لكلام الناس عن بيت الوطن — من كل الكومنتات مش فيديو واحد.
-    """
-    if not ai.available or not comments:
+def _extract_comment_item(vid, comment_id, sn):
+    """يبني عنصر تقرير من snippet كومنت (سواء أساسي أو رد) لو يستاهل."""
+    text = (sn.get("textDisplay") or "").strip()
+    likes = int(sn.get("likeCount", 0) or 0)
+    if likes < MIN_LIKES_TO_REPORT or not _is_worthy_comment(text):
         return None
-
-    ranked = sorted(comments, key=lambda c: c.get("likes", 0), reverse=True)[:60]
-    listing = "\n".join(
-        f'- ({c.get("likes", 0)}👍) {c.get("text", "")[:260]}' for c in ranked
-    )
-
-    prompt = f"""دي تعليقات مصريين بالخارج على محتوى يخص **بيت الوطن** وأراضي المصريين بالخارج.
-(الرقم = عدد الإعجابات، يعني كام واحد موافق على الكلام ده)
-
-{listing}
-
-{extra_context}
-
-اكتب تحليل منظّم بالأقسام دي بالظبط وبنفس العناوين:
-
-## المزاج العام
-(2-3 جمل: الناس مبسوطة؟ متوترة؟ فاقدة ثقة؟ مستنية إيه؟ — واذكر إيه اللي مخليهم كده)
-
-## أكتر 5 شكاوى ومخاوف
-(مرتبة حسب التكرار وعدد الإعجابات — كل واحدة سطر)
-
-## أسئلة الناس اللي مالهاش إجابة
-(الحاجات اللي بيسألوا عنها ومحدش رد عليهم — دي بتوضّح فين الغموض في المشروع)
-
-## معلومات عملية من خبرات الناس
-(حاجات ذكرها ناس عملوا الإجراء فعلًا — خطوات، مشاكل واجهتهم، حلول)
-⚠️ نبّه إن ده كلام أفراد على الإنترنت ومحتاج تأكيد رسمي.
-
-## مؤشرات من كلام الناس
-(لو كلامهم بيوحي بحاجة عن المرحلة الجاية أو مشكلة قادمة، قولها — ووضّح إنها قراءة مش خبر)
-
-قواعد: ماتخترعش. لو قسم مافيهوش كلام كافي، اكتب "مفيش إشارات واضحة في التعليقات المتاحة"."""
-
-    return ai.ask(prompt, SYSTEM_AR)
-
-
-# ============================================================
-#  التوقعات والخطوات
-# ============================================================
-
-def forecast(ai, state, items, people_text=None):
-    """توقع المرحلة الجاية بناءً على التاريخ المرصود."""
-    if not ai.available:
-        return None
-
-    facts = state.get("facts") or {}
-    fact_lines = "\n".join(
-        f"- {k.replace('_', ' ')}: {v.get('value')}"
-        for k, v in facts.items() if v.get("value")
-    ) or "لا توجد حقائق مؤكدة محفوظة بعد."
-
-    timeline = state.get("timeline") or []
-    hist = "\n".join(
-        f"- {t['when'][:10]}: {t['field'].replace('_', ' ')} "
-        f"{'اتغير من ' + str(t['from']) + ' لـ ' if t.get('from') else 'اتسجل: '}{t['to']}"
-        for t in timeline[-25:]
-    ) or "لا يوجد تاريخ محفوظ بعد (أول تشغيل)."
-
-    news = "\n".join(f"- {it['title']}" for it in items[:20])
-
-    prompt = f"""ملف **بيت الوطن** — البيانات المرصودة:
-
-### الحالة المؤكدة الآن:
-{fact_lines}
-
-### الخط الزمني للتغييرات المرصودة:
-{hist}
-
-### أحدث العناوين:
-{news}
-
-{"### خلاصة كلام الناس:" if people_text else ""}
-{(people_text or "")[:1500]}
-
-اكتب قراءة استشرافية لملف بيت الوطن بالأقسام دي بالظبط وبنفس العناوين:
-
-## أين نحن الآن
-(3 جمل: الملف واقف فين بالظبط دلوقتي)
-
-## المتوقع في الأسابيع القادمة
-(إيه الخطوة الجاية المرجّحة ومتى تقريبًا — مع توضيح إن ده ترجيح مش خبر)
-
-## سيناريوهات
-(3 سيناريوهات: الأرجح / متفائل / متحفظ — وإيه المؤشر اللي يأكد كل واحد)
-
-## أماكن ومدن تستحق الانتباه
-(بناءً على المدن المذكورة في الأخبار — ليه كل مدينة مرشحة وإيه اللي يعطّلها)
-
-## إشارات إنذار
-(علامات لو ظهرت تبقى تحذير حقيقي: تأجيل، تغيير شروط، تعديل أسعار...)
-
-قواعد صارمة:
-- كل استنتاج لازم يكون مبني على معطى من فوق — لو مش موجود قول "المعطيات مش كفاية".
-- ماتخترعش تواريخ ولا أرقام.
-- ماتقولش "اشتري" أو "متشتريش" — اعرض الاعتبارات."""
-
-    return ai.ask(prompt, SYSTEM_AR)
-
-
-def checklist(ai, state):
-    """خطوات عملية بناءً على الحالة الحالية."""
-    if not ai.available:
-        return None
-
-    facts = state.get("facts") or {}
-    status = (facts.get("حالة_الحجز") or {}).get("value") or "غير معروف"
-    stage = (facts.get("المرحلة_الحالية") or {}).get("value") or "غير محددة"
-    conds = (facts.get("شروط_التقديم") or {}).get("value") or "غير مذكورة"
-    pay = (facts.get("طريقة_السداد") or {}).get("value") or "غير مذكورة"
-    dates = "\n".join(
-        f"- {d['label']}: {d['raw']}" for d in (state.get("dates") or [])
-    ) or "- لا توجد مواعيد مؤكدة"
-
-    prompt = f"""حالة ملف بيت الوطن دلوقتي:
-- المرحلة: {stage}
-- حالة الحجز: {status}
-- الشروط المعروفة: {conds}
-- طريقة السداد: {pay}
-- المواعيد:
-{dates}
-
-اكتب **خطوات عملية مرقّمة** لمصري مقيم بالخارج عايز يتابع أو يقدّم في المرحلة دي.
-لكل خطوة: إيه المطلوب بالظبط، وفين يتعمل (الجهة أو المنصة).
-
-قسّمها كده:
-## لو الحجز مفتوح دلوقتي
-## لو لسه مفتحش
-## أوراق ومتطلبات لازم تكون جاهزة
-## أخطاء شائعة تتجنبها
-
-قواعد: اعتمد على المعلومات فوق فقط. أي حاجة مش مؤكدة اكتب جنبها "(يحتاج تأكيد من كراسة الشروط الرسمية)".
-ماتخترعش رسوم ولا أرقام ولا روابط."""
-
-    return ai.ask(prompt, SYSTEM_AR)
-
-
-def summarize(ai, state, items):
-    """ملخص تنفيذي قصير مخصّص لبيت الوطن."""
-    if not ai.available or not items:
-        return None
-
-    facts = state.get("facts") or {}
-    fact_lines = "\n".join(
-        f"- {k.replace('_', ' ')}: {v.get('value')}"
-        for k, v in facts.items() if v.get("value")
-    ) or "لا توجد حقائق مؤكدة."
-    news = "\n".join(f"- {it['title']}" for it in items[:25])
-
-    prompt = f"""### الحالة المرصودة لملف بيت الوطن:
-{fact_lines}
-
-### أحدث الأخبار:
-{news}
-
-اكتب ملخصًا تنفيذيًا لملف **بيت الوطن** لمصري مقيم بالخارج، بالأقسام دي بالظبط:
-
-## الخلاصة في سطرين
-(أهم حاجة يعرفها دلوقتي — من غير لف)
-
-## آخر المستجدات
-(3-5 نقاط قصيرة بأحدث اللي حصل)
-
-## المواعيد المهمة
-(المواعيد المؤكدة بس — لو مفيش، اكتب "لا توجد مواعيد معلنة مؤكدة حتى الآن")
-
-## غموض ومعلومات ناقصة
-(إيه اللي لسه مش واضح ومحتاج إعلان رسمي)
-
-قواعد: اعتمد على المعطيات فوق فقط، ماتخترعش أرقام أو تواريخ."""
-
-    return ai.ask(prompt, SYSTEM_AR)
-
-
-# ============================================================
-#  للعرض
-# ============================================================
-
-def dashboard(state):
-    """يحوّل الحالة لشكل جاهز للعرض في الصفحة والبوت."""
-    facts = state.get("facts") or {}
-    dates = state.get("dates") or build_dates(facts)
-
-    def val(field):
-        return (facts.get(field) or {}).get("value")
-
     return {
-        "stage": val("المرحلة_الحالية"),
-        "booking": val("حالة_الحجز"),
-        "price": val("سعر_المتر"),
-        "areas": val("المساحات_المتاحة"),
-        "cities_text": val("المدن_المطروحة"),
-        "deposit": val("قيمة_الجدية"),
-        "conditions": val("شروط_التقديم"),
-        "payment": val("طريقة_السداد"),
-        "last": val("آخر_تطور"),
-        "confidence": val("درجة_الثقة") or "غير محددة",
-        "dates": dates,
-        "next": next_deadline(dates),
-        "cities": state.get("cities") or {},
-        "timeline": list(reversed(state.get("timeline") or []))[:40],
-        "sources": state.get("sources") or [],
-        "summary": state.get("summary"),
-        "people": state.get("people"),
-        "forecast": state.get("forecast"),
-        "checklist": state.get("checklist"),
-        "updated": state.get("updated"),
+        "title": text[:180],
+        "link": f"https://www.youtube.com/watch?v={vid}&lc={comment_id}",
+        "source": f'تعليق ({likes} إعجاب) — '
+                  f'{sn.get("authorDisplayName", "مستخدم")}',
+        "kind": "comment",
+        "when": sn.get("publishedAt", ""),
     }
 
 
-FIELD_LABELS = {
-    "المرحلة_الحالية": "المرحلة الحالية",
-    "حالة_الحجز": "حالة الحجز",
-    "موعد_فتح_الحجز": "موعد فتح الحجز",
-    "موعد_غلق_الحجز": "موعد غلق الحجز",
-    "موعد_السداد": "موعد السداد",
-    "موعد_القرعة": "موعد القرعة",
-    "سعر_المتر": "سعر المتر",
-    "المساحات_المتاحة": "المساحات المتاحة",
-    "المدن_المطروحة": "المدن المطروحة",
-    "قيمة_الجدية": "قيمة الجدية",
-    "شروط_التقديم": "شروط التقديم",
-    "طريقة_السداد": "طريقة السداد",
-    "آخر_تطور": "آخر تطور",
-    "درجة_الثقة": "درجة الثقة في البيانات",
+def _extract_trending_question(vid, comment_id, sn):
+    """
+    سؤال شائع (لايكات عالية جدًا) من غير رد فيه معلومة — بيتبعت
+    بعلامة "سؤال متكرر" عشان يوريك إن ناس كتير قلقانة من نفس النقطة،
+    من غير ما نوهم إنه "معلومة" أو "تسريب".
+    """
+    text = (sn.get("textDisplay") or "").strip()
+    likes = int(sn.get("likeCount", 0) or 0)
+    if likes < MIN_LIKES_FOR_TRENDING_QUESTION or len(text) < 15:
+        return None
+    if any(n in text for n in COMMENT_NOISE_WORDS):
+        return None
+    if not _is_question(text):
+        return None
+    if not any(w in text for w in COMMENT_INFO_WORDS):
+        return None
+    return {
+        "title": text[:180],
+        "link": f"https://www.youtube.com/watch?v={vid}&lc={comment_id}",
+        "source": f'سؤال متكرر ({likes} إعجاب) — لسه من غير رد رسمي',
+        "kind": "trending_question",
+        "when": sn.get("publishedAt", ""),
+    }
+
+
+def fetch_comments(video_ids):
+    """
+    أعلى الكومنتات تفاعلًا من كل فيديو (التعليق الأساسي وكمان الردود عليه)،
+    مفلترة على اللي فيها معلومة حقيقية (مش رأي أو دعاء). الأسئلة العادية
+    بتترفض، لكن سؤال شائع جدًا (لايكات عالية) بيتبعت بعلامة "سؤال متكرر"
+    عشان يوضح اهتمام الناس حتى لو مفيش إجابة عليه لسه.
+    """
+    if not (COMMENTS_ENABLED and YOUTUBE_API_KEY and video_ids):
+        return []
+
+    items = []
+    for vid in list(video_ids)[:MAX_VIDEOS_FOR_COMMENTS]:
+        try:
+            r = requests.get(
+                "https://www.googleapis.com/youtube/v3/commentThreads",
+                params={"key": YOUTUBE_API_KEY, "videoId": vid,
+                       "part": "snippet,replies", "order": "relevance",
+                       "maxResults": min(MAX_COMMENTS_PER_VIDEO, 100),
+                       "textFormat": "plainText"},
+                timeout=20)
+            r.raise_for_status()
+        except Exception as exc:
+            msg = str(exc)
+            if "403" not in msg:      # 403 = كومنتات مقفولة، عادي نتخطاها بصمت
+                log(f"    ! كومنتات {vid}: {msg[:60]}")
+            continue
+
+        for thread in r.json().get("items", []):
+            top = ((thread.get("snippet") or {}).get("topLevelComment") or {})
+            top_id = top.get("id", thread.get("id", ""))
+            top_sn = top.get("snippet") or {}
+
+            item = _extract_comment_item(vid, top_id, top_sn)
+            if item:
+                items.append(item)
+            else:
+                tq = _extract_trending_question(vid, top_id, top_sn)
+                if tq:
+                    items.append(tq)
+
+            # الردود كمان ممكن تحمل المعلومة الحقيقية، مش بس السؤال الأصلي
+            for reply in (thread.get("replies") or {}).get("comments", []):
+                r_sn = reply.get("snippet") or {}
+                r_item = _extract_comment_item(
+                    vid, reply.get("id", ""), r_sn)
+                if r_item:
+                    items.append(r_item)
+
+    if items:
+        log(f"  → {len(items)} كومنت/رد/سؤال متكرر مرصود")
+    return items
+
+
+# ============================================================
+#  تليجرام
+# ============================================================
+
+def send_telegram(text):
+    if not (TELEGRAM_TOKEN and TELEGRAM_CHAT_ID):
+        log("  ! تليجرام مش مضبوط — مش هيتبعت")
+        return False
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    try:
+        r = requests.post(url, data={
+            "chat_id": TELEGRAM_CHAT_ID,
+            "text": text,
+            "parse_mode": "HTML",
+            "disable_web_page_preview": "false",
+        }, timeout=20)
+        body = r.json()
+        if not body.get("ok"):
+            log(f"  ! تليجرام رفض: {body.get('description', '')[:100]}")
+            return False
+        return True
+    except Exception as exc:
+        log(f"  ! فشل الإرسال: {str(exc)[:80]}")
+        return False
+
+
+def _ar_date():
+    months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو",
+              "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"]
+    now = datetime.now()
+    return f"{now.day} {months[now.month - 1]} {now.year} — {now:%H:%M}"
+
+
+def format_digest(new_items):
+    """
+    تقرير واحد منظّم بدل رسالة لكل خبر — أسهل للقراءة ومحترف.
+    الترتيب: العاجل (فيه كلمة حجز/قرعة/موعد) الأول، بعدين الباقي.
+    """
+    import html
+
+    trending_qs = [it for it in new_items if it["kind"] == "trending_question"]
+    rest = [it for it in new_items if it["kind"] != "trending_question"]
+
+    urgent = [it for it in rest if is_urgent(it["title"])]
+    normal = [it for it in rest if not is_urgent(it["title"])]
+
+    lines = [
+        "🏛️ <b>متابعة بيت الوطن</b>",
+        f"<i>{_ar_date()}</i>",
+        "",
+    ]
+
+    comments = [it for it in normal if it["kind"] == "comment"]
+    normal = [it for it in normal if it["kind"] != "comment"]
+
+    if urgent:
+        lines.append(f"🔴 <b>مستجدات مهمة ({len(urgent)})</b>")
+        lines.append("")
+        for it in urgent:
+            kind = "💬" if it["kind"] == "comment" else (
+                "🎥" if it["kind"] == "video" else "📰")
+            lines.append(
+                f'{kind} <a href="{html.escape(it["link"])}">'
+                f'{html.escape(it["title"])}</a>')
+            lines.append(f'   <i>المصدر: {html.escape(it["source"])}</i>')
+            lines.append("")
+
+    if normal:
+        lines.append(f"📋 <b>أخبار أخرى ({len(normal)})</b>")
+        lines.append("")
+        for it in normal:
+            kind = "🎥" if it["kind"] == "video" else "📰"
+            lines.append(
+                f'{kind} <a href="{html.escape(it["link"])}">'
+                f'{html.escape(it["title"])}</a>')
+            lines.append(f'   <i>المصدر: {html.escape(it["source"])}</i>')
+            lines.append("")
+
+    if comments:
+        lines.append(f"💬 <b>من كلام الناس — غير مؤكد رسميًا ({len(comments)})</b>")
+        lines.append("")
+        for it in comments:
+            lines.append(
+                f'💬 <a href="{html.escape(it["link"])}">'
+                f'{html.escape(it["title"])}</a>')
+            lines.append(f'   <i>{html.escape(it["source"])}</i>')
+            lines.append("")
+
+    if trending_qs:
+        lines.append(f"❓ <b>أسئلة متكررة من الناس — لسه من غير رد ({len(trending_qs)})</b>")
+        lines.append("")
+        for it in trending_qs:
+            lines.append(
+                f'❓ <a href="{html.escape(it["link"])}">'
+                f'{html.escape(it["title"])}</a>')
+            lines.append(f'   <i>{html.escape(it["source"])}</i>')
+            lines.append("")
+
+    lines.append("─" * 22)
+    lines.append("<i>مصادر: Google News · يوتيوب · تعليقات — رصد آلي، راجع كراسة "
+                 "الشروط الرسمية قبل أي إجراء. كلام الناس مش مصدر رسمي.</i>")
+
+    return "\n".join(lines).strip()
+
+
+# حد أقصى لطول رسالة تليجرام — لو التقرير أطول، بيتقسم عند فاصل خبر
+_TG_LIMIT = 3800
+
+
+def split_digest(text):
+    """تقسيم آمن عند نهاية عنصر — ما بيكسرش وسم <a> أو <b> نص."""
+    if len(text) <= _TG_LIMIT:
+        return [text]
+    blocks = text.split("\n\n")
+    chunks, current = [], ""
+    for block in blocks:
+        if len(current) + len(block) + 2 > _TG_LIMIT:
+            if current.strip():
+                chunks.append(current.strip())
+            current = block
+        else:
+            current = f"{current}\n\n{block}" if current else block
+    if current.strip():
+        chunks.append(current.strip())
+    return chunks
+
+
+# ============================================================
+#  الموقع (صفحة واحدة ثابتة، بتتحدث كل دورة، تُنشر على GitHub Pages)
+# ============================================================
+
+_KIND_LABEL = {
+    "news": ("📰", "خبر"),
+    "video": ("🎥", "فيديو"),
+    "comment": ("💬", "من كلام الناس"),
+    "trending_question": ("❓", "سؤال متكرر"),
 }
 
 
-def format_changes(changes):
-    """صياغة تغييرات بيت الوطن لرسالة تليجرام."""
-    if not changes:
-        return None
-    import html as _html
+def build_site(log_items):
+    """
+    صفحة HTML واحدة بسيطة تعرض كل العناصر اللي اتبعتت من الأحدث للأقدم.
+    بتتبني من نفس الـ log اللي بيتحدث كل دورة — مفيش قاعدة بيانات
+    ولا سيرفر، مجرد ملف ثابت يتنشر عبر GitHub Pages.
+    """
+    import html
 
-    lines = ["🏘️ <b>تحديث في ملف بيت الوطن</b>", ""]
-    for ch in changes:
-        label = FIELD_LABELS.get(ch["field"], ch["field"].replace("_", " "))
-        to = _html.escape(str(ch["to"])[:200])
-        if ch.get("from"):
-            frm = _html.escape(str(ch["from"])[:120])
-            lines.append(f"▸ <b>{label}</b>\n   <s>{frm}</s>\n   ← <b>{to}</b>")
-        else:
-            lines.append(f"▸ <b>{label}</b>: {to}")
-    if changes and changes[0].get("source_link"):
-        lines += ["", f'<a href="{_html.escape(changes[0]["source_link"])}">المصدر ←</a>']
-    return "\n".join(lines)
+    os.makedirs(SITE_DIR, exist_ok=True)
+
+    rows = []
+    for it in reversed(log_items):
+        icon, label = _KIND_LABEL.get(it.get("kind"), ("📄", "عنصر"))
+        urgent_badge = ""
+        if it.get("kind") not in ("comment", "trending_question") \
+                and is_urgent(it.get("title", "")):
+            urgent_badge = '<span class="badge urgent">عاجل</span>'
+        rows.append(f'''
+        <div class="item">
+          <div class="item-head">
+            <span class="icon">{icon}</span>
+            <span class="label">{html.escape(label)}</span>
+            {urgent_badge}
+          </div>
+          <a class="title" href="{html.escape(it.get("link", "#"))}" target="_blank"
+             rel="noopener">{html.escape(it.get("title", ""))}</a>
+          <div class="source">المصدر: {html.escape(it.get("source", ""))}</div>
+        </div>''')
+
+    page = f"""<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>متابعة بيت الوطن</title>
+<style>
+  body {{ font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background:#0f1420;
+         color:#e8e8ec; margin:0; padding:0; }}
+  header {{ background:#161c2c; padding:24px 16px; text-align:center;
+            border-bottom:1px solid #262e42; }}
+  header h1 {{ margin:0 0 6px; font-size:22px; }}
+  header p {{ margin:0; color:#8b93a7; font-size:13px; }}
+  .wrap {{ max-width:720px; margin:0 auto; padding:16px; }}
+  .item {{ background:#161c2c; border:1px solid #262e42; border-radius:10px;
+           padding:14px 16px; margin-bottom:12px; }}
+  .item-head {{ display:flex; align-items:center; gap:8px; margin-bottom:6px;
+                font-size:13px; color:#8b93a7; }}
+  .icon {{ font-size:16px; }}
+  .badge {{ font-size:11px; padding:2px 8px; border-radius:20px; margin-inline-start:auto; }}
+  .badge.urgent {{ background:#3a1620; color:#ff6b81; }}
+  .title {{ display:block; color:#fff; text-decoration:none; font-size:16px;
+            font-weight:600; margin-bottom:6px; line-height:1.5; }}
+  .title:hover {{ color:#7aa2f7; }}
+  .source {{ font-size:12px; color:#8b93a7; }}
+  .empty {{ text-align:center; color:#8b93a7; padding:60px 20px; }}
+  footer {{ text-align:center; color:#565f76; font-size:11px; padding:20px; }}
+</style>
+</head>
+<body>
+<header>
+  <h1>🏛️ متابعة بيت الوطن</h1>
+  <p>آخر تحديث: {html.escape(_ar_date())} · {len(log_items)} عنصر مسجّل</p>
+</header>
+<div class="wrap">
+  {"".join(rows) if rows else '<div class="empty">لسه مفيش حاجة اتسجّلت. أول ما يظهر خبر جديد هيتحط هنا.</div>'}
+</div>
+<footer>رصد آلي — كلام الناس مش مصدر رسمي، راجع كراسة الشروط الرسمية قبل أي إجراء.</footer>
+</body>
+</html>"""
+
+    with open(os.path.join(SITE_DIR, "index.html"), "w", encoding="utf-8") as f:
+        f.write(page)
+
+
+# ============================================================
+#  الدورة
+# ============================================================
+
+def run_once():
+    log("=" * 50)
+    log("دورة متابعة بيت الوطن")
+    log("=" * 50)
+
+    seen = load_seen()
+    news_items = fetch_news()
+    video_items = fetch_youtube() + fetch_youtube_channels()
+
+    # إزالة التكرار لو نفس الفيديو طلع من البحث ومن القناة مع بعض
+    dedup, videos_dedup = set(), []
+    for it in video_items:
+        if it["link"] in dedup:
+            continue
+        dedup.add(it["link"])
+        videos_dedup.append(it)
+    video_items = videos_dedup
+
+    # كومنتات على أحدث الفيديوهات المتابَعة (يخص بيت الوطن) بس
+    video_ids = []
+    for it in video_items:
+        m = re.search(r"v=([\w-]{5,})", it["link"])
+        if m:
+            video_ids.append(m.group(1))
+    comment_items = fetch_comments(video_ids)
+
+    all_items = news_items + video_items + comment_items
+
+    dedup, out = set(), []
+    for it in all_items:
+        if it["link"] in dedup:
+            continue
+        dedup.add(it["link"])
+        out.append(it)
+    all_items = out
+
+    new_items = [it for it in all_items if it["link"] not in seen]
+    log(f"إجمالي: {len(all_items)} · جديد: {len(new_items)}")
+
+    if not new_items:
+        log("مفيش جديد — مفيش تقرير.")
+    else:
+        new_items.sort(key=lambda x: is_urgent(x["title"]), reverse=True)
+        digest = format_digest(new_items)
+        for chunk in split_digest(digest):
+            sent = send_telegram(chunk)
+            log(f"  {'✓' if sent else '✗'} تقرير مُرسل ({len(new_items)} عنصر)")
+            time.sleep(0.6)
+
+        log_items = load_log()
+        log_items.extend(new_items)
+        save_log(log_items)
+
+    build_site(load_log())
+
+    seen.update(it["link"] for it in all_items)
+    save_seen(seen)
+    log("خلصت الدورة.\n")
+    return len(new_items)
+
+
+def run_daemon():
+    log(f"وضع مستمر — فحص كل {CHECK_INTERVAL_MINUTES} دقيقة. Ctrl+C للإيقاف.")
+    while True:
+        try:
+            run_once()
+        except Exception as exc:
+            log(f"! خطأ: {str(exc)[:100]}")
+        time.sleep(CHECK_INTERVAL_MINUTES * 60)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="متابعة بيت الوطن المبسّطة")
+    parser.add_argument("--once", action="store_true", help="دورة واحدة")
+    parser.add_argument("--daemon", action="store_true", help="تشغيل مستمر")
+    args = parser.parse_args()
+
+    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
+        log("!! لازم تضبط TELEGRAM_TOKEN و TELEGRAM_CHAT_ID الأول.")
+        sys.exit(1)
+
+    if args.daemon:
+        run_daemon()
+    else:
+        run_once()
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        log("تم الإيقاف.")
