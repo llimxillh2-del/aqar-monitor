@@ -1202,37 +1202,228 @@ def build_beit_page(d, engines_note, intel=None):
 
 
 # ============================================================
-#  تليجرام
+#  تليجرام — رسالة موحّدة احترافية
 # ============================================================
+#
+# فلسفة التصميم:
+#   • رسالة واحدة منظّمة بأقسام واضحة، بدل ٤-٥ رسائل مبعثرة
+#   • ترتيب هرمي: الأهم أولًا (بيت الوطن → تغييرات → عاجل → إشارات → أخبار
+#     → استشراف → إحصائيات)
+#   • فواصل بصرية متسقة بين الأقسام (━━━)
+#   • أيقونات موحّدة لكل نوع (📍 مرحلة · 💰 سعر · ⏰ موعد · 📝 تطور)
+#   • كل قسم اختياري: لو مفيهوش محتوى، مايظهرش أصلًا
+#   • split ذكي عند حدود الأقسام لو الرسالة طويلة (Telegram limit 4096)
+#
+# الرسالة الوحيدة اللي بتفضل منفصلة: تنبيه رصد لحظي للمصادر الرسمية
+# (`watcher.format_alert`) — لأنها لحظية وبتيجي بره الدورة الكاملة.
 
-def build_telegram(new_by_section, brief, urgent_links, beit=None):
-    lines = ["🏛️ <b>مرصد العقارات المصرية</b>", f"<i>{stamp()}</i>", ""]
+_SEP = "━" * 22
+_SUB = "─" * 18
 
-    if beit and (beit.get("stage") or beit.get("booking")):
-        lines.append("🏘️ <b>بيت الوطن</b>")
-        if beit.get("stage"):
-            lines.append(f"  المرحلة: <b>{esc(beit['stage'])}</b>")
-        if beit.get("booking"):
-            lines.append(f"  الحجز: <b>{esc(beit['booking'])}</b>")
-        nxt = beit.get("next")
-        if nxt:
-            lines.append(f"  ⏰ {esc(nxt['label'])}: <b>{esc(nxt['raw'])}</b> "
-                         f"(خلال {nxt['days_left']} يوم)")
-        lines.append("")
 
-    if brief:
-        summary = next((p.strip() for p in str(brief).split("##") if p.strip()), "")
-        if summary:
-            plain = re.sub(r"\*\*(.+?)\*\*", r"\1", summary)[:600]
-            lines += ["📋 <b>الخلاصة</b>", esc(plain), ""]
+def _clean_brief(text, limit=600):
+    """يشيل ماركداون بسيط ويقصّ لطول معقول."""
+    if not text:
+        return ""
+    text = re.sub(r"^#+\s*", "", str(text).strip(), flags=re.M)
+    text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    if len(text) <= limit:
+        return text.strip()
+    cut = text.rfind("\n", 0, limit)
+    if cut < limit // 2:
+        cut = text.rfind(". ", 0, limit)
+    if cut < limit // 2:
+        cut = limit
+    return text[:cut].strip() + "…"
 
+
+def _beit_block(beit):
+    """لوحة حالة بيت الوطن — الأولوية القصوى."""
+    if not beit:
+        return None
+    fields = [
+        ("📍", "المرحلة",    beit.get("stage")),
+        ("🎫", "الحجز",      beit.get("booking")),
+        ("💰", "سعر المتر",  beit.get("price")),
+        ("💵", "مقدم الجدية", beit.get("deposit")),
+        ("📐", "المساحات",   beit.get("areas")),
+        ("💳", "نظام السداد", beit.get("payment")),
+    ]
+    rows = [(ic, lbl, val) for ic, lbl, val in fields if val and val != "—"]
+    if not (rows or beit.get("next") or beit.get("last") or beit.get("summary")):
+        return None
+
+    lines = ["🏘️ <b>بيت الوطن — لوحة الحالة</b>", _SUB]
+    for ic, lbl, val in rows:
+        lines.append(f"{ic} <b>{lbl}:</b> {esc(str(val)[:120])}")
+
+    cities = beit.get("cities")
+    if cities:
+        cs = cities if isinstance(cities, str) else "، ".join(cities[:4])
+        lines.append(f"🏙️ <b>المدن:</b> {esc(cs[:200])}")
+
+    nxt = beit.get("next")
+    if nxt:
+        left = nxt.get("days_left")
+        left_txt = ""
+        if isinstance(left, int):
+            if left < 0:
+                left_txt = " · <i>مرّ الموعد</i>"
+            elif left == 0:
+                left_txt = " · <b>النهاردة!</b>"
+            elif left <= 3:
+                left_txt = f" · <b>باقي {left} يوم فقط ⚠️</b>"
+            else:
+                left_txt = f" · باقي {left} يوم"
+        lines += ["", f"⏰ <b>{esc(nxt.get('label', 'الموعد القادم'))}</b>",
+                  f"   {esc(str(nxt.get('raw', ''))[:140])}{left_txt}"]
+
+    last = beit.get("last")
+    if last:
+        lines += ["", "📝 <b>آخر تطور</b>", f"   {esc(str(last)[:220])}"]
+
+    summary = _clean_brief(beit.get("summary"), 320)
+    if summary:
+        lines += ["", "💡 <b>قراءة سريعة</b>", esc(summary)]
+
+    checklist = beit.get("checklist")
+    if checklist:
+        items = checklist if isinstance(checklist, list) else [checklist]
+        items = [str(x).strip() for x in items if str(x).strip()][:4]
+        if items:
+            lines += ["", "🎯 <b>خطواتك المقترحة</b>"]
+            for i, step in enumerate(items, 1):
+                lines.append(f"  {i}. {esc(step[:180])}")
+
+    conf = beit.get("confidence")
+    if conf:
+        lines += ["", f"<i>درجة الثقة في البيانات: {esc(str(conf))}</i>"]
+
+    return "\n".join(lines)
+
+
+def _market_changes_block(changes):
+    """تغييرات في السوق (بيت الوطن / بيتك في مصر / منصة عقارية...)."""
+    if not changes:
+        return None
+    lines = [f"📌 <b>تغييرات حصلت في السوق ({len(changes)})</b>", _SUB]
+    by_topic = {}
+    for ch in changes:
+        by_topic.setdefault(ch.get("topic", "—"), []).append(ch)
+    for topic, items in by_topic.items():
+        lines.append(f"<b>▸ {esc(topic)}</b>")
+        for ch in items[:6]:
+            field = str(ch.get("field", "")).replace("_", " ")
+            to = esc(str(ch.get("to", ""))[:140])
+            if ch.get("from"):
+                frm = esc(str(ch["from"])[:80])
+                lines.append(f"  • {esc(field)}: <b>{to}</b>  <s>{frm}</s>")
+            else:
+                lines.append(f"  • {esc(field)}: <b>{to}</b>")
+    return "\n".join(lines)
+
+
+def _beit_changes_block(changes):
+    """تغييرات محددة في ملف بيت الوطن."""
+    if not changes:
+        return None
+    lines = [f"🏘️ <b>تحديثات على ملف بيت الوطن ({len(changes)})</b>", _SUB]
+    for ch in changes[:6]:
+        field = str(ch.get("field", "")).replace("_", " ")
+        to = esc(str(ch.get("to", ""))[:140])
+        if ch.get("from"):
+            frm = esc(str(ch["from"])[:80])
+            lines.append(f"• <b>{esc(field)}</b>: {to}  <s>{frm}</s>")
+        else:
+            lines.append(f"• <b>{esc(field)}</b>: {to}")
+    return "\n".join(lines)
+
+
+def _urgent_block(items, urgent_links):
+    urgent = [it for it in items if it.get("link") in urgent_links][:6]
+    if not urgent:
+        return None
+    lines = [f"🚨 <b>تنبيهات عاجلة ({len(urgent)})</b>", _SUB]
+    for it in urgent:
+        title = esc(str(it.get("title", ""))[:180])
+        link = esc(it.get("link", ""))
+        src = esc(it.get("source", ""))
+        lines.append(f'🔴 <a href="{link}">{title}</a>')
+        if src:
+            lines.append(f'   <i>{src}</i>')
+    return "\n".join(lines)
+
+
+def _intel_block(intel_view, max_signals=4):
+    """أهم إشارات مبكرة من كلام الناس."""
+    if not intel_view:
+        return None
+    signals = intel_view.get("signals") or []
+    if not signals:
+        return None
+    # ترتيب: الجديد غير المنشور رسميًا الأول
+    picked = sorted(signals, key=lambda s: (
+        0 if s.get("novel") else 1,
+        -int(s.get("weight", 0) or 0),
+    ))[:max_signals]
+    if not picked:
+        return None
+
+    counts = intel_view.get("counts") or {}
+    header = f"🔍 <b>إشارات مبكرة ({counts.get('total', len(signals))})</b>"
+    if counts.get("novel"):
+        header += f" · <i>{counts['novel']} مش في الأخبار</i>"
+    lines = [header, _SUB]
+
+    for sig in picked:
+        icon = "✅" if sig.get("status") == "مؤكدة رسميًا" else (
+            "🆕" if sig.get("novel") else "🟢")
+        stmt = esc(str(sig.get("statement", ""))[:220])
+        lines.append(f"{icon} <b>{stmt}</b>")
+
+        meta = []
+        m = sig.get("mentions")
+        i = sig.get("independence")
+        if m:
+            meta.append(f"{m} شخص من {i or 1} مصدر")
+        if sig.get("firsthand"):
+            meta.append(f"👁 {sig['firsthand']} تجربة شخصية")
+        if sig.get("lead_days"):
+            meta.append(f"⏱ سبقت الأخبار بـ {sig['lead_days']} يوم")
+        if meta:
+            lines.append(f"   <i>{esc(' · '.join(meta))}</i>")
+
+        sources = sig.get("sources") or []
+        if sources:
+            src = sources[0]
+            quote = esc(str(src.get("quote", ""))[:160])
+            if quote:
+                lines.append(f"   💬 «{quote}»")
+    return "\n".join(lines)
+
+
+def _news_block(new_by_section, urgent_links, per_section=4, total_cap=14):
+    """أخبار جديدة مصنّفة — من غير تكرار للعاجل اللي فوق."""
+    if not new_by_section:
+        return None
+    blocks = []
+    total = 0
     for section, items in new_by_section.items():
-        if not items:
+        # نستبعد اللي طلع بالفعل في قسم "عاجل"
+        remaining = [it for it in items if it.get("link") not in urgent_links]
+        if not remaining:
             continue
-        lines.append(f"<b>▸ {esc(section)}</b>")
-        for it in items[:6]:
-            mark = "🔴 " if it["link"] in urgent_links else "• "
-            lines.append(f'{mark}<a href="{esc(it["link"])}">{esc(it["title"])}</a>')
+        picked = remaining[:per_section]
+        if total + len(picked) > total_cap:
+            picked = picked[:total_cap - total]
+        if not picked:
+            break
+        blocks.append(f"<b>▸ {esc(section)}</b>")
+        for it in picked:
+            title = esc(str(it.get("title", ""))[:150])
+            link = esc(it.get("link", ""))
+            blocks.append(f'• <a href="{link}">{title}</a>')
             bits = []
             if it.get("source"):
                 bits.append(it["source"])
@@ -1240,7 +1431,129 @@ def build_telegram(new_by_section, brief, urgent_links, beit=None):
             if st.get("views"):
                 bits.append(f'👁 {num(st["views"])}')
             if bits:
-                lines.append(f'  <i>{esc(" · ".join(bits))}</i>')
-        lines.append("")
+                blocks.append(f'  <i>{esc(" · ".join(bits))}</i>')
+        blocks.append("")
+        total += len(picked)
+        if total >= total_cap:
+            break
+    if not blocks:
+        return None
+    return "📰 <b>أخبار جديدة</b>\n" + _SUB + "\n" + "\n".join(blocks).rstrip()
 
-    return "\n".join(lines).strip()
+
+def _forecast_block(forecast):
+    text = _clean_brief(forecast, 500)
+    if not text:
+        return None
+    return "🔮 <b>قراءة استشرافية</b>\n" + _SUB + "\n" + esc(text)
+
+
+def _brief_block(brief):
+    if not brief:
+        return None
+    # ناخد أول قسم بس من الملخص التنفيذي
+    parts = [p.strip() for p in str(brief).split("##") if p.strip()]
+    summary = parts[0] if parts else str(brief)
+    text = _clean_brief(summary, 450)
+    if not text:
+        return None
+    return "⚡ <b>الأهم دلوقتي</b>\n" + _SUB + "\n" + esc(text)
+
+
+def _stats_footer(counts, engines, links=None):
+    lines = ["📊 <b>هذه الدورة</b>", _SUB]
+    bits = []
+    if counts.get("new"):
+        bits.append(f"🆕 {counts['new']} خبر جديد")
+    if counts.get("videos"):
+        bits.append(f"🎬 {counts['videos']} فيديو")
+    if counts.get("official_ok"):
+        bits.append(f"🏛️ {counts['official_ok']} مصدر رسمي")
+    if counts.get("signals"):
+        bits.append(f"🔍 {counts['signals']} إشارة")
+    if bits:
+        lines.append(" · ".join(bits))
+    if engines:
+        lines.append(f"<i>🤖 {esc(engines)}</i>")
+    if links:
+        lines.append("")
+        for label, url in links:
+            lines.append(f'{label}: <a href="{esc(url)}">{esc(url)}</a>')
+    return "\n".join(lines)
+
+
+def build_unified_telegram(*, new_by_section=None, brief=None, forecast=None,
+                           urgent_links=None, beit=None, beit_changes=None,
+                           market_changes=None, intel_view=None, counts=None,
+                           engines="", site_links=None):
+    """
+    الرسالة الموحّدة الاحترافية — ترتيب هرمي بالأهمية.
+
+    ترجّع list من نصوص (كل نص رسالة تليجرام واحدة). عادةً عنصر واحد؛
+    لو الرسالة طويلة جدًا يتم تقسيمها عند حدود الأقسام (مش في نص القسم).
+    """
+    all_items = []
+    for items in (new_by_section or {}).values():
+        all_items.extend(items)
+    urgent_links = urgent_links or set()
+
+    header = [f"🏛️ <b>مرصد العقارات المصرية</b>",
+              f"<i>📅 {stamp()}</i>"]
+
+    # الترتيب: بيت الوطن (أهم شيء) → تغييرات → عاجل → إشارات → أخبار
+    # → استشراف → إحصائيات
+    blocks = [
+        _beit_block(beit),
+        _beit_changes_block(beit_changes),
+        _market_changes_block(market_changes),
+        _urgent_block(all_items, urgent_links),
+        _intel_block(intel_view),
+        _brief_block(brief),
+        _news_block(new_by_section, urgent_links),
+        _forecast_block(forecast),
+        _stats_footer(counts or {}, engines, site_links),
+    ]
+    blocks = [b for b in blocks if b]
+
+    footer_note = ("⚠️ <i>للاسترشاد فقط — راجع كراسة الشروط والمصدر الرسمي "
+                   "قبل أي التزام مالي.</i>")
+
+    # نجمّع في رسالة واحدة، ولو تعدّت الحد نقسّم على الأقسام
+    limit = 3800
+    header_txt = "\n".join(header)
+    parts = [header_txt]
+    current = header_txt
+
+    def push_block(b):
+        nonlocal current
+        candidate = current + "\n\n" + _SEP + "\n\n" + b
+        if len(candidate) <= limit:
+            current = candidate
+            parts[-1] = current
+            return
+        # القسم مش هيدخل — ابدأ رسالة جديدة (بدون هيدر ضخم، بس تنويه بسيط)
+        cont_header = f"🏛️ <b>مرصد العقارات — تكملة {len(parts) + 1}</b>"
+        if len(cont_header) + len(b) + 6 > limit:
+            # القسم لوحده أطول من الحد — نقصّه بأمان
+            b = b[:limit - len(cont_header) - 10] + "…"
+        current = cont_header + "\n\n" + b
+        parts.append(current)
+
+    for b in blocks:
+        push_block(b)
+
+    # التنويه القانوني على آخر رسالة
+    if len(parts[-1]) + len(footer_note) + 4 <= limit:
+        parts[-1] += "\n\n" + footer_note
+    else:
+        parts.append(footer_note)
+
+    return parts
+
+
+# للتوافق مع الكود القديم — بيرجّع نفس الشكل بس بالتنسيق الجديد
+def build_telegram(new_by_section, brief, urgent_links, beit=None):
+    msgs = build_unified_telegram(
+        new_by_section=new_by_section, brief=brief,
+        urgent_links=urgent_links, beit=beit)
+    return "\n\n".join(msgs) if msgs else ""

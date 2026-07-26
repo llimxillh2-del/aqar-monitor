@@ -1,0 +1,91 @@
+name: مرصد العقارات المصرية
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'       # الدورة الكاملة كل 4 ساعات
+    - cron: '*/30 * * * *'      # فحص سريع للمصادر الرسمية كل 30 دقيقة
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'وضع التشغيل'
+        type: choice
+        default: 'once'
+        options: [once, watch]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: aqar-monitor
+  cancel-in-progress: false      # ما نلغيش دورة شغالة — ممكن نفقد تنبيه
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: تنصيب المكتبات
+        run: pip install -r requirements.txt
+
+      - name: تحديد الوضع
+        id: mode
+        run: |
+          if [ "${{ github.event.schedule }}" = "*/30 * * * *" ]; then
+            echo "flag=--watch" >> $GITHUB_OUTPUT
+            echo "name=فحص سريع للمصادر الرسمية" >> $GITHUB_OUTPUT
+          else
+            flag="--${{ github.event.inputs.mode || 'once' }}"
+            echo "flag=$flag" >> $GITHUB_OUTPUT
+            echo "name=دورة كاملة" >> $GITHUB_OUTPUT
+          fi
+
+      - name: ${{ steps.mode.outputs.name }}
+        run: python monitor.py ${{ steps.mode.outputs.flag }}
+        env:
+          TELEGRAM_TOKEN:     ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_ALLOWED:   ${{ secrets.TELEGRAM_ALLOWED }}
+          GEMINI_API_KEY:     ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY:       ${{ secrets.GROQ_API_KEY }}
+          CEREBRAS_API_KEY:   ${{ secrets.CEREBRAS_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          YOUTUBE_API_KEY:    ${{ secrets.YOUTUBE_API_KEY }}
+
+      - name: حفظ الحالة
+        run: |
+          git config user.name  "aqar-monitor-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add -A state/ index.html beit-alwatan.html latest.json
+          git diff --staged --quiet && exit 0
+          git commit -m "تحديث تلقائي — $(date -u +'%Y-%m-%d %H:%M UTC')"
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin ${{ github.ref_name }} && \
+            git push && exit 0
+            sleep 5
+          done
+          exit 1
+
+      - name: تجهيز الموقع للنشر
+        if: steps.mode.outputs.flag == '--once'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: نشر الموقع
+        if: steps.mode.outputs.flag == '--once'
+        id: deployment
+        uses: actions/deploy-pages@v4

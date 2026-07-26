@@ -481,27 +481,54 @@ def full_cycle(ai, use_ai=True, notify=True, force=False):
                    "beit": len(beit_items)},
     })
 
-    # ---------- 12) تليجرام ----------
+    # ---------- 12) تليجرام — رسالة موحّدة احترافية ----------
     if notify:
-        if beit_changes:
-            telegram(beit_alwatan.format_changes(beit_changes))
-        if market_changes:
-            telegram(market_state.format_changes(market_changes))
-        for msg in intel_msgs:
-            telegram(msg, preview=False)
-        if intel_msgs:
-            print(f"[*] {len(intel_msgs)} تنبيه إشارة مُرسل")
-
         new_by_section = {
             name: [it for it in items if it["link"] in new_links]
             for name, items in sections.items()
         }
-        if any(new_by_section.values()):
-            telegram(render.build_telegram(new_by_section, brief, urgent_links,
-                                           beit_view))
-            print("[*] رسالة تليجرام مُرسلة")
+
+        # هل عندنا أي حاجة تستاهل نبعت؟
+        has_content = (
+            any(new_by_section.values())
+            or beit_changes
+            or market_changes
+            or intel_msgs
+            or (urgent_links and any(i["link"] in urgent_links for i in all_items))
+        )
+
+        if has_content:
+            counts_footer = {
+                "new": len(new_items),
+                "videos": len(videos or []),
+                "official_ok": sum(1 for h in (health or [])
+                                   if h.get("status") == "يعمل"),
+                "signals": (intel_view or {}).get("counts", {}).get("total", 0),
+            }
+            engines_line = ai.report() if use_ai else "معطّل"
+
+            messages = render.build_unified_telegram(
+                new_by_section=new_by_section,
+                brief=brief,
+                forecast=forecast,
+                urgent_links=urgent_links,
+                beit=beit_view,
+                beit_changes=beit_changes,
+                market_changes=market_changes,
+                intel_view=intel_view,
+                counts=counts_footer,
+                engines=engines_line,
+            )
+
+            for i, msg in enumerate(messages, 1):
+                telegram(msg, preview=False)
+                if len(messages) > 1:
+                    print(f"    ↗ رسالة {i}/{len(messages)} مُرسلة")
+
+            print(f"[*] رسالة تليجرام موحّدة مُرسلة "
+                  f"({len(messages)} جزء · {sum(len(m) for m in messages)} حرف)")
         else:
-            print("[i] مفيش جديد — مفيش رسالة")
+            print("[i] مفيش أي جديد — مفيش رسالة")
 
     # ---------- 13) حفظ المشاهَد ----------
     seen.update(it["link"] for it in all_items)
