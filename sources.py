@@ -24,6 +24,7 @@ except ImportError:                      # pragma: no cover
     Retry = None
 
 import config
+import quality
 
 
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -163,7 +164,12 @@ def score_item(item):
 
 def fetch_news(extra_queries=None):
     """
-    يجمع كل أقسام الأخبار.
+    يجمع كل أقسام الأخبار مع طبقة الجودة:
+      • فك تشفير روابط Google News (شغّالة فعلًا مش wrappers)
+      • تصنيف tier للمصادر (الأهرام أعلى من بلوج مجهول)
+      • فلتر مصر (بيرمي أخبار السعودية/الإمارات من "تحليل السوق")
+      • dedup ذكي (نفس القصة من ٨ مصادر = كارت واحد + قائمة مصادر)
+
     extra_queries: عبارات إضافية تتحط في القسم الأول (بيت الوطن).
     """
     result = {}
@@ -188,9 +194,23 @@ def fetch_news(extra_queries=None):
                 seen_titles.add(key)
                 bucket.append(item)
             time.sleep(0.8)
-        bucket.sort(key=lambda x: (score_item(x), x["published_ts"]), reverse=True)
-        result[section] = bucket
-        print(f"    → {len(bucket)} عنصر")
+
+        # ٥) طبقة الجودة — الفلترة والدمج
+        raw_count = len(bucket)
+        # فلتر مصر بس على "تحليل السوق" — الأقسام التانية أصلاً عن مصر
+        filter_eg = "تحليل السوق" in section
+        clean = quality.enrich_items(bucket, filter_egypt=filter_eg,
+                                     dedupe=True, dedupe_threshold=0.42)
+        clean.sort(key=lambda x: (
+            -score_item(x),           # أولوية الكلمات المفتاحية
+            x.get("source_tier", 3),  # مصادر أفضل
+            -float(x.get("published_ts") or 0),  # أحدث
+        ))
+        result[section] = clean
+        merged = raw_count - len(clean)
+        print(f"    → {len(clean)} عنصر (اتدمج {merged} خبر مكرر)")
+
+    quality.save_url_cache()
     return result
 
 

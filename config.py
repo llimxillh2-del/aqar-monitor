@@ -132,18 +132,24 @@ BEIT_HTML = "beit-alwatan.html"
 # tier: "urgent" = أي تغيير حقيقي فيها يستاهل تنبيه فوري
 # js:   True     = الصفحة بتتبني بجافاسكريبت، الرصد النصي عليها ضعيف
 WATCH_PAGES = [
+    # هيئة المجتمعات العمرانية — المصدر الرسمي الأول
+    {"name": "هيئة المجتمعات العمرانية — الرئيسية العربية",
+     "url": "https://lands.nuca.gov.eg/ar/Home.aspx", "tier": "urgent"},
     {"name": "هيئة المجتمعات العمرانية — الأخبار",
      "url": "https://lands.nuca.gov.eg/ar/News.aspx", "tier": "urgent"},
-    {"name": "هيئة المجتمعات العمرانية — الرئيسية",
+    {"name": "هيئة المجتمعات العمرانية — الجذر",
      "url": "https://lands.nuca.gov.eg/", "tier": "urgent"},
     {"name": "بوابة هيئة المجتمعات العمرانية",
      "url": "http://www.newcities.gov.eg/", "tier": "urgent"},
+    # منصات الحجز
     {"name": "منصة مصر العقارية",
-     "url": "https://reservations.realestate.gov.eg/ar", "tier": "urgent", "js": True},
+     "url": "https://reservations.realestate.gov.eg/ar",
+     "tier": "urgent", "js": True},
     {"name": "بيتك في مصر",
      "url": "https://beitakfemisr.com/", "tier": "normal", "js": True},
-    {"name": "وزارة الإسكان — الأخبار",
-     "url": "http://www.mhuc.gov.eg/Media/News", "tier": "urgent"},
+    # وزارة الإسكان (URL قديم اتغير — نجرّب الحالي)
+    {"name": "وزارة الإسكان والمرافق والمجتمعات العمرانية",
+     "url": "https://www.mhuc.gov.eg/", "tier": "urgent"},
 ]
 
 # كلمات لو ظهرت في تغيير رسمي = إنذار أحمر فوري

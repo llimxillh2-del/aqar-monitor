@@ -136,76 +136,112 @@ def inline(text):
 # ============================================================
 
 CSS = """
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Cairo:wght@600;700;800;900&display=swap');
 
 :root{
-  --ink:#15181c; --body:#2f3640; --muted:#69727e; --faint:#98a1ad;
-  --line:#e0e4ea; --line-soft:#eef1f5; --bg:#f2f4f7; --paper:#ffffff;
-  --navy:#0f3557; --navy-2:#1b4f7d; --gold:#96702c; --gold-soft:#f6f1e6;
-  --red:#a52820; --red-soft:#fbeeed; --green:#17603f; --green-soft:#ecf5f0;
-  --amber:#8a5a00; --amber-soft:#fdf4e3;
-  --radius:4px;
+  --ink:#0d1220; --body:#26303f; --muted:#5c6879; --faint:#8b95a5;
+  --line:#dde2eb; --line-soft:#eef1f6; --bg:#f4f6fa; --paper:#ffffff;
+  --navy:#082a4d; --navy-2:#124a7d; --navy-3:#1c6dab;
+  --gold:#8b6420; --gold-2:#b28638; --gold-soft:#faf3e2;
+  --red:#a91d1d; --red-soft:#fcecec;
+  --green:#0f5c39; --green-soft:#e8f4ee;
+  --amber:#8a5a00; --amber-soft:#fef4d9;
+  --purple:#5d3aa8; --purple-soft:#f0ebfb;
+  --radius:6px;
+  --shadow-sm:0 1px 2px rgba(8,42,77,.06);
+  --shadow-md:0 4px 14px rgba(8,42,77,.08);
+  --shadow-lg:0 10px 30px rgba(8,42,77,.12);
 }
 *{box-sizing:border-box;}
 html{scroll-behavior:smooth;}
 body{
   margin:0; background:var(--bg); color:var(--body);
   font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;
-  font-size:15.5px; line-height:1.85; -webkit-font-smoothing:antialiased;
+  font-size:15px; line-height:1.8; -webkit-font-smoothing:antialiased;
 }
-a{color:var(--navy-2); text-decoration:none;}
-a:hover{text-decoration:underline;}
+a{color:var(--navy-2); text-decoration:none; transition:color .15s;}
+a:hover{color:var(--navy-3);}
+.display{font-family:'Cairo','IBM Plex Sans Arabic',sans-serif; letter-spacing:-.4px;}
 
 /* ---------- الترويسة ---------- */
-.masthead{background:var(--navy); color:#fff; border-bottom:4px solid var(--gold);}
-.masthead-in{max-width:1180px; margin:0 auto; padding:26px 24px 22px;}
-.eyebrow{font-size:11.5px; letter-spacing:2.6px; text-transform:uppercase;
-  color:#9fc0dd; margin-bottom:9px; font-weight:500;}
-.masthead h1{margin:0; font-size:27px; font-weight:700; letter-spacing:-.3px;}
-.masthead .lede{margin:7px 0 0; font-size:14px; color:#c6dbeb; font-weight:300;}
-.issue{margin-top:16px; padding-top:13px; border-top:1px solid rgba(255,255,255,.16);
-  display:flex; gap:22px; flex-wrap:wrap; font-size:12.5px; color:#b9d3e6;}
-.issue b{color:#fff; font-weight:600;}
+.masthead{background:linear-gradient(135deg,var(--navy) 0%,#0d3866 60%,#124a7d 100%);
+  color:#fff; border-bottom:3px solid var(--gold-2); position:relative;}
+.masthead::after{content:''; position:absolute; inset:auto 0 0 0; height:3px;
+  background:linear-gradient(90deg,var(--gold),var(--gold-2),var(--gold));}
+.masthead-in{max-width:1240px; margin:0 auto; padding:30px 26px 26px;
+  display:flex; align-items:flex-end; gap:28px; flex-wrap:wrap;}
+.masthead-brand{flex:1 1 480px; min-width:0;}
+.eyebrow{font-size:11px; letter-spacing:2.8px; text-transform:uppercase;
+  color:#b8d0e8; margin-bottom:10px; font-weight:600;}
+.masthead h1{margin:0; font-size:30px; font-weight:800; letter-spacing:-.5px;
+  font-family:'Cairo','IBM Plex Sans Arabic',sans-serif; line-height:1.3;}
+.masthead .lede{margin:10px 0 0; font-size:14.5px; color:#d2e2f0; font-weight:400;
+  max-width:640px;}
+.masthead-meta{display:flex; gap:20px; flex-wrap:wrap; font-size:12.5px;
+  color:#a8c4dd; padding:12px 18px; background:rgba(0,0,0,.18);
+  border-radius:var(--radius); border:1px solid rgba(255,255,255,.08);}
+.masthead-meta b{color:#fff; font-weight:700; font-variant-numeric:tabular-nums;}
+.masthead-meta .live{display:inline-flex; align-items:center; gap:6px;
+  color:#7fe0a5; font-weight:700; letter-spacing:.4px;}
+.masthead-meta .live::before{content:''; width:8px; height:8px; border-radius:50%;
+  background:#7fe0a5; animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;} 50%{opacity:.35;}}
 
 /* ---------- شريط التنقل ---------- */
-.topbar{position:sticky; top:0; z-index:60; background:var(--paper);
-  border-bottom:1px solid var(--line); box-shadow:0 1px 4px rgba(15,53,87,.07);}
-.topbar-in{max-width:1180px; margin:0 auto; padding:0 24px;
-  display:flex; align-items:center; gap:4px; flex-wrap:wrap;}
-.topbar a{display:inline-block; padding:12px 13px; font-size:13.5px;
-  font-weight:500; color:var(--muted); border-bottom:2px solid transparent;}
-.topbar a:hover{color:var(--navy); border-bottom-color:var(--line); text-decoration:none;}
-.topbar a.cta{margin-inline-start:auto; color:var(--gold); font-weight:600;}
+.topbar{position:sticky; top:0; z-index:60; background:rgba(255,255,255,.95);
+  backdrop-filter:blur(10px); border-bottom:1px solid var(--line);
+  box-shadow:0 2px 10px rgba(8,42,77,.04);}
+.topbar-in{max-width:1240px; margin:0 auto; padding:0 26px;
+  display:flex; align-items:center; gap:2px; flex-wrap:wrap;}
+.topbar a{display:inline-block; padding:14px 15px; font-size:13.5px;
+  font-weight:600; color:var(--muted); border-bottom:2px solid transparent;
+  transition:.15s;}
+.topbar a:hover{color:var(--navy); border-bottom-color:var(--gold-2);}
+.topbar a.cta{margin-inline-start:auto; color:#fff; background:var(--gold-2);
+  padding:8px 18px; border-radius:var(--radius); font-weight:700; margin-block:6px;}
+.topbar a.cta:hover{background:var(--gold); color:#fff;}
 
 /* ---------- التخطيط ---------- */
-.wrap{max-width:1180px; margin:0 auto; padding:26px 24px 60px;
-  display:grid; grid-template-columns:1fr 268px; gap:26px; align-items:start;}
-@media(max-width:940px){ .wrap{grid-template-columns:1fr; padding:18px 15px 44px;} .rail{order:-1;} }
+.wrap{max-width:1240px; margin:0 auto; padding:30px 26px 70px;
+  display:grid; grid-template-columns:1fr 300px; gap:30px; align-items:start;}
+@media(max-width:1000px){ .wrap{grid-template-columns:1fr; padding:22px 16px 50px;} .rail{order:-1;} }
 
 /* ---------- المؤشرات ---------- */
-.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(132px,1fr));
-  gap:1px; background:var(--line); border:1px solid var(--line);
-  border-radius:var(--radius); overflow:hidden; margin-bottom:22px;}
-.kpi{background:var(--paper); padding:14px 16px;}
-.kpi .k-label{font-size:11.5px; color:var(--muted); letter-spacing:.4px;}
-.kpi .k-value{font-size:25px; font-weight:700; color:var(--navy); line-height:1.35;
-  font-variant-numeric:tabular-nums;}
+.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:12px; margin-bottom:24px;}
+.kpi{background:var(--paper); padding:18px 20px; border-radius:var(--radius);
+  border:1px solid var(--line); box-shadow:var(--shadow-sm); position:relative;
+  overflow:hidden;}
+.kpi::before{content:''; position:absolute; inset-inline-start:0; top:0; bottom:0;
+  width:3px; background:var(--navy-3);}
+.kpi.alert::before{background:var(--red);}
+.kpi.good::before{background:var(--green);}
+.kpi.warn::before{background:var(--gold-2);}
+.kpi .k-label{font-size:12px; color:var(--muted); letter-spacing:.4px;
+  font-weight:600; margin-bottom:4px; text-transform:uppercase;}
+.kpi .k-value{font-size:32px; font-weight:800; color:var(--navy); line-height:1.15;
+  font-variant-numeric:tabular-nums; font-family:'Cairo','IBM Plex Sans Arabic',sans-serif;}
 .kpi.alert .k-value{color:var(--red);}
 .kpi.good .k-value{color:var(--green);}
+.kpi.warn .k-value{color:var(--gold-2);}
+.kpi .k-hint{font-size:11.5px; color:var(--faint); margin-top:4px;}
 
 /* ---------- الأقسام ---------- */
 .doc{counter-reset:sec;}
 section.block{background:var(--paper); border:1px solid var(--line);
-  border-radius:var(--radius); margin-bottom:22px; overflow:hidden;}
-section.block > h2{counter-increment:sec; margin:0; padding:15px 22px;
-  font-size:16.5px; font-weight:600; color:var(--navy);
-  background:linear-gradient(180deg,#fbfcfd,#f5f7fa);
-  border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:11px;}
-section.block > h2::before{content:counter(sec); font-size:12px; font-weight:700;
-  color:#fff; background:var(--navy); min-width:23px; height:23px; border-radius:3px;
+  border-radius:var(--radius); margin-bottom:22px; overflow:hidden;
+  box-shadow:var(--shadow-sm);}
+section.block > h2{counter-increment:sec; margin:0; padding:18px 24px;
+  font-size:17px; font-weight:700; color:var(--navy);
+  background:linear-gradient(180deg,#fcfdff,#f5f8fc);
+  border-bottom:1px solid var(--line); display:flex; align-items:center; gap:12px;
+  font-family:'Cairo','IBM Plex Sans Arabic',sans-serif;}
+section.block > h2::before{content:counter(sec); font-size:12px; font-weight:800;
+  color:#fff; background:linear-gradient(180deg,var(--navy-2),var(--navy));
+  min-width:26px; height:26px; border-radius:6px;
   display:inline-flex; align-items:center; justify-content:center; flex:none;
-  align-self:center; font-variant-numeric:tabular-nums;}
-.block-body{padding:19px 22px 22px;}
+  font-variant-numeric:tabular-nums;}
+.block-body{padding:22px 24px 24px;}
 .block-body > *:first-child{margin-top:0;}
 .block-body > *:last-child{margin-bottom:0;}
 
@@ -239,26 +275,83 @@ td.k{font-weight:600; color:var(--ink); width:32%; white-space:nowrap;}
 .tag.gray{background:#eff1f4; color:var(--muted);}
 
 /* ---------- الفيد ---------- */
-.filters{display:flex; gap:7px; flex-wrap:wrap; padding:13px 22px;
-  border-bottom:1px solid var(--line); background:#fafbfc;}
-.filters button{font-family:inherit; font-size:13px; font-weight:500;
-  padding:6px 14px; border:1px solid var(--line); background:var(--paper);
-  color:var(--muted); border-radius:100px; cursor:pointer; transition:.12s;}
-.filters button:hover{border-color:var(--navy); color:var(--navy);}
-.filters button.on{background:var(--navy); border-color:var(--navy); color:#fff;}
+.filters{display:flex; gap:8px; flex-wrap:wrap; padding:16px 24px;
+  border-bottom:1px solid var(--line); background:#fafbfd;}
+.filters button{font-family:inherit; font-size:13px; font-weight:600;
+  padding:7px 16px; border:1px solid var(--line); background:var(--paper);
+  color:var(--muted); border-radius:100px; cursor:pointer; transition:.15s;}
+.filters button:hover{border-color:var(--navy-2); color:var(--navy); background:#fff;}
+.filters button.on{background:var(--navy); border-color:var(--navy); color:#fff;
+  box-shadow:0 2px 8px rgba(8,42,77,.2);}
 
-.entry{padding:16px 22px; border-bottom:1px solid var(--line-soft);}
+.entry{padding:20px 24px; border-bottom:1px solid var(--line-soft);
+  transition:background .15s;}
 .entry:last-child{border-bottom:none;}
+.entry:hover{background:#fafbfd;}
 .entry-meta{display:flex; gap:8px; align-items:center; flex-wrap:wrap;
-  font-size:12px; color:var(--faint); margin-bottom:5px;}
-.entry-meta .src{font-weight:600; color:var(--muted);}
-.entry h3.t{border:none; padding:0; margin:0 0 5px; font-size:15.5px;
-  font-weight:600; line-height:1.6;}
+  font-size:12px; color:var(--faint); margin-bottom:7px;}
+.entry-meta .src{font-weight:700; color:var(--navy-2); display:inline-flex;
+  align-items:center; gap:4px;}
+.entry-meta .src::before{content:''; width:3px; height:3px; border-radius:50%;
+  background:var(--gold-2); display:inline-block;}
+.entry-meta .src-plus{background:var(--gold-soft); color:var(--gold);
+  padding:1px 8px; border-radius:100px; font-weight:700; font-size:11px;
+  margin-inline-start:4px;}
+.entry-meta .dot{color:var(--faint); user-select:none;}
+.entry h3.t{border:none; padding:0; margin:0 0 6px; font-size:16.5px;
+  font-weight:700; line-height:1.55; font-family:'Cairo','IBM Plex Sans Arabic',sans-serif;}
 .entry h3.t a{color:var(--ink);}
-.entry h3.t a:hover{color:var(--navy-2);}
-.snip{font-size:13.5px; color:var(--muted); margin:5px 0 0;}
-.metrics{display:flex; gap:15px; font-size:12px; color:var(--faint);
-  margin-top:8px; font-variant-numeric:tabular-nums;}
+.entry h3.t a:hover{color:var(--navy-3);}
+.snip{font-size:14px; color:var(--muted); margin:6px 0 0; line-height:1.75;}
+.metrics{display:flex; gap:16px; font-size:12px; color:var(--faint);
+  margin-top:10px; font-variant-numeric:tabular-nums;}
+
+/* أخبار مدموجة — عرض المصادر المتعددة */
+.aliases{margin-top:8px; padding-top:8px; border-top:1px dashed var(--line);
+  display:flex; gap:6px; flex-wrap:wrap; font-size:11.5px;}
+.aliases .a-label{color:var(--faint); font-weight:600; margin-inline-end:4px;}
+.aliases a{color:var(--muted); background:#f2f4f8; padding:2px 9px;
+  border-radius:100px; text-decoration:none;}
+.aliases a:hover{background:#e8ecf2; color:var(--navy);}
+
+/* ---------- قسم آخر التحديثات ---------- */
+.updates{background:linear-gradient(180deg,#fff,#fafbfd);
+  border:1px solid var(--line); border-radius:var(--radius);
+  margin-bottom:24px; overflow:hidden; box-shadow:var(--shadow-md);}
+.updates-head{display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:16px 22px; background:linear-gradient(90deg,var(--navy) 0%,var(--navy-2) 100%);
+  color:#fff; flex-wrap:wrap;}
+.updates-head h2{margin:0; font-size:17px; font-weight:800; color:#fff;
+  display:flex; align-items:center; gap:10px;
+  font-family:'Cairo','IBM Plex Sans Arabic',sans-serif;}
+.updates-head h2::before{content:''; width:10px; height:10px; border-radius:50%;
+  background:#ff5544; box-shadow:0 0 0 4px rgba(255,85,68,.2);
+  animation:pulse 1.5s infinite;}
+.updates-head .u-when{font-size:12.5px; color:#c8dcee; font-weight:500;}
+.updates-list{padding:8px 0;}
+.u-item{display:grid; grid-template-columns:96px 1fr auto; gap:16px;
+  padding:14px 22px; border-bottom:1px solid var(--line-soft); align-items:start;}
+.u-item:last-child{border-bottom:none;}
+.u-item:hover{background:#fbfcfd;}
+.u-when{font-size:11.5px; color:var(--muted); font-weight:600;
+  padding-top:2px; font-variant-numeric:tabular-nums;
+  text-transform:uppercase; letter-spacing:.3px;}
+.u-when b{display:block; color:var(--navy); font-size:13.5px; margin-bottom:1px;}
+.u-body{min-width:0;}
+.u-title{font-size:14.5px; font-weight:700; color:var(--ink); line-height:1.5;
+  margin-bottom:4px; font-family:'Cairo','IBM Plex Sans Arabic',sans-serif;}
+.u-title a{color:inherit;}
+.u-title a:hover{color:var(--navy-3);}
+.u-meta{display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  font-size:11.5px; color:var(--faint);}
+.u-meta .src{color:var(--navy-2); font-weight:600;}
+.u-tags{display:flex; gap:4px; flex-wrap:wrap; align-items:flex-start;}
+@media(max-width:640px){
+  .u-item{grid-template-columns:1fr; gap:6px;}
+  .u-when{font-size:11px;}
+  .u-when b{display:inline; margin-inline-end:6px;}
+  .u-tags{margin-top:4px;}
+}
 
 .ai-box{background:#f8fafc; border:1px solid var(--line);
   border-inline-start:3px solid var(--navy-2); border-radius:var(--radius);
@@ -298,20 +391,43 @@ td.k{font-weight:600; color:var(--ink); width:32%; white-space:nowrap;}
 .rail .toc a{display:block; padding:5px 0; font-size:13.5px; color:var(--body);}
 .rail .toc a:hover{color:var(--navy); text-decoration:none;}
 
-/* ---------- بانر بيت الوطن ---------- */
-.spotlight{background:linear-gradient(135deg,var(--navy) 0%,#154572 100%);
-  color:#fff; border-radius:var(--radius); padding:22px 24px; margin-bottom:22px;
-  border-inline-start:4px solid var(--gold);}
-.spotlight .sp-eyebrow{font-size:11px; letter-spacing:2.2px; color:#9fc0dd;
-  text-transform:uppercase; font-weight:600;}
-.spotlight h2{margin:6px 0 12px; font-size:21px; font-weight:700; color:#fff;}
-.spotlight .sp-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(128px,1fr));
-  gap:14px; margin:15px 0;}
-.spotlight .sp-cell .l{font-size:11.5px; color:#9fc0dd;}
-.spotlight .sp-cell .v{font-size:15px; font-weight:600; color:#fff; line-height:1.55;}
-.spotlight .sp-cta{display:inline-block; margin-top:6px; background:var(--gold);
-  color:#fff; padding:8px 19px; border-radius:3px; font-size:14px; font-weight:600;}
-.spotlight .sp-cta:hover{background:#ab8034; text-decoration:none;}
+/* ---------- بانر بيت الوطن (Hero) ---------- */
+.spotlight{background:linear-gradient(135deg,var(--navy) 0%,#0d3866 40%,#154572 100%);
+  color:#fff; border-radius:var(--radius); padding:0; margin-bottom:24px;
+  overflow:hidden; box-shadow:var(--shadow-lg); position:relative;}
+.spotlight::before{content:''; position:absolute; inset:0;
+  background:radial-gradient(1200px 400px at 90% -20%,rgba(178,134,56,.35),transparent 60%);
+  pointer-events:none;}
+.spotlight-in{position:relative; padding:28px 32px 26px;
+  border-inline-start:5px solid var(--gold-2);}
+.spotlight .sp-eyebrow{font-size:11px; letter-spacing:3px; color:#c9dded;
+  text-transform:uppercase; font-weight:700;
+  display:inline-flex; align-items:center; gap:8px;}
+.spotlight .sp-eyebrow::before{content:''; width:22px; height:2px;
+  background:var(--gold-2);}
+.spotlight h2{margin:10px 0 6px; font-size:26px; font-weight:800; color:#fff;
+  font-family:'Cairo','IBM Plex Sans Arabic',sans-serif; letter-spacing:-.4px;}
+.spotlight .sp-tag{display:inline-block; background:rgba(178,134,56,.25);
+  color:#fce6b8; padding:3px 12px; border-radius:100px; font-size:12px;
+  font-weight:600; margin-bottom:4px;
+  border:1px solid rgba(178,134,56,.35);}
+.spotlight .sp-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:14px; margin:20px 0 18px;}
+.spotlight .sp-cell{background:rgba(255,255,255,.06); padding:12px 14px;
+  border-radius:var(--radius); border:1px solid rgba(255,255,255,.08);}
+.spotlight .sp-cell .l{font-size:11px; color:#a8c4dd; font-weight:600;
+  letter-spacing:.5px; margin-bottom:3px; text-transform:uppercase;}
+.spotlight .sp-cell .v{font-size:15.5px; font-weight:700; color:#fff; line-height:1.5;}
+.spotlight .sp-cta{display:inline-flex; align-items:center; gap:8px;
+  background:var(--gold-2); color:#fff; padding:10px 24px; border-radius:var(--radius);
+  font-size:14px; font-weight:700; transition:.15s;}
+.spotlight .sp-cta:hover{background:var(--gold); color:#fff;
+  transform:translateY(-1px); box-shadow:0 6px 16px rgba(178,134,56,.4);}
+.spotlight .sp-next{margin-top:14px; padding:12px 16px;
+  background:rgba(255,255,255,.08); border-radius:var(--radius);
+  border-inline-start:3px solid #fce6b8; font-size:14px;}
+.spotlight .sp-next b{color:#fce6b8;}
+.spotlight .sp-next .days{color:#fff; font-weight:700; font-variant-numeric:tabular-nums;}
 
 /* ---------- العدّاد ---------- */
 .countdown{background:var(--gold-soft); border:1px solid #e5d9c0;
@@ -520,15 +636,21 @@ def _entry(item, section, new_links, top_links, urgent_links):
     if kind_tag:
         tags.append(f'<span class="tag {kind_tag[1]}">{kind_tag[0]}</span>')
 
+    # مصدر مع علامة "+ N مصادر" لو الخبر مدموج
+    src_html = esc(item.get("source") or "مصدر")
+    n_src = int(item.get("source_count") or 1)
+    if n_src > 1:
+        src_html += f' <span class="src-plus">+{n_src - 1}</span>'
+
     parts = [
         f'    <article class="entry" data-sec="{slug(section)}">',
         '      <div class="entry-meta">',
-        f'        <span class="src">{esc(item.get("source") or "مصدر")}</span>',
-        f'        <span>·</span><span>{esc(section)}</span>',
+        f'        <span class="src">{src_html}</span>',
+        f'        <span class="dot">·</span><span>{esc(section)}</span>',
     ]
     when = ago(item.get("published", ""))
     if when:
-        parts.append(f'        <span>·</span><span>{esc(when)}</span>')
+        parts.append(f'        <span class="dot">·</span><span>{esc(when)}</span>')
     if tags:
         parts.append("        " + "".join(tags))
     parts.append('      </div>')
@@ -538,6 +660,20 @@ def _entry(item, section, new_links, top_links, urgent_links):
 
     if item.get("snippet"):
         parts.append(f'      <p class="snip">{esc(item["snippet"][:230])}</p>')
+
+    # قائمة المصادر المدموجة (لو موجودة)
+    aliases = item.get("aliases") or []
+    if aliases:
+        alias_links = []
+        for a in aliases[:8]:
+            src = esc(a.get("source", "مصدر"))
+            link = esc(a.get("link", "#"))
+            alias_links.append(
+                f'<a href="{link}" target="_blank" rel="noopener">{src}</a>')
+        parts.append(
+            '      <div class="aliases">'
+            '<span class="a-label">نُشر أيضًا في:</span>'
+            + " ".join(alias_links) + '</div>')
 
     st = item.get("stats") or {}
     if st.get("views"):
@@ -772,6 +908,130 @@ def _radar_body(intel, limit=24, compact=False):
 
 
 # ============================================================
+#  قسم "آخر التحديثات" — Latest Updates timeline
+# ============================================================
+
+_SECTION_ICON = {
+    "بيت الوطن ومبادرات المغتربين": "🏘️",
+    "طروحات ومشروعات جديدة": "📢",
+    "تحليل السوق والأسعار": "📊",
+    "فيديوهات وتحليلات": "🎬",
+    "🏛️ المصادر الرسمية": "🏛️",
+    "سوشيال ميديا": "💬",
+}
+
+
+def _pick_latest(sections, new_links, urgent_links, official_changes, limit=8):
+    """
+    يجمع آخر التحديثات من كل مصدر:
+      • تغييرات رسمية جديدة (أولوية)
+      • أخبار عاجلة/جديدة من كل قسم
+    مرتّبة زمنيًا — الأحدث فوق.
+    """
+    latest = []
+
+    # تغييرات رسمية → أولوية قصوى
+    for ch in (official_changes or [])[:5]:
+        latest.append({
+            "kind": "official",
+            "when_iso": ch.get("when") or "",
+            "title": f"تغيير في {ch['name']}",
+            "source": "🏛️ مصدر رسمي",
+            "section": "🏛️ المصادر الرسمية",
+            "link": ch.get("url", "#"),
+            "urgent": ch.get("urgent", False),
+            "is_new": True,
+            "snippet": " · ".join((ch.get("added") or [])[:2])[:200],
+            "source_count": 1,
+        })
+
+    # أخبار من كل الأقسام — بس الجديد والعاجل والمهم
+    for name, items in (sections or {}).items():
+        for it in items:
+            link = it.get("link", "")
+            is_new = link in new_links
+            is_urgent = link in urgent_links
+            if not (is_new or is_urgent):
+                continue
+            latest.append({
+                "kind": it.get("kind", "news"),
+                "when_iso": it.get("published") or "",
+                "when_ts": it.get("published_ts") or 0,
+                "title": it.get("title", ""),
+                "source": it.get("source", ""),
+                "section": name,
+                "link": link,
+                "urgent": is_urgent,
+                "is_new": is_new,
+                "snippet": (it.get("snippet") or "")[:180],
+                "source_count": it.get("source_count", 1),
+            })
+
+    # ترتيب: عاجل الأول، بعده الأحدث
+    latest.sort(key=lambda x: (
+        0 if x.get("urgent") else 1,
+        -float(x.get("when_ts") or 0),
+    ))
+    return latest[:limit]
+
+
+def _updates_block(latest):
+    """قسم آخر التحديثات على شكل timeline نظيف."""
+    if not latest:
+        return ""
+
+    rows = []
+    for it in latest:
+        when = ago(it.get("when_iso") or "")
+        if not when:
+            when = "الآن"
+        # نجزّئ الوقت: "منذ 2 ساعة" → b:2 remainder:ساعة
+        m = re.match(r"منذ\s+(\d+)\s+(.+)", when)
+        if m:
+            when_html = f'<b>{m.group(1)}</b>{esc(m.group(2))}'
+        else:
+            when_html = f'<b>{esc(when)}</b>'
+
+        tags = []
+        if it.get("urgent"):
+            tags.append('<span class="tag red">عاجل</span>')
+        if it.get("kind") == "official":
+            tags.append('<span class="tag navy">رسمي</span>')
+        elif it.get("kind") == "video":
+            tags.append('<span class="tag gold">فيديو</span>')
+        if it.get("is_new") and not it.get("urgent"):
+            tags.append('<span class="tag green">جديد</span>')
+
+        icon = _SECTION_ICON.get(it.get("section", ""), "•")
+        src = esc(it.get("source", "مصدر"))
+        n = int(it.get("source_count") or 1)
+        if n > 1:
+            src += f' <span class="src-plus">+{n - 1}</span>'
+
+        rows.append(
+            f'    <div class="u-item">'
+            f'<div class="u-when">{when_html}</div>'
+            f'<div class="u-body">'
+            f'<div class="u-title"><a href="{esc(it["link"])}" '
+            f'target="_blank" rel="noopener">{icon} {esc(it["title"])}</a></div>'
+            f'<div class="u-meta"><span class="src">{src}</span>'
+            f'<span>·</span><span>{esc(it.get("section", ""))}</span></div>'
+            f'</div>'
+            f'<div class="u-tags">{" ".join(tags)}</div>'
+            f'</div>')
+
+    return f"""<section class="updates" id="updates">
+  <div class="updates-head">
+    <h2>آخر التحديثات</h2>
+    <div class="u-when">تحديث كل ٤ ساعات · آخر دورة: {esc(stamp())}</div>
+  </div>
+  <div class="updates-list">
+{chr(10).join(rows)}
+  </div>
+</section>"""
+
+
+# ============================================================
 #  الصفحة الرئيسية
 # ============================================================
 
@@ -784,11 +1044,15 @@ def build_index(sections, brief, new_links, top_links, urgent_links,
     novel_count = ((intel or {}).get("counts") or {}).get("novel", 0)
 
     masthead = f"""<header class="masthead"><div class="masthead-in">
-  <div class="eyebrow">تقرير دوري · رصد وتحليل</div>
-  <h1>مرصد العقارات المصرية للمصريين بالخارج</h1>
-  <p class="lede">رصد آلي للمصادر الرسمية والإعلامية · تحليل واستشراف مدعوم بالذكاء الاصطناعي</p>
-  <div class="issue">
-    <span>صدر في: <b>{esc(stamp())}</b></span>
+  <div class="masthead-brand">
+    <div class="eyebrow">مرصد مستقل · رصد وتحليل آلي</div>
+    <h1>مرصد العقارات المصرية للمصريين بالخارج</h1>
+    <p class="lede">متابعة لحظية لبيت الوطن ومبادرات المغتربين ومصادر وزارة الإسكان الرسمية،
+      بتحليل مدعوم بالذكاء الاصطناعي وتنبيهات مبكرة.</p>
+  </div>
+  <div class="masthead-meta">
+    <span class="live">مباشر</span>
+    <span>الإصدار: <b>{esc(stamp())}</b></span>
     <span>العناصر المرصودة: <b>{total}</b></span>
     <span>مصادر رسمية عاملة: <b>{official_ok}/{len(health_rows or [])}</b></span>
   </div>
@@ -796,6 +1060,7 @@ def build_index(sections, brief, new_links, top_links, urgent_links,
 
     radar_link = ('\n  <a href="#radar">رادار الإشارات</a>' if intel else "")
     topbar = f"""<nav class="topbar"><div class="topbar-in">
+  <a href="#updates">آخر التحديثات</a>
   <a href="#summary">الملخص التنفيذي</a>
   <a href="#status">حالة الملفات</a>{radar_link}
   <a href="#outlook">الاستشراف</a>
@@ -805,38 +1070,67 @@ def build_index(sections, brief, new_links, top_links, urgent_links,
 </div></nav>"""
 
     kpi_cells = [
-        ("إجمالي العناصر", total, ""),
-        ("جديد هذه الدورة", len(new_links), "good" if new_links else ""),
-        ("عاجل", len(urgent_links), "alert" if urgent_links else ""),
-        ("تغييرات رسمية", len(official_changes or []),
-         "alert" if official_changes else ""),
+        ("إجمالي العناصر", str(total), ""),
+        ("جديد هذه الدورة", str(len(new_links)), "good" if new_links else ""),
+        ("عاجل", str(len(urgent_links)), "alert" if urgent_links else ""),
+        ("تغييرات رسمية", str(len(official_changes or [])),
+         "warn" if official_changes else ""),
     ]
     if intel:
-        kpi_cells.append(("إشارات مش في الأخبار", novel_count,
-                          "alert" if novel_count else ""))
+        kpi_cells.append(("إشارات مش في الأخبار", str(novel_count),
+                          "warn" if novel_count else ""))
     main = [_kpis(kpi_cells)]
 
-    # بانر بيت الوطن
+    # بانر بيت الوطن (Hero)
     if beit:
         cells = []
         for label, key in (("المرحلة", "stage"), ("حالة الحجز", "booking"),
-                           ("سعر المتر", "price"), ("المساحات", "areas")):
+                           ("سعر المتر", "price"), ("المساحات", "areas"),
+                           ("مقدم الجدية", "deposit")):
             v = beit.get(key) or "لم يُعلن بعد"
             cells.append(f'<div class="sp-cell"><div class="l">{esc(label)}</div>'
                          f'<div class="v">{esc(str(v)[:60])}</div></div>')
         nxt = beit.get("next")
         nxt_line = ""
         if nxt:
-            nxt_line = (f'<p style="margin:4px 0 0;color:#f0d9a8;font-size:14px">'
-                        f'أقرب موعد: <b style="color:#fff">{esc(nxt["label"])}</b> — '
-                        f'{esc(nxt["raw"])} (خلال {nxt["days_left"]} يومًا)</p>')
-        main.append(f"""<div class="spotlight">
-  <div class="sp-eyebrow">الملف المتابَع باستمرار</div>
-  <h2>بيت الوطن — أراضي المصريين بالخارج</h2>
+            days = nxt.get("days_left")
+            days_txt = ""
+            if isinstance(days, int):
+                if days < 0:
+                    days_txt = ' — <span class="days">مرّ الموعد</span>'
+                elif days == 0:
+                    days_txt = ' — <span class="days">النهاردة!</span>'
+                elif days <= 3:
+                    days_txt = f' — <span class="days">باقي {days} يوم فقط ⚠️</span>'
+                else:
+                    days_txt = f' — <span class="days">باقي {days} يوم</span>'
+            nxt_line = (f'<div class="sp-next">⏰ <b>{esc(nxt.get("label", "الموعد القادم"))}:</b> '
+                        f'{esc(nxt.get("raw", ""))}{days_txt}</div>')
+        summary_line = ""
+        if beit.get("summary"):
+            plain = re.sub(r"\*\*(.+?)\*\*", r"\1", str(beit["summary"]))
+            plain = re.sub(r"##[^\n]*\n", "", plain).strip()[:220]
+            if plain:
+                summary_line = (f'<p style="margin:12px 0 0;color:#e0ecf7;'
+                                f'font-size:14.5px;line-height:1.7">{esc(plain)}…</p>')
+        main.append(f"""<div class="spotlight"><div class="spotlight-in">
+  <div class="sp-tag">الملف الأهم — متابعة مستمرة</div>
+  <div class="sp-eyebrow">أراضي المصريين بالخارج</div>
+  <h2 class="display">بيت الوطن</h2>
+  {summary_line}
   <div class="sp-grid">{''.join(cells)}</div>
   {nxt_line}
-  <a class="sp-cta" href="beit-alwatan.html">افتح الملف الكامل ←</a>
-</div>""")
+  <div style="margin-top:18px">
+    <a class="sp-cta" href="beit-alwatan.html">افتح الملف الكامل ←</a>
+  </div>
+</div></div>""")
+
+    # آخر التحديثات — أهم قسم بصريًا، فوق الملخص
+    latest = _pick_latest(sections, new_links, urgent_links, official_changes,
+                          limit=10)
+    updates_html = _updates_block(latest)
+    if updates_html:
+        main.append(updates_html)
 
     if brief:
         main.append(_block("الملخص التنفيذي", md_to_html(brief), "summary"))
