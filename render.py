@@ -1358,6 +1358,9 @@ def build_beit_page(d, engines_note, intel=None):
 
     # المدن
     cities = d.get("cities") or {}
+    # التوافق مع الشكلين: dict (المفروض) و list (لو حد بعتها مخطئة)
+    if isinstance(cities, list):
+        cities = {c: 1 for c in cities}
     if cities:
         top = list(cities.items())[:14]
         mx = max(v for _, v in top) or 1
@@ -1552,9 +1555,15 @@ def _beit_block(beit):
     for ic, lbl, val in rows:
         lines.append(f"{ic} <b>{lbl}:</b> {esc(str(val)[:120])}")
 
-    cities = beit.get("cities")
+    # نفضل cities_top (list) للتليجرام، ولو مش موجودة نستخدم cities
+    cities = beit.get("cities_top") or beit.get("cities")
     if cities:
-        cs = cities if isinstance(cities, str) else "، ".join(cities[:4])
+        if isinstance(cities, dict):
+            cities = sorted(cities, key=lambda k: -cities[k])
+        if isinstance(cities, str):
+            cs = cities
+        else:
+            cs = "، ".join(list(cities)[:4])
         lines.append(f"🏙️ <b>المدن:</b> {esc(cs[:200])}")
 
     nxt = beit.get("next")

@@ -1098,6 +1098,23 @@ _DATE_LABELS = {
     "موعد_القرعة": "القرعة",
 }
 
+# أسماء الحقول العربية → عناوين قصيرة نظيفة (يستخدمها render.build_beit_page)
+FIELD_LABELS = {
+    "المرحلة_الحالية":   "المرحلة الحالية",
+    "حالة_الحجز":         "حالة الحجز",
+    "موعد_فتح_الحجز":     "موعد فتح الحجز",
+    "موعد_غلق_الحجز":     "موعد غلق الحجز",
+    "موعد_السداد":        "موعد السداد",
+    "موعد_القرعة":        "موعد القرعة",
+    "سعر_المتر":          "سعر المتر",
+    "المساحات_المتاحة":   "المساحات المتاحة",
+    "المدن_المطروحة":     "المدن المطروحة",
+    "قيمة_الجدية":        "قيمة الجدية",
+    "شروط_التقديم":       "شروط التقديم",
+    "آخر_تطور":           "آخر تطور",
+    "درجة_الثقة":         "درجة الثقة",
+}
+
 
 def _parse_days_left(raw_value):
     """يحاول يستخرج تاريخ ISO ويحسب الأيام المتبقية. بيرجع (iso, days)."""
@@ -1155,9 +1172,14 @@ def dashboard(state):
     upcoming.sort(key=lambda d: d["days_left"])
     nxt = upcoming[0] if upcoming else None
 
-    cities = state.get("cities") or {}
-    top_cities = sorted(cities.items(), key=lambda x: -x[1])[:5]
-    cities_out = [c for c, _ in top_cities]
+    # المدن — نرجّعها بالشكلين:
+    #   cities_top  → list[str] لعرض الـ spotlight ورسالة تليجرام
+    #   cities      → dict {city: count} لعرض المخطط في صفحة بيت الوطن
+    cities_dict = state.get("cities") or {}
+    if not isinstance(cities_dict, dict):
+        cities_dict = {}
+    top_cities = sorted(cities_dict.items(), key=lambda x: -x[1])[:5]
+    cities_top = [c for c, _ in top_cities]
 
     checklist_val = state.get("checklist")
     if isinstance(checklist_val, str):
@@ -1169,6 +1191,8 @@ def dashboard(state):
                 lines.append(line)
         checklist_val = lines[:6] if lines else checklist_val
 
+    cities_text = "، ".join(cities_top) if cities_top else None
+
     return {
         "stage":      _v("المرحلة_الحالية"),
         "booking":    _v("حالة_الحجز"),
@@ -1179,7 +1203,9 @@ def dashboard(state):
         "conditions": _v("شروط_التقديم"),
         "last":       _v("آخر_تطور"),
         "confidence": _v("درجة_الثقة"),
-        "cities":     cities_out,
+        "cities":     cities_dict,     # dict لصفحة بيت الوطن
+        "cities_top": cities_top,      # list لعرض السبوت لايت والتليجرام
+        "cities_text": cities_text,    # نص جاهز للعرض
         "dates":      dates,
         "next":       nxt,
         "summary":    state.get("summary"),
