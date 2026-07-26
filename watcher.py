@@ -9,6 +9,7 @@
 import os
 import re
 import json
+import html
 import hashlib
 from datetime import datetime, timezone
 
@@ -173,11 +174,12 @@ def format_alert(change):
     """رسالة تليجرام فورية لتغيير رسمي."""
     head = "🚨 <b>تنبيه عاجل — مصدر رسمي</b>" if change["urgent"] \
         else "🏛️ <b>تحديث — مصدر رسمي</b>"
-    lines = [head, "", f"<b>{change['name']}</b>"]
+    lines = [head, "", f"<b>{html.escape(change['name'])}</b>"]
     if change["keywords"]:
-        lines.append(f"<i>كلمات مرصودة: {', '.join(change['keywords'][:6])}</i>")
+        kws = html.escape(", ".join(change["keywords"][:6]))
+        lines.append(f"<i>كلمات مرصودة: {kws}</i>")
     lines.append("")
     for ln in change["added"][:8]:
-        lines.append(f"• {ln[:200]}")
-    lines += ["", f'<a href="{change["url"]}">افتح الصفحة ←</a>']
+        lines.append(f"• {html.escape(ln[:200])}")
+    lines += ["", f'<a href="{html.escape(change["url"])}">افتح الصفحة ←</a>']
     return "\n".join(lines)
