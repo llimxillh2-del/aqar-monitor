@@ -1,647 +1,679 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-متابعة بيت الوطن — نسخة مبسّطة
-================================
-ملف واحد، مفيش رادار ولا تحليل عام ولا "كلام ناس". بس:
-
-  1. يدور على أخبار وفيديوهات فيها كلمات مفتاحية عن بيت الوطن
-     (حجز / قرعة / ترتيب / مواعيد / كراسة شروط)
-  2. يقارن باللي بعته قبل كده
-  3. أي حاجة جديدة → يبعتها فورًا على تليجرام: العنوان + المصدر + الرابط
-
-مفيش "إشارات" ولا "درجة ثقة" ولا تحليل AI معقد. خبر جديد = رسالة.
-هدفه إنه يجيبلك أي إعلان عن فتح الحجز أو نتيجة القرعة أو الترتيب
-أسرع من إنك تفتح فيسبوك بنفسك، مش إنه "يفهم السوق".
-
-التشغيل:
-    python beit_alwatan_simple.py --once     دورة واحدة
-    python beit_alwatan_simple.py --daemon   يشتغل كل 30 دقيقة لوحده
-"""
-
-import os
-import re
-import sys
-import json
-import time
-import argparse
-import urllib.parse
-from datetime import datetime, timezone, timedelta
-
-import requests
-import feedparser
-
-# ============================================================
-#  الإعدادات — عدّل هنا بس
-# ============================================================
-
-TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "").strip()
-TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
-YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", "").strip()
-
-# كل عبارة هنا بتترصد في Google News منفصلة
-SEARCH_QUERIES = [
-    "بيت الوطن حجز",
-    "بيت الوطن قرعة",
-    "بيت الوطن ترتيب المتقدمين",
-    "بيت الوطن كراسة الشروط",
-    "بيت الوطن موعد",
-    "بيت الوطن المرحلة",
-    "بيت الوطن تخصيص",
-    "بيت الوطن المصريين بالخارج",
-]
-
-# لازم العنوان يحتوي على كلمة من دول عشان يتحسب "يخص بيت الوطن" فعلًا
-MUST_CONTAIN = ["بيت الوطن", "بيتك في مصر"]
-
-# كلمات لو ظهرت في العنوان = عاجل (🔴 بدل 🔵)
-URGENT_WORDS = ["حجز", "قرعة", "ترتيب", "فتح", "موعد", "كراسة الشروط",
-                "تخصيص", "نتيجة", "إعلان"]
-
-# كومنتات الفيديوهات — بنقرا الأعلى تفاعلًا بس، ونبعت اللي فيها معلومة حقيقية
-# (مش رأي أو دعاء). محتاج YOUTUBE_API_KEY.
-COMMENTS_ENABLED = True
-MAX_COMMENTS_PER_VIDEO = 40      # كام كومنت نقرا من كل فيديو
-MIN_LIKES_TO_REPORT = 15         # أقل عدد إعجابات عشان الكومنت "يستاهل"
-MAX_VIDEOS_FOR_COMMENTS = 6      # كام فيديو (الأحدث) نقرا كومنتاته كل دورة
-
-# كومنت "يستاهل" لازم يحتوي على كلمة من دول — علامة إنه معلومة مش كلام عام
-COMMENT_INFO_WORDS = [
-    "حجز", "قرعة", "ترتيب", "موعد", "كراسة", "شروط", "سعر", "جنيه",
-    "دولار", "متر", "تحويل", "بنك", "مساحة", "مرحلة", "تخصيص", "كلمت",
-    "اتصلت", "الهيئة", "رد عليا", "قالولي", "استلمت", "جاني", "رقمي",
-]
-
-# كلمات فاضية بتترمي حتى لو فيها إعجابات كتير
-COMMENT_NOISE_WORDS = ["ربنا يوفق", "الله يكرمك", "جزاك الله", "تسلم",
-                       "اشتركوا", "لايك للفيديو", "ما شاء الله"]
-
-YOUTUBE_QUERIES = [
-    "بيت الوطن حجز",
-    "بيت الوطن قرعة ترتيب",
-]
-
-# قنوات يوتيوب بعينها بنتابعها بالكامل — أي فيديو جديد منها عن بيت الوطن
-# (فيديوهاتهم التانية بتتفلتر بنفس شرط MUST_CONTAIN، فمش كل حاجة بتاعتهم
-# هتوصلك، بس اللي يخص بيت الوطن بس)
-YOUTUBE_CHANNELS = [
-    ("الاسكان مع عمر مخلوف", "UCTRxog2J5dFMIiDqDvc4DYw"),
-    ("الإسكان مع عمرو زكي", "UC68MAMp5g8Lft48Knm3pheg"),
-    ("كلام في المفيد — هاني الخميسي", "UCl3L_aO3A1-nqQhBRFtbcnw"),
-    ("عقارات", "UCGiEiZDpqoyfXUcWmTrLfWw"),
-]
-
-MAX_AGE_DAYS = 14           # يتجاهل الأخبار الأقدم من كده
-CHECK_INTERVAL_MINUTES = 30  # في وضع --daemon
-
-SEEN_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                         "state", "beit_seen_simple.json")
-
-UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-      "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
-
-
-# ============================================================
-#  أدوات
-# ============================================================
-
-def log(msg):
-    now = datetime.now().strftime("%H:%M:%S")
-    print(f"[{now}] {msg}", flush=True)
-
-
-def load_seen():
-    if os.path.exists(SEEN_FILE):
-        try:
-            with open(SEEN_FILE, encoding="utf-8") as f:
-                return set(json.load(f))
-        except Exception:
-            pass
-    return set()
-
-
-def save_seen(seen):
-    os.makedirs(os.path.dirname(SEEN_FILE), exist_ok=True)
-    tmp = SEEN_FILE + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(sorted(seen)[-3000:], f, ensure_ascii=False, indent=1)
-    os.replace(tmp, SEEN_FILE)
-
-
-def is_relevant(title, snippet=""):
-    blob = f"{title} {snippet}"
-    return any(w in blob for w in MUST_CONTAIN)
-
-
-def is_urgent(title):
-    return any(w in title for w in URGENT_WORDS)
-
-
-def clean_title(title):
-    return re.sub(r"\s+-\s+[^-]+$", "", title).strip()
-
-
-# ============================================================
-#  جلب الأخبار
-# ============================================================
-
-def fetch_news():
-    """يدور في Google News على كل عبارة، ويرجّع عناصر موحّدة."""
-    items = []
-    seen_links = set()
-    cutoff = datetime.now(timezone.utc) - timedelta(days=MAX_AGE_DAYS)
-
-    for query in SEARCH_QUERIES:
-        log(f"  بدور: {query}")
-        q = urllib.parse.quote(query)
-        url = f"https://news.google.com/rss/search?q={q}&hl=ar&gl=EG&ceid=EG:ar"
-
-        try:
-            r = requests.get(url, headers={"User-Agent": UA}, timeout=20)
-            r.raise_for_status()
-            feed = feedparser.parse(r.content)
-        except Exception as exc:
-            log(f"    ! فشل: {str(exc)[:70]}")
-            continue
-
-        for entry in feed.entries[:15]:
-            link = entry.get("link", "")
-            if not link or link in seen_links:
-                continue
-
-            title = clean_title(entry.get("title", ""))
-            if not title or not is_relevant(title):
-                continue
-
-            published = None
-            if getattr(entry, "published_parsed", None):
-                published = datetime(*entry.published_parsed[:6],
-                                     tzinfo=timezone.utc)
-            if published and published < cutoff:
-                continue
-
-            source = ""
-            src_obj = getattr(entry, "source", None)
-            if src_obj is not None:
-                source = getattr(src_obj, "title", "") or ""
-
-            seen_links.add(link)
-            items.append({
-                "title": title,
-                "link": link,
-                "source": source or "خبر",
-                "kind": "news",
-                "when": published.isoformat() if published else "",
-            })
-        time.sleep(0.8)
-
-    log(f"  → {len(items)} خبر يخص بيت الوطن")
-    return items
-
-
-def fetch_youtube():
-    """يدور في يوتيوب لو فيه مفتاح — عناوين فيديوهات بس، من غير كومنتات."""
-    if not YOUTUBE_API_KEY:
-        return []
-
-    items = []
-    seen_links = set()
-    cutoff = datetime.now(timezone.utc) - timedelta(days=MAX_AGE_DAYS)
-
-    for query in YOUTUBE_QUERIES:
-        log(f"  يوتيوب: {query}")
-        try:
-            r = requests.get(
-                "https://www.googleapis.com/youtube/v3/search",
-                params={"key": YOUTUBE_API_KEY, "q": query, "part": "snippet",
-                       "type": "video", "order": "date", "maxResults": 8,
-                       "relevanceLanguage": "ar"},
-                timeout=20)
-            r.raise_for_status()
-        except Exception as exc:
-            log(f"    ! فشل: {str(exc)[:70]}")
-            continue
-
-        for entry in r.json().get("items", []):
-            sn = entry.get("snippet", {})
-            vid = (entry.get("id") or {}).get("videoId")
-            if not vid:
-                continue
-            link = f"https://www.youtube.com/watch?v={vid}"
-            if link in seen_links:
-                continue
-
-            title = sn.get("title", "")
-            if not is_relevant(title, sn.get("description", "")):
-                continue
-
-            published = None
-            try:
-                published = datetime.fromisoformat(
-                    (sn.get("publishedAt") or "").replace("Z", "+00:00"))
-            except (TypeError, ValueError):
-                pass
-            if published and published < cutoff:
-                continue
-
-            seen_links.add(link)
-            items.append({
-                "title": title,
-                "link": link,
-                "source": sn.get("channelTitle", "قناة يوتيوب"),
-                "kind": "video",
-                "when": published.isoformat() if published else "",
-            })
-        time.sleep(0.5)
-
-    log(f"  → {len(items)} فيديو يخص بيت الوطن")
-    return items
-
-
-def fetch_youtube_channels():
-    """
-    RSS رسمي مجاني لكل قناة من YOUTUBE_CHANNELS — بيرجّع آخر ١٥ فيديو
-    منها من غير أي مفتاح API ومن غير حصة (quota). بيتفلتر بعدين على
-    اللي يخص بيت الوطن بس.
-    """
-    if not YOUTUBE_CHANNELS:
-        return []
-
-    items = []
-    cutoff = datetime.now(timezone.utc) - timedelta(days=MAX_AGE_DAYS)
-
-    for name, channel_id in YOUTUBE_CHANNELS:
-        log(f"  قناة: {name}")
-        url = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
-        try:
-            r = requests.get(url, headers={"User-Agent": UA}, timeout=20)
-            r.raise_for_status()
-            feed = feedparser.parse(r.content)
-        except Exception as exc:
-            log(f"    ! فشل: {str(exc)[:70]}")
-            continue
-
-        for entry in feed.entries[:15]:
-            title = entry.get("title", "")
-            link = entry.get("link", "")
-            if not link or not is_relevant(title):
-                continue
-
-            published = None
-            if getattr(entry, "published_parsed", None):
-                published = datetime(*entry.published_parsed[:6],
-                                     tzinfo=timezone.utc)
-            if published and published < cutoff:
-                continue
-
-            items.append({
-                "title": title,
-                "link": link,
-                "source": name,
-                "kind": "video",
-                "when": published.isoformat() if published else "",
-            })
-        time.sleep(0.4)
-
-    log(f"  → {len(items)} فيديو من القنوات المتابَعة يخص بيت الوطن")
-    return items
-
-
-QUESTION_STARTERS = ("هل ", "حد عارف", "حد يعرف", "في حد", "فيه حد",
-                     "ياريت حد", "محتاج اعرف", "محتاجة اعرف")
-
-# سؤال شائع محتاج لايكات أعلى بكتير عشان يستاهل يتبعت (فرق عن معلومة عادية)
-MIN_LIKES_FOR_TRENDING_QUESTION = 60
-
-
-def _is_question(text):
-    if "؟" in text or text.strip().endswith("?"):
-        return True
-    return any(text.startswith(w) for w in QUESTION_STARTERS)
-
-
-def _is_worthy_comment(text):
-    """
-    كومنت يستاهل التقرير كـ"معلومة": فيه كلمة معلومة، مش كلام فاضي معروف،
-    ومش سؤال (سؤال ≠ معلومة حتى لو فيه نفس الكلمات وإعجابات كتير).
-    """
-    if len(text) < 20:
-        return False
-    if any(n in text for n in COMMENT_NOISE_WORDS):
-        return False
-    if _is_question(text):
-        return False
-    return any(w in text for w in COMMENT_INFO_WORDS)
-
-
-def _extract_comment_item(vid, comment_id, sn):
-    """يبني عنصر تقرير من snippet كومنت (سواء أساسي أو رد) لو يستاهل."""
-    text = (sn.get("textDisplay") or "").strip()
-    likes = int(sn.get("likeCount", 0) or 0)
-    if likes < MIN_LIKES_TO_REPORT or not _is_worthy_comment(text):
-        return None
-    return {
-        "title": text[:180],
-        "link": f"https://www.youtube.com/watch?v={vid}&lc={comment_id}",
-        "source": f'تعليق ({likes} إعجاب) — '
-                  f'{sn.get("authorDisplayName", "مستخدم")}',
-        "kind": "comment",
-        "when": sn.get("publishedAt", ""),
-    }
-
-
-def _extract_trending_question(vid, comment_id, sn):
-    """
-    سؤال شائع (لايكات عالية جدًا) من غير رد فيه معلومة — بيتبعت
-    بعلامة "سؤال متكرر" عشان يوريك إن ناس كتير قلقانة من نفس النقطة،
-    من غير ما نوهم إنه "معلومة" أو "تسريب".
-    """
-    text = (sn.get("textDisplay") or "").strip()
-    likes = int(sn.get("likeCount", 0) or 0)
-    if likes < MIN_LIKES_FOR_TRENDING_QUESTION or len(text) < 15:
-        return None
-    if any(n in text for n in COMMENT_NOISE_WORDS):
-        return None
-    if not _is_question(text):
-        return None
-    if not any(w in text for w in COMMENT_INFO_WORDS):
-        return None
-    return {
-        "title": text[:180],
-        "link": f"https://www.youtube.com/watch?v={vid}&lc={comment_id}",
-        "source": f'سؤال متكرر ({likes} إعجاب) — لسه من غير رد رسمي',
-        "kind": "trending_question",
-        "when": sn.get("publishedAt", ""),
-    }
-
-
-def fetch_comments(video_ids):
-    """
-    أعلى الكومنتات تفاعلًا من كل فيديو (التعليق الأساسي وكمان الردود عليه)،
-    مفلترة على اللي فيها معلومة حقيقية (مش رأي أو دعاء). الأسئلة العادية
-    بتترفض، لكن سؤال شائع جدًا (لايكات عالية) بيتبعت بعلامة "سؤال متكرر"
-    عشان يوضح اهتمام الناس حتى لو مفيش إجابة عليه لسه.
-    """
-    if not (COMMENTS_ENABLED and YOUTUBE_API_KEY and video_ids):
-        return []
-
-    items = []
-    for vid in list(video_ids)[:MAX_VIDEOS_FOR_COMMENTS]:
-        try:
-            r = requests.get(
-                "https://www.googleapis.com/youtube/v3/commentThreads",
-                params={"key": YOUTUBE_API_KEY, "videoId": vid,
-                       "part": "snippet,replies", "order": "relevance",
-                       "maxResults": min(MAX_COMMENTS_PER_VIDEO, 100),
-                       "textFormat": "plainText"},
-                timeout=20)
-            r.raise_for_status()
-        except Exception as exc:
-            msg = str(exc)
-            if "403" not in msg:      # 403 = كومنتات مقفولة، عادي نتخطاها بصمت
-                log(f"    ! كومنتات {vid}: {msg[:60]}")
-            continue
-
-        for thread in r.json().get("items", []):
-            top = ((thread.get("snippet") or {}).get("topLevelComment") or {})
-            top_id = top.get("id", thread.get("id", ""))
-            top_sn = top.get("snippet") or {}
-
-            item = _extract_comment_item(vid, top_id, top_sn)
-            if item:
-                items.append(item)
-            else:
-                tq = _extract_trending_question(vid, top_id, top_sn)
-                if tq:
-                    items.append(tq)
-
-            # الردود كمان ممكن تحمل المعلومة الحقيقية، مش بس السؤال الأصلي
-            for reply in (thread.get("replies") or {}).get("comments", []):
-                r_sn = reply.get("snippet") or {}
-                r_item = _extract_comment_item(
-                    vid, reply.get("id", ""), r_sn)
-                if r_item:
-                    items.append(r_item)
-
-    if items:
-        log(f"  → {len(items)} كومنت/رد/سؤال متكرر مرصود")
-    return items
-
-
-# ============================================================
-#  تليجرام
-# ============================================================
-
-def send_telegram(text):
-    if not (TELEGRAM_TOKEN and TELEGRAM_CHAT_ID):
-        log("  ! تليجرام مش مضبوط — مش هيتبعت")
-        return False
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    try:
-        r = requests.post(url, data={
-            "chat_id": TELEGRAM_CHAT_ID,
-            "text": text,
-            "parse_mode": "HTML",
-            "disable_web_page_preview": "false",
-        }, timeout=20)
-        body = r.json()
-        if not body.get("ok"):
-            log(f"  ! تليجرام رفض: {body.get('description', '')[:100]}")
-            return False
-        return True
-    except Exception as exc:
-        log(f"  ! فشل الإرسال: {str(exc)[:80]}")
-        return False
-
-
-def _ar_date():
-    months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو",
-              "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"]
-    now = datetime.now()
-    return f"{now.day} {months[now.month - 1]} {now.year} — {now:%H:%M}"
-
-
-def format_digest(new_items):
-    """
-    تقرير واحد منظّم بدل رسالة لكل خبر — أسهل للقراءة ومحترف.
-    الترتيب: العاجل (فيه كلمة حجز/قرعة/موعد) الأول، بعدين الباقي.
-    """
-    import html
-
-    trending_qs = [it for it in new_items if it["kind"] == "trending_question"]
-    rest = [it for it in new_items if it["kind"] != "trending_question"]
-
-    urgent = [it for it in rest if is_urgent(it["title"])]
-    normal = [it for it in rest if not is_urgent(it["title"])]
-
-    lines = [
-        "🏛️ <b>متابعة بيت الوطن</b>",
-        f"<i>{_ar_date()}</i>",
-        "",
-    ]
-
-    comments = [it for it in normal if it["kind"] == "comment"]
-    normal = [it for it in normal if it["kind"] != "comment"]
-
-    if urgent:
-        lines.append(f"🔴 <b>مستجدات مهمة ({len(urgent)})</b>")
-        lines.append("")
-        for it in urgent:
-            kind = "💬" if it["kind"] == "comment" else (
-                "🎥" if it["kind"] == "video" else "📰")
-            lines.append(
-                f'{kind} <a href="{html.escape(it["link"])}">'
-                f'{html.escape(it["title"])}</a>')
-            lines.append(f'   <i>المصدر: {html.escape(it["source"])}</i>')
-            lines.append("")
-
-    if normal:
-        lines.append(f"📋 <b>أخبار أخرى ({len(normal)})</b>")
-        lines.append("")
-        for it in normal:
-            kind = "🎥" if it["kind"] == "video" else "📰"
-            lines.append(
-                f'{kind} <a href="{html.escape(it["link"])}">'
-                f'{html.escape(it["title"])}</a>')
-            lines.append(f'   <i>المصدر: {html.escape(it["source"])}</i>')
-            lines.append("")
-
-    if comments:
-        lines.append(f"💬 <b>من كلام الناس — غير مؤكد رسميًا ({len(comments)})</b>")
-        lines.append("")
-        for it in comments:
-            lines.append(
-                f'💬 <a href="{html.escape(it["link"])}">'
-                f'{html.escape(it["title"])}</a>')
-            lines.append(f'   <i>{html.escape(it["source"])}</i>')
-            lines.append("")
-
-    if trending_qs:
-        lines.append(f"❓ <b>أسئلة متكررة من الناس — لسه من غير رد ({len(trending_qs)})</b>")
-        lines.append("")
-        for it in trending_qs:
-            lines.append(
-                f'❓ <a href="{html.escape(it["link"])}">'
-                f'{html.escape(it["title"])}</a>')
-            lines.append(f'   <i>{html.escape(it["source"])}</i>')
-            lines.append("")
-
-    lines.append("─" * 22)
-    lines.append("<i>مصادر: Google News · يوتيوب · تعليقات — رصد آلي، راجع كراسة "
-                 "الشروط الرسمية قبل أي إجراء. كلام الناس مش مصدر رسمي.</i>")
-
-    return "\n".join(lines).strip()
-
-
-# حد أقصى لطول رسالة تليجرام — لو التقرير أطول، بيتقسم عند فاصل خبر
-_TG_LIMIT = 3800
-
-
-def split_digest(text):
-    """تقسيم آمن عند نهاية عنصر — ما بيكسرش وسم <a> أو <b> نص."""
-    if len(text) <= _TG_LIMIT:
-        return [text]
-    blocks = text.split("\n\n")
-    chunks, current = [], ""
-    for block in blocks:
-        if len(current) + len(block) + 2 > _TG_LIMIT:
-            if current.strip():
-                chunks.append(current.strip())
-            current = block
-        else:
-            current = f"{current}\n\n{block}" if current else block
-    if current.strip():
-        chunks.append(current.strip())
-    return chunks
-
-
-# ============================================================
-#  الدورة
-# ============================================================
-
-def run_once():
-    log("=" * 50)
-    log("دورة متابعة بيت الوطن")
-    log("=" * 50)
-
-    seen = load_seen()
-    news_items = fetch_news()
-    video_items = fetch_youtube() + fetch_youtube_channels()
-
-    # إزالة التكرار لو نفس الفيديو طلع من البحث ومن القناة مع بعض
-    dedup, videos_dedup = set(), []
-    for it in video_items:
-        if it["link"] in dedup:
-            continue
-        dedup.add(it["link"])
-        videos_dedup.append(it)
-    video_items = videos_dedup
-
-    # كومنتات على أحدث الفيديوهات المتابَعة (يخص بيت الوطن) بس
-    video_ids = []
-    for it in video_items:
-        m = re.search(r"v=([\w-]{5,})", it["link"])
-        if m:
-            video_ids.append(m.group(1))
-    comment_items = fetch_comments(video_ids)
-
-    all_items = news_items + video_items + comment_items
-
-    dedup, out = set(), []
-    for it in all_items:
-        if it["link"] in dedup:
-            continue
-        dedup.add(it["link"])
-        out.append(it)
-    all_items = out
-
-    new_items = [it for it in all_items if it["link"] not in seen]
-    log(f"إجمالي: {len(all_items)} · جديد: {len(new_items)}")
-
-    if not new_items:
-        log("مفيش جديد — مفيش تقرير.")
-    else:
-        new_items.sort(key=lambda x: is_urgent(x["title"]), reverse=True)
-        digest = format_digest(new_items)
-        for chunk in split_digest(digest):
-            sent = send_telegram(chunk)
-            log(f"  {'✓' if sent else '✗'} تقرير مُرسل ({len(new_items)} عنصر)")
-            time.sleep(0.6)
-
-    seen.update(it["link"] for it in all_items)
-    save_seen(seen)
-    log("خلصت الدورة.\n")
-    return len(new_items)
-
-
-def run_daemon():
-    log(f"وضع مستمر — فحص كل {CHECK_INTERVAL_MINUTES} دقيقة. Ctrl+C للإيقاف.")
-    while True:
-        try:
-            run_once()
-        except Exception as exc:
-            log(f"! خطأ: {str(exc)[:100]}")
-        time.sleep(CHECK_INTERVAL_MINUTES * 60)
-
-
-def main():
-    parser = argparse.ArgumentParser(description="متابعة بيت الوطن المبسّطة")
-    parser.add_argument("--once", action="store_true", help="دورة واحدة")
-    parser.add_argument("--daemon", action="store_true", help="تشغيل مستمر")
-    args = parser.parse_args()
-
-    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
-        log("!! لازم تضبط TELEGRAM_TOKEN و TELEGRAM_CHAT_ID الأول.")
-        sys.exit(1)
-
-    if args.daemon:
-        run_daemon()
-    else:
-        run_once()
-
-
-if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        log("تم الإيقاف.")
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="متابعة لحظية لمشروع بيت الوطن: المرحلة، المواعيد، الأسعار، الشروط، وتحليل">
+<meta name="robots" content="index,follow">
+<title>بيت الوطن — ملف متابعة | مرصد العقارات المصرية</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+
+:root{
+  --ink:#15181c; --body:#2f3640; --muted:#69727e; --faint:#98a1ad;
+  --line:#e0e4ea; --line-soft:#eef1f5; --bg:#f2f4f7; --paper:#ffffff;
+  --navy:#0f3557; --navy-2:#1b4f7d; --gold:#96702c; --gold-soft:#f6f1e6;
+  --red:#a52820; --red-soft:#fbeeed; --green:#17603f; --green-soft:#ecf5f0;
+  --amber:#8a5a00; --amber-soft:#fdf4e3;
+  --radius:4px;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0; background:var(--bg); color:var(--body);
+  font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;
+  font-size:15.5px; line-height:1.85; -webkit-font-smoothing:antialiased;
+}
+a{color:var(--navy-2); text-decoration:none;}
+a:hover{text-decoration:underline;}
+
+/* ---------- الترويسة ---------- */
+.masthead{background:var(--navy); color:#fff; border-bottom:4px solid var(--gold);}
+.masthead-in{max-width:1180px; margin:0 auto; padding:26px 24px 22px;}
+.eyebrow{font-size:11.5px; letter-spacing:2.6px; text-transform:uppercase;
+  color:#9fc0dd; margin-bottom:9px; font-weight:500;}
+.masthead h1{margin:0; font-size:27px; font-weight:700; letter-spacing:-.3px;}
+.masthead .lede{margin:7px 0 0; font-size:14px; color:#c6dbeb; font-weight:300;}
+.issue{margin-top:16px; padding-top:13px; border-top:1px solid rgba(255,255,255,.16);
+  display:flex; gap:22px; flex-wrap:wrap; font-size:12.5px; color:#b9d3e6;}
+.issue b{color:#fff; font-weight:600;}
+
+/* ---------- شريط التنقل ---------- */
+.topbar{position:sticky; top:0; z-index:60; background:var(--paper);
+  border-bottom:1px solid var(--line); box-shadow:0 1px 4px rgba(15,53,87,.07);}
+.topbar-in{max-width:1180px; margin:0 auto; padding:0 24px;
+  display:flex; align-items:center; gap:4px; flex-wrap:wrap;}
+.topbar a{display:inline-block; padding:12px 13px; font-size:13.5px;
+  font-weight:500; color:var(--muted); border-bottom:2px solid transparent;}
+.topbar a:hover{color:var(--navy); border-bottom-color:var(--line); text-decoration:none;}
+.topbar a.cta{margin-inline-start:auto; color:var(--gold); font-weight:600;}
+
+/* ---------- التخطيط ---------- */
+.wrap{max-width:1180px; margin:0 auto; padding:26px 24px 60px;
+  display:grid; grid-template-columns:1fr 268px; gap:26px; align-items:start;}
+@media(max-width:940px){ .wrap{grid-template-columns:1fr; padding:18px 15px 44px;} .rail{order:-1;} }
+
+/* ---------- المؤشرات ---------- */
+.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(132px,1fr));
+  gap:1px; background:var(--line); border:1px solid var(--line);
+  border-radius:var(--radius); overflow:hidden; margin-bottom:22px;}
+.kpi{background:var(--paper); padding:14px 16px;}
+.kpi .k-label{font-size:11.5px; color:var(--muted); letter-spacing:.4px;}
+.kpi .k-value{font-size:25px; font-weight:700; color:var(--navy); line-height:1.35;
+  font-variant-numeric:tabular-nums;}
+.kpi.alert .k-value{color:var(--red);}
+.kpi.good .k-value{color:var(--green);}
+
+/* ---------- الأقسام ---------- */
+.doc{counter-reset:sec;}
+section.block{background:var(--paper); border:1px solid var(--line);
+  border-radius:var(--radius); margin-bottom:22px; overflow:hidden;}
+section.block > h2{counter-increment:sec; margin:0; padding:15px 22px;
+  font-size:16.5px; font-weight:600; color:var(--navy);
+  background:linear-gradient(180deg,#fbfcfd,#f5f7fa);
+  border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:11px;}
+section.block > h2::before{content:counter(sec); font-size:12px; font-weight:700;
+  color:#fff; background:var(--navy); min-width:23px; height:23px; border-radius:3px;
+  display:inline-flex; align-items:center; justify-content:center; flex:none;
+  align-self:center; font-variant-numeric:tabular-nums;}
+.block-body{padding:19px 22px 22px;}
+.block-body > *:first-child{margin-top:0;}
+.block-body > *:last-child{margin-bottom:0;}
+
+h3{font-size:15px; font-weight:600; color:var(--navy-2); margin:20px 0 7px;
+  padding-inline-start:11px; border-inline-start:3px solid var(--gold);}
+h4{font-size:14px; font-weight:600; color:var(--gold); margin:15px 0 5px;}
+h5{font-size:13.5px; font-weight:600; color:var(--body); margin:12px 0 4px;}
+p{margin:9px 0;}
+ul{margin:9px 0; padding-inline-start:21px;}
+li{margin:5px 0;}
+
+/* ---------- الجداول ---------- */
+table{width:100%; border-collapse:collapse; font-size:14px; margin:12px 0;}
+th{background:#f6f8fa; text-align:start; padding:10px 12px; font-weight:600;
+  color:var(--navy); border-bottom:2px solid var(--line); font-size:13px;
+  white-space:nowrap;}
+td{padding:10px 12px; border-bottom:1px solid var(--line-soft); vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:#fafbfc;}
+td.k{font-weight:600; color:var(--ink); width:32%; white-space:nowrap;}
+.note-row td{background:#fbfcfd; color:var(--muted); font-size:13px; padding-top:0;}
+
+/* ---------- الشارات ---------- */
+.tag{display:inline-block; font-size:11.5px; font-weight:600; padding:2px 9px;
+  border-radius:3px; white-space:nowrap; line-height:1.7;}
+.tag.red{background:var(--red-soft); color:var(--red);}
+.tag.green{background:var(--green-soft); color:var(--green);}
+.tag.amber{background:var(--amber-soft); color:var(--amber);}
+.tag.navy{background:#eaf1f7; color:var(--navy);}
+.tag.gold{background:var(--gold-soft); color:var(--gold);}
+.tag.gray{background:#eff1f4; color:var(--muted);}
+
+/* ---------- الفيد ---------- */
+.filters{display:flex; gap:7px; flex-wrap:wrap; padding:13px 22px;
+  border-bottom:1px solid var(--line); background:#fafbfc;}
+.filters button{font-family:inherit; font-size:13px; font-weight:500;
+  padding:6px 14px; border:1px solid var(--line); background:var(--paper);
+  color:var(--muted); border-radius:100px; cursor:pointer; transition:.12s;}
+.filters button:hover{border-color:var(--navy); color:var(--navy);}
+.filters button.on{background:var(--navy); border-color:var(--navy); color:#fff;}
+
+.entry{padding:16px 22px; border-bottom:1px solid var(--line-soft);}
+.entry:last-child{border-bottom:none;}
+.entry-meta{display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  font-size:12px; color:var(--faint); margin-bottom:5px;}
+.entry-meta .src{font-weight:600; color:var(--muted);}
+.entry h3.t{border:none; padding:0; margin:0 0 5px; font-size:15.5px;
+  font-weight:600; line-height:1.6;}
+.entry h3.t a{color:var(--ink);}
+.entry h3.t a:hover{color:var(--navy-2);}
+.snip{font-size:13.5px; color:var(--muted); margin:5px 0 0;}
+.metrics{display:flex; gap:15px; font-size:12px; color:var(--faint);
+  margin-top:8px; font-variant-numeric:tabular-nums;}
+
+.ai-box{background:#f8fafc; border:1px solid var(--line);
+  border-inline-start:3px solid var(--navy-2); border-radius:var(--radius);
+  padding:12px 15px; margin-top:11px; font-size:13.5px;}
+.ai-box .ai-label{font-size:11px; font-weight:700; letter-spacing:1.1px;
+  color:var(--navy-2); text-transform:uppercase; margin-bottom:5px;}
+.ai-box.people{border-inline-start-color:var(--gold); background:#fdfbf7;}
+.ai-box.people .ai-label{color:var(--gold);}
+.ai-box p{margin:5px 0;} .ai-box ul{margin:5px 0; padding-inline-start:18px;}
+.ai-box h4{margin:9px 0 3px; font-size:13px;}
+
+.quotes{margin-top:11px; border-top:1px dashed var(--line); padding-top:10px;}
+.quotes .q-label{font-size:11.5px; font-weight:600; color:var(--faint); margin-bottom:8px;}
+.quote{display:flex; gap:9px; margin-bottom:9px;}
+.quote .av{width:27px; height:27px; border-radius:50%; flex:none; background:#e8ebef;
+  color:var(--muted); display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:600;}
+.quote .qb{flex:1; background:#f7f8fa; border-radius:var(--radius);
+  padding:8px 12px; font-size:13px;}
+.quote .qn{font-weight:600; font-size:12.5px; color:var(--ink);}
+.quote .ql{font-size:11.5px; color:var(--faint); margin-top:3px;}
+
+/* ---------- العمود الجانبي ---------- */
+.rail{position:sticky; top:60px;}
+@media(max-width:940px){ .rail{position:static;} }
+.rail .box{background:var(--paper); border:1px solid var(--line);
+  border-radius:var(--radius); padding:15px 17px; margin-bottom:16px;}
+.rail h4{margin:0 0 11px; font-size:12px; letter-spacing:1.1px; color:var(--muted);
+  text-transform:uppercase; font-weight:700;}
+.rail .r{display:flex; justify-content:space-between; gap:10px; font-size:13.5px;
+  padding:7px 0; border-bottom:1px solid var(--line-soft);}
+.rail .r:last-child{border-bottom:none;}
+.rail .r b{color:var(--navy); font-variant-numeric:tabular-nums;}
+.rail .lnk{display:block; padding:6px 0; font-size:13.5px;
+  border-bottom:1px solid var(--line-soft);}
+.rail .lnk:last-child{border-bottom:none;}
+.rail .toc a{display:block; padding:5px 0; font-size:13.5px; color:var(--body);}
+.rail .toc a:hover{color:var(--navy); text-decoration:none;}
+
+/* ---------- بانر بيت الوطن ---------- */
+.spotlight{background:linear-gradient(135deg,var(--navy) 0%,#154572 100%);
+  color:#fff; border-radius:var(--radius); padding:22px 24px; margin-bottom:22px;
+  border-inline-start:4px solid var(--gold);}
+.spotlight .sp-eyebrow{font-size:11px; letter-spacing:2.2px; color:#9fc0dd;
+  text-transform:uppercase; font-weight:600;}
+.spotlight h2{margin:6px 0 12px; font-size:21px; font-weight:700; color:#fff;}
+.spotlight .sp-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(128px,1fr));
+  gap:14px; margin:15px 0;}
+.spotlight .sp-cell .l{font-size:11.5px; color:#9fc0dd;}
+.spotlight .sp-cell .v{font-size:15px; font-weight:600; color:#fff; line-height:1.55;}
+.spotlight .sp-cta{display:inline-block; margin-top:6px; background:var(--gold);
+  color:#fff; padding:8px 19px; border-radius:3px; font-size:14px; font-weight:600;}
+.spotlight .sp-cta:hover{background:#ab8034; text-decoration:none;}
+
+/* ---------- العدّاد ---------- */
+.countdown{background:var(--gold-soft); border:1px solid #e5d9c0;
+  border-radius:var(--radius); padding:17px 20px; margin:14px 0; text-align:center;}
+.countdown .cd-label{font-size:12.5px; color:var(--gold); font-weight:600;
+  letter-spacing:.5px;}
+.countdown .cd-when{font-size:16px; font-weight:700; color:var(--ink); margin:5px 0;}
+.countdown .cd-units{display:flex; justify-content:center; gap:22px; margin-top:10px;}
+.countdown .u{min-width:56px;}
+.countdown .u .n{font-size:27px; font-weight:700; color:var(--navy);
+  font-variant-numeric:tabular-nums; line-height:1.2;}
+.countdown .u .s{font-size:11.5px; color:var(--muted);}
+
+/* ---------- الخط الزمني ---------- */
+.timeline{position:relative; padding-inline-start:22px; margin:12px 0;}
+.timeline::before{content:''; position:absolute; inset-inline-start:5px; top:6px;
+  bottom:6px; width:2px; background:var(--line);}
+.tl-item{position:relative; padding-bottom:16px;}
+.tl-item::before{content:''; position:absolute; inset-inline-start:-21px; top:7px;
+  width:10px; height:10px; border-radius:50%; background:var(--paper);
+  border:2px solid var(--navy-2);}
+.tl-item.new::before{background:var(--gold); border-color:var(--gold);}
+.tl-when{font-size:11.5px; color:var(--faint); font-variant-numeric:tabular-nums;}
+.tl-what{font-size:14px; margin-top:1px;}
+.tl-what b{color:var(--navy);}
+.tl-what s{color:var(--faint);}
+
+/* ---------- تذييل ---------- */
+.disclaimer{background:#fffdf7; border:1px solid #e8ddc4;
+  border-radius:var(--radius); padding:16px 20px; font-size:13px;
+  color:#6b5c3c; line-height:1.8;}
+.disclaimer b{color:#8a6d2f;}
+.engines{margin-top:11px; padding-top:10px; border-top:1px solid #e8ddc4;
+  font-size:11.5px; color:#9a8a68; font-family:ui-monospace,Menlo,Consolas,monospace;
+  direction:ltr; text-align:end;}
+.empty{padding:30px 22px; text-align:center; color:var(--faint); font-size:14px;}
+.hidden{display:none !important;}
+
+/* ---------- رادار الإشارات ---------- */
+.radar-intro{background:#f7f9fb; border:1px solid var(--line);
+  border-radius:var(--radius); padding:13px 16px; font-size:13.5px;
+  color:var(--muted); margin-bottom:16px;}
+.radar-intro b{color:var(--navy);}
+
+.signal{border:1px solid var(--line); border-radius:var(--radius);
+  margin-bottom:13px; overflow:hidden; background:var(--paper);}
+.signal.novel{border-inline-start:4px solid var(--gold); background:#fffdf8;}
+.signal.confirmed{border-inline-start:4px solid var(--green); background:#f8fcfa;}
+.signal.weak{opacity:.86;}
+.sig-head{padding:12px 15px 9px; display:flex; gap:9px;
+  align-items:flex-start; flex-wrap:wrap;}
+.sig-statement{flex:1 1 260px; font-size:15px; font-weight:600;
+  color:var(--ink); line-height:1.65; min-width:200px;}
+.sig-evidence{display:flex; gap:14px; flex-wrap:wrap; padding:0 15px 10px;
+  font-size:12.5px; color:var(--muted); font-variant-numeric:tabular-nums;}
+.sig-evidence b{color:var(--navy); font-weight:600;}
+.sig-quotes{background:#f8f9fb; border-top:1px solid var(--line-soft);
+  padding:10px 15px;}
+.sig-quote{font-size:13px; color:var(--body); padding:5px 0;
+  border-bottom:1px dotted var(--line); line-height:1.7;}
+.sig-quote:last-child{border-bottom:none;}
+.sig-quote .who{font-weight:600; color:var(--navy-2); font-size:12.5px;}
+.sig-quote .eye{color:var(--gold); font-size:11.5px; font-weight:600;}
+.sig-lead{background:var(--green-soft); color:var(--green); font-size:12.5px;
+  font-weight:600; padding:7px 15px; border-top:1px solid #d5e8de;}
+
+.gauge{display:grid; grid-template-columns:repeat(auto-fit,minmax(118px,1fr));
+  gap:1px; background:var(--line); border:1px solid var(--line);
+  border-radius:var(--radius); overflow:hidden; margin-bottom:18px;}
+.gauge .g{background:var(--paper); padding:12px 14px; text-align:center;}
+.gauge .g .n{font-size:23px; font-weight:700; color:var(--navy);
+  font-variant-numeric:tabular-nums; line-height:1.3;}
+.gauge .g .l{font-size:11.5px; color:var(--muted);}
+.gauge .g.gold .n{color:var(--gold);}
+.gauge .g.green .n{color:var(--green);}
+
+.qlist{margin:0; padding:0; list-style:none;}
+.qlist li{padding:8px 0; border-bottom:1px solid var(--line-soft);
+  font-size:13.5px;}
+.qlist li:last-child{border-bottom:none;}
+.qlist .meta{font-size:11.5px; color:var(--faint); margin-top:2px;}
+
+/* ---------- طباعة ---------- */
+@media print{
+  body{background:#fff; font-size:11.5pt;}
+  .topbar,.filters,.rail,.sp-cta{display:none !important;}
+  .wrap{display:block; max-width:100%; padding:0;}
+  section.block{border:1px solid #ccc; break-inside:avoid; margin-bottom:14px;
+    box-shadow:none;}
+  .masthead{background:#fff !important; color:#000; border-bottom:3px solid #000;}
+  .masthead .eyebrow,.masthead .lede,.issue{color:#444 !important;}
+  .masthead h1,.issue b{color:#000 !important;}
+  .spotlight{background:#fff !important; color:#000; border:2px solid #000;}
+  .spotlight h2,.spotlight .v{color:#000 !important;}
+  .spotlight .sp-eyebrow,.spotlight .l{color:#444 !important;}
+  a{color:#000; text-decoration:underline;}
+  .entry{break-inside:avoid;}
+}
+</style>
+</head>
+<body>
+<header class="masthead"><div class="masthead-in">
+  <div class="eyebrow">ملف متابعة مخصّص</div>
+  <h1>بيت الوطن — أراضي المصريين بالخارج</h1>
+  <p class="lede">رصد مستمر للمرحلة والمواعيد والأسعار والشروط · تحليل وقراءة استشرافية</p>
+  <div class="issue">
+    <span>آخر تحديث: <b>26 يوليو 2026 — 21:14 بتوقيت القاهرة</b></span>
+    <span>المرحلة: <b>المرحلة 11</b></span>
+    <span>حالة الحجز: <b>غير معروف</b></span>
+    <span>درجة الثقة: <b>متوسطة</b></span>
+  </div>
+</div></header>
+<nav class="topbar"><div class="topbar-in">
+  <a href="index.html">← التقرير العام</a>
+  <a href="#brief">الملخص</a>
+  <a href="#facts">البطاقة</a>
+  <a href="#dates">المواعيد</a>
+  <a href="#radar" style="color:var(--gold);font-weight:600">رادار الإشارات</a>
+  <a href="#places">المدن</a>
+  <a href="#timeline">الخط الزمني</a>
+  <a href="#people">كلام الناس</a>
+  <a href="#outlook">التوقعات</a>
+  <a href="#steps">خطوات عملية</a>
+</div></nav>
+<div class="wrap">
+  <main class="doc">
+<div class="kpis">
+  <div class="kpi "><div class="k-label">المرحلة الحالية</div><div class="k-value">المرحلة 11</div></div>
+  <div class="kpi "><div class="k-label">حالة الحجز</div><div class="k-value">غير معروف</div></div>
+  <div class="kpi "><div class="k-label">سعر المتر</div><div class="k-value">—</div></div>
+  <div class="kpi "><div class="k-label">أقرب موعد</div><div class="k-value">—</div></div>
+  <div class="kpi alert"><div class="k-label">إشارات مش في الأخبار</div><div class="k-value">9</div></div>
+</div>
+<section class="block" id="brief">
+  <h2>الملخص التنفيذي</h2>
+  <div class="block-body">
+<h3>الخلاصة في سطرين</h3>
+<p>ملف بيت الوطن وصل للمرحلة 11، وآخر التطورات تشمل دخول مناطق جديدة. درجة الثقة في المعلومات المتاحة هي متوسطة.</p>
+<h3>آخر المستجدات</h3>
+<ul>
+<li>دخول شمال الرحاب واللوتس ومناطق جديدة لأول مرة.</li>
+<li>إعلان عن أراضي للبيع في اكتوبر الجديدة.</li>
+<li>تسريبات عن آخر التطورات في مشروع بيت الوطن.</li>
+</ul>
+<h3>المواعيد المهمة</h3>
+<p>موعد القرعة كان في 2018، ولا توجد مواعيد جديدة معلنة.</p>
+<h3>غموض ومعلومات ناقصة</h3>
+<p>درجة الثقة في المعلومات المتاحة هي متوسطة، وهناك حاجة لتوضيح أكثر حول التطورات الجديدة في المشروع.</p>
+  </div>
+</section>
+<section class="block" id="facts">
+  <h2>البطاقة التعريفية للمرحلة</h2>
+  <div class="block-body">
+<table><tbody>
+<tr><td class="k">المرحلة الحالية</td><td>المرحلة 11</td></tr>
+<tr><td class="k">حالة الحجز</td><td><span class="tag gray">غير معروف</span></td></tr>
+<tr><td class="k">سعر المتر</td><td><span style="color:var(--faint)">لم يُعلن رسميًا بعد</span></td></tr>
+<tr><td class="k">المساحات المتاحة</td><td><span style="color:var(--faint)">لم يُعلن رسميًا بعد</span></td></tr>
+<tr><td class="k">المدن المطروحة</td><td>اكتوبر, القاهرة الجديدة</td></tr>
+<tr><td class="k">قيمة الجدية</td><td><span style="color:var(--faint)">لم يُعلن رسميًا بعد</span></td></tr>
+<tr><td class="k">طريقة السداد</td><td><span style="color:var(--faint)">لم يُعلن رسميًا بعد</span></td></tr>
+<tr><td class="k">شروط التقديم</td><td><span style="color:var(--faint)">لم يُعلن رسميًا بعد</span></td></tr>
+<tr><td class="k">آخر تطور</td><td>دخول شمال الرحاب واللوتس ومناطق جديدة لأول مرة</td></tr>
+</tbody></table>
+<p style="font-size:13px;color:var(--muted);margin-top:12px">البيانات مستخرجة آليًا من الأخبار والمصادر الرسمية المرصودة. <b>أي رقم أو موعد لازم يتأكد من كراسة الشروط الرسمية قبل أي إجراء.</b></p>
+  </div>
+</section>
+<section class="block" id="dates">
+  <h2>المواعيد الرسمية</h2>
+  <div class="block-body">
+<table><thead><tr><th>الموعد</th><th>كما ورد</th><th>الحالة</th><th>المتبقي</th></tr></thead><tbody>
+<tr><td class="k">القرعة / إعلان النتيجة</td><td>2018</td><td><span class="tag gray">غير محدد بدقة</span></td><td>—</td></tr>
+</tbody></table>
+  </div>
+</section>
+<section class="block" id="radar">
+  <h2>رادار الإشارات المبكرة — ما يقوله الناس قبل الأخبار</h2>
+  <div class="block-body">
+<div class="radar-intro">
+  الرادار بيقرا كلام الناس في تعليقات يوتيوب وقنوات تليجرام و Reddit، ويطلّع منه
+  <b>الادعاءات الواقعية</b> بس (مش الآراء). الادعاء اللي يتكرر من
+  <b>مصادر مستقلة مختلفة</b> بياخد ثقة أعلى. الإشارة المعلّمة
+  <b>«مش في الأخبار»</b> يعني ناس بتقولها ومحدش نشرها رسميًا لحد دلوقتي.
+  <br><b>ده كلام ناس على الإنترنت — مش مصدر رسمي، ومش كله صح.</b>
+</div>
+<div class="gauge"><div class="g "><div class="n">9</div><div class="l">إشارة مرصودة</div></div><div class="g gold"><div class="n">9</div><div class="l">مش في الأخبار</div></div><div class="g "><div class="n"></div><div class="l">قوية أو متقاطعة</div></div><div class="g green"><div class="n"></div><div class="l">اتأكدت رسميًا</div></div></div>
+<div class="ai-box people"><div class="ai-label">قراءة الرادار</div><h3>إيه اللي الناس بتقوله ومش في الأخبار</h3>
+<p>ناس بتقول إن أقل مقدم حجز متاح هو 8000 دولار، وقالها شخص واحد من مصدر مستقل، وده مش مؤكد. كمان، هناك إشارة إن سعر 33 الف للمتر مربع، وقالها شخص واحد من مصدر مستقل، وده كمان مش مؤكد. ناس تانية بتقول إن أقل سعر للمتر هو 45 الف بعد ارتفاع الأسعار، وقالها شخص واحد من مصدر مستقل، وده مش مؤكد. ثقةنا في تلك المعلومات ضعيفة بسبب انها قالها شخص واحد فقط من مصدر مستقل.</p>
+<h3>إشارات تستاهل متابعة</h3>
+<p>ناس بتقول إن المناطق في مرحلة الدراسة الفنية بنسبة 100%، وقالها شخص واحد من مصدر مستقل، وده مش مؤكد. كمان، هناك إشارة إن مساحة الشقق على محور محمد بن زايد 160 متر، وقالها شخص واحد من مصدر مستقل، وده كمان مش مؤكد. تلك الإشارات لسه ضعيفة، ولكن لو اتأكدت، قد تكون مهمة.</p>
+<h3>تناقضات</h3>
+<p>مافيش تناقضات واضحة في الإشارات، ولكن هناك اختلاف في الأسعار المذكورة، حيث إن هناك إشارة تقول إن أقل سعر للمتر هو 45 الف، بينما هناك إشارة أخرى تقول إن سعر 33 الف للمتر مربع.</p>
+<h3>فجوات المعلومات</h3>
+<p>ناس بتسأل عن تجهيز الملفات، ولكن مفيش إجابة واضحة. ده بيوضح إن هناك غموض حول تجهيز الملفات، وبيحتاج إلى توضيح رسمي.</p>
+<h3>قراءة عامة</h3>
+<p>كلام الناس ده بيوحي إن هناك اهتمام كبير بمشروع بيت الوطن، ولكن هناك غموض حول بعض التفاصيل. الناس بتحاول تجمع معلومات من مصادر مختلفة، ولكن ثقةنا في تلك المعلومات مش عالية. كلام الناس ده بيوضح إن هناك حاجة مهمة وهي الحاجة إلى توضيح رسمي حول بعض التفاصيل.</p></div>
+<h3>معلومات من الناس مش موجودة في الأخبار</h3>
+<p style="font-size:13px;color:var(--muted);margin-top:0">دي أهم حاجة في الرادار — كلام بيتقال ومحدش نشره رسميًا. <b>كل واحدة محتاجة تأكيد قبل ما تتصرف عليها.</b></p>
+<div class="signal novel weak">
+  <div class="sig-head">
+    <div class="sig-statement">أقل مقدم حجز متاح هو 8000 دولار</div>
+    <div><span class="tag gray">إشارة فردية</span><span class="tag gold">مش في الأخبار</span><span class="tag gray">سعر</span></div>
+  </div>
+  <div class="sig-evidence">
+    <span>قالها <b>1</b> شخص</span>
+    <span>من <b>1</b> مصدر مستقل</span>
+    <span><b>1</b> تفاعل</span>
+    <span>يوتيوب</span>
+    <span>أول رصد: منذ 1 ساعة</span>
+  </div>
+  <div class="sig-quotes">
+    <div class="sig-quote"><span class="who"><a href="https://www.youtube.com/watch?v=deNhseBhPF8&amp;lc=UgwAudnuo5IG0EZeAud4AaABAg" target="_blank" rel="noopener">@اخبارالاسكان</a></span><br>«أقل مقدم حجز متاح على الموقع حالياً هو 8000 دولار في مدينة أخميم الجديدة.. أي مبلغ أقل من مقدمات الأراضي المتاحة لن يسجل»</div>
+  </div>
+</div>
+<div class="signal novel weak">
+  <div class="sig-head">
+    <div class="sig-statement">المناطق في مرحلة الدراسة الفنية بنسبة 100%</div>
+    <div><span class="tag gray">إشارة فردية</span><span class="tag gold">مش في الأخبار</span><span class="tag gray">إجراء</span></div>
+  </div>
+  <div class="sig-evidence">
+    <span>قالها <b>1</b> شخص</span>
+    <span>من <b>1</b> مصدر مستقل</span>
+    <span><b>1</b> تفاعل</span>
+    <span>يوتيوب</span>
+    <span>أول رصد: منذ 1 ساعة</span>
+  </div>
+  <div class="sig-quotes">
+    <div class="sig-quote"><span class="who"><a href="https://www.youtube.com/watch?v=deNhseBhPF8&amp;lc=Ugwg8dDaNnxdqshvFkp4AaABAg" target="_blank" rel="noopener">@اخبارالاسكان</a></span><br>«المناطق دي لسه في مرحلة الدراسة الفنية بنسبة 100%، لكن التحركات جادة جداً لتوفير رقعة أرض قوية ترضي الطابور الطويل من الحجوزات»</div>
+  </div>
+</div>
+<div class="signal novel weak">
+  <div class="sig-head">
+    <div class="sig-statement">سعر 33 الف للمتر مربع</div>
+    <div><span class="tag gray">إشارة فردية</span><span class="tag gold">مش في الأخبار</span><span class="tag gray">سعر</span></div>
+  </div>
+  <div class="sig-evidence">
+    <span>قالها <b>1</b> شخص</span>
+    <span>من <b>1</b> مصدر مستقل</span>
+    <span>يوتيوب</span>
+    <span>أول رصد: منذ 1 ساعة</span>
+  </div>
+  <div class="sig-quotes">
+    <div class="sig-quote"><span class="who"><a href="https://www.youtube.com/watch?v=ys3qjk2mK7Q&amp;lc=UgzyLQ3LBxGQmAns3tx4AaABAg.AZ5CUQ6PYw2AZ5en2xyX5n" target="_blank" rel="noopener">@RAOF-MOUSSArealestate</a></span><br>«مفيش المساحة ده من اول ٢٠٠ متر بسعر ٣٣ الف»</div>
+  </div>
+</div>
+<div class="signal novel weak">
+  <div class="sig-head">
+    <div class="sig-statement">أقل سعر للمتر هو 45 الف بعد ارتفاع الأسعار</div>
+    <div><span class="tag gray">إشارة فردية</span><span class="tag gold">مش في الأخبار</span><span class="tag gray">سعر</span></div>
+  </div>
+  <div class="sig-evidence">
+    <span>قالها <b>1</b> شخص</span>
+    <span>من <b>1</b> مصدر مستقل</span>
+    <span>يوتيوب</span>
+    <span>أول رصد: منذ 1 ساعة</span>
+  </div>
+  <div class="sig-quotes">
+    <div class="sig-quote"><span class="who"><a href="https://www.youtube.com/watch?v=ys3qjk2mK7Q&amp;lc=Ugy-m0T30E-2yczIN6N4AaABAg" target="_blank" rel="noopener">@yasmeanali2101</a></span><br>«مافيش تسليم فوري ب ٣٠ الف دي خصوصا في الأماكن المميزة اقل سعر ٤٥ الف للمتر بعد ارتفاع سعر الأراضي للضعف»</div>
+  </div>
+</div>
+<div class="signal novel weak">
+  <div class="sig-head">
+    <div class="sig-statement">مساحة الشقق على محور محمد بن زايد 160 متر</div>
+    <div><span class="tag gray">إشارة فردية</span><span class="tag gold">مش في الأخبار</span><span class="tag gray">مكان</span></div>
+  </div>
+  <div class="sig-evidence">
+    <span>قالها <b>1</b> شخص</span>
+    <span>من <b>1</b> مصدر مستقل</span>
+    <span>يوتيوب</span>
+    <span>أول رصد: منذ 1 ساعة</span>
+  </div>
+  <div class="sig-quotes">
+    <div class="sig-quote"><span class="who"><a href="https://www.youtube.com/watch?v=ys3qjk2mK7Q&amp;lc=UgzyLQ3LBxGQmAns3tx4AaABAg" target="_blank" rel="noopener">@naamatkamel7723</a></span><br>«الشقق اللي علي محور محمد بن زايد بكام لو مساحة نصلا ١٦٠ متر مثلا»</div>
+  </div>
+</div>
+<div class="signal novel weak">
+  <div class="sig-head">
+    <div class="sig-statement">65% من المشروع سيتم إنشاؤه في عام 2028</div>
+    <div><span class="tag gray">إشارة فردية</span><span class="tag gold">مش في الأخبار</span><span class="tag gray">موعد</span></div>
+  </div>
+  <div class="sig-evidence">
+    <span>قالها <b>1</b> شخص</span>
+    <span>من <b>1</b> مصدر مستقل</span>
+    <span>يوتيوب</span>
+    <span>أول رصد: منذ 1 ساعة</span>
+  </div>
+  <div class="sig-quotes">
+    <div class="sig-quote"><span class="who"><a href="https://www.youtube.com/watch?v=ys3qjk2mK7Q&amp;lc=UgwUpRB2Q630LDZzcOV4AaABAg.AZNj0_pcQi-AZNmRZUTgqA" target="_blank" rel="noopener">@RAOF-MOUSSArealestate</a></span><br>«٦٥٪؜ انشاءات و على ٢٠٢٨ يكون فيه ناس كتير ساكنه»</div>
+  </div>
+</div>
+<div class="signal novel weak">
+  <div class="sig-head">
+    <div class="sig-statement">توفير تسهيلات من 20 إلى 25</div>
+    <div><span class="tag gray">إشارة فردية</span><span class="tag gold">مش في الأخبار</span><span class="tag gray">سعر</span></div>
+  </div>
+  <div class="sig-evidence">
+    <span>قالها <b>1</b> شخص</span>
+    <span>من <b>1</b> مصدر مستقل</span>
+    <span>يوتيوب</span>
+    <span>أول رصد: منذ 1 ساعة</span>
+  </div>
+  <div class="sig-quotes">
+    <div class="sig-quote"><span class="who"><a href="https://www.youtube.com/watch?v=ys3qjk2mK7Q&amp;lc=UgxgO9knw9aBU2p8rM94AaABAg.AZ4fkrAffALAZ5eKNiwyqQ" target="_blank" rel="noopener">@RAOF-MOUSSArealestate</a></span><br>«٠١١١٢٥٢٧٤٢٤ تحت امرك من ٢٠ الى ٢٥ تسهيلات»</div>
+  </div>
+</div>
+<div class="signal novel weak">
+  <div class="sig-head">
+    <div class="sig-statement">لا توجد تقديمات أو تحويلات مالية إضافية حالياً</div>
+    <div><span class="tag gray">إشارة فردية</span><span class="tag gold">مش في الأخبار</span><span class="tag gray">إجراء</span></div>
+  </div>
+  <div class="sig-evidence">
+    <span>قالها <b>1</b> شخص</span>
+    <span>من <b>1</b> مصدر مستقل</span>
+    <span><b>1</b> تفاعل</span>
+    <span>يوتيوب</span>
+    <span>أول رصد: منذ 1 ساعة</span>
+  </div>
+  <div class="sig-quotes">
+    <div class="sig-quote"><span class="who"><a href="https://www.youtube.com/watch?v=deNhseBhPF8&amp;lc=UgzAYF4OZbIX5vhPyr54AaABAg" target="_blank" rel="noopener">@اخبارالاسكان</a></span><br>«تذكر دائماً: مفيش أي تقديمات أو تحويلات مالية إضافية جديدة حالياً، المرحلة مقفولة وبتخدم فقط اللي حولوا بالفعل قبل كده!&quot; (p. 2)»</div>
+  </div>
+</div>
+<div class="signal novel weak">
+  <div class="sig-head">
+    <div class="sig-statement">لا يوجد قرار أو ترخيص لإنشاء دور رابع</div>
+    <div><span class="tag gray">إشارة فردية</span><span class="tag gold">مش في الأخبار</span><span class="tag gray">مشكلة</span></div>
+  </div>
+  <div class="sig-evidence">
+    <span>قالها <b>1</b> شخص</span>
+    <span>من <b>1</b> مصدر مستقل</span>
+    <span>يوتيوب</span>
+    <span>أول رصد: منذ 1 ساعة</span>
+  </div>
+  <div class="sig-quotes">
+    <div class="sig-quote"><span class="who"><a href="https://www.youtube.com/watch?v=ys3qjk2mK7Q&amp;lc=UgyHaFZ-ilIwSpXaF3x4AaABAg" target="_blank" rel="noopener">@a_sh.9267</a></span><br>«هو ممكن يعلو دور رابع يعني أرضي واربعه ولا مفيش قرار ولا ترخيص من الجهاز؟»</div>
+  </div>
+</div>
+<h3>أسئلة الناس اللي مالهاش إجابة</h3>
+<p style="font-size:13px;color:var(--muted);margin-top:0">دي بتوضّح فين الغموض الرسمي — الحاجات اللي الناس محتاجة تعرفها والجهات ماوضّحتهاش.</p>
+<ul class="qlist">
+<li>هل تم تجهيز الملفات أم لا<div class="meta">يوتيوب · <a href="https://www.youtube.com/watch?v=deNhseBhPF8&amp;lc=UgxkPeZVN1JQXZz4wlJ4AaABAg" target="_blank" rel="noopener">المصدر</a></div></li>
+</ul>
+  </div>
+</section>
+<section class="block" id="places">
+  <h2>المدن الأكثر ذكرًا</h2>
+  <div class="block-body">
+<table><tbody>
+<tr><td class="k">القاهرة الجديدة</td><td><div style="background:#eaf1f7;border-radius:3px;height:19px;position:relative;min-width:60px"><div style="background:var(--navy-2);height:100%;width:100%;border-radius:3px"></div></div></td><td style="width:70px;text-align:center">3 ذكر</td></tr>
+<tr><td class="k">الشيخ زايد</td><td><div style="background:#eaf1f7;border-radius:3px;height:19px;position:relative;min-width:60px"><div style="background:var(--navy-2);height:100%;width:33%;border-radius:3px"></div></div></td><td style="width:70px;text-align:center">1 ذكر</td></tr>
+<tr><td class="k">بدر</td><td><div style="background:#eaf1f7;border-radius:3px;height:19px;position:relative;min-width:60px"><div style="background:var(--navy-2);height:100%;width:33%;border-radius:3px"></div></div></td><td style="width:70px;text-align:center">1 ذكر</td></tr>
+</tbody></table>
+<p style="font-size:13px;color:var(--muted)">ترتيب حسب تكرار ذكر المدينة في الأخبار المرصودة — مؤشر اهتمام إعلامي، <b>ليس تأكيدًا على الطرح</b>.</p>
+  </div>
+</section>
+<section class="block" id="timeline">
+  <h2>الخط الزمني للتغييرات المرصودة</h2>
+  <div class="block-body">
+<div class="timeline">
+<div class="tl-item new"><div class="tl-when">2026-07-26</div><div class="tl-what"><b>المدن المطروحة</b>: <s>اكتوبر, القاهرة الجديدة, شمال الرحاب, اللوتس</s> ← اكتوبر, القاهرة الجديدة <a href="https://www.youtube.com/watch?v=zZWiViPWPHE" target="_blank" rel="noopener" style="font-size:12px">[المصدر]</a></div></div>
+<div class="tl-item"><div class="tl-when">2026-07-26</div><div class="tl-what"><b>درجة الثقة في البيانات</b>: متوسطة <a href="https://www.youtube.com/watch?v=zZWiViPWPHE" target="_blank" rel="noopener" style="font-size:12px">[المصدر]</a></div></div>
+<div class="tl-item"><div class="tl-when">2026-07-26</div><div class="tl-what"><b>آخر تطور</b>: دخول شمال الرحاب واللوتس ومناطق جديدة لأول مرة <a href="https://www.youtube.com/watch?v=zZWiViPWPHE" target="_blank" rel="noopener" style="font-size:12px">[المصدر]</a></div></div>
+<div class="tl-item"><div class="tl-when">2026-07-26</div><div class="tl-what"><b>المدن المطروحة</b>: اكتوبر, القاهرة الجديدة, شمال الرحاب, اللوتس <a href="https://www.youtube.com/watch?v=zZWiViPWPHE" target="_blank" rel="noopener" style="font-size:12px">[المصدر]</a></div></div>
+<div class="tl-item"><div class="tl-when">2026-07-26</div><div class="tl-what"><b>موعد القرعة</b>: 2018 <a href="https://www.youtube.com/watch?v=zZWiViPWPHE" target="_blank" rel="noopener" style="font-size:12px">[المصدر]</a></div></div>
+<div class="tl-item"><div class="tl-when">2026-07-26</div><div class="tl-what"><b>المرحلة الحالية</b>: المرحلة 11 <a href="https://www.youtube.com/watch?v=zZWiViPWPHE" target="_blank" rel="noopener" style="font-size:12px">[المصدر]</a></div></div>
+</div>
+  </div>
+</section>
+<section class="block" id="outlook">
+  <h2>القراءة الاستشرافية</h2>
+  <div class="block-body">
+<h3>أين نحن الآن</h3>
+<p>الملف واقف حاليًا عند المرحلة 11 من مشروع بيت الوطن، حيث تم تسجيل هذه المرحلة مؤخرًا. المدن المطروحة في المشروع تشمل اكتوبر والقاهرة الجديدة، مع آخر تطور تم تسجيله هو دخول شمال الرحاب واللوتس ومناطق جديدة لأول مرة. درجة الثقة في هذه المعلومات هي متوسطة.</p>
+<h3>المتوقع في الأسابيع القادمة</h3>
+<p>من المرجح أن يتم الإعلان عن مزيد من التفاصيل حول المرحلة 11 من مشروع بيت الوطن في الأسابيع القادمة، حيث تم تسجيل آخر تطور في 26 يوليو 2026. هذا التوقع مبني على تسلسل الأحداث السابقة، حيث تم تسجيل آخر تطور في دخول شمال الرحاب واللوتس ومناطق جديدة لأول مرة، مما قد يشير إلى استمرار التطورات في المشروع.</p>
+<h3>سيناريوهات</h3>
+<ul>
+<li><strong>الأرجح</strong>: استمرار المشروع في المرحلة 11 مع إضافة مزيد من المدن أو مناطق جديدة، حيث يشير آخر تطور إلى دخول شمال الرحاب واللوتس للمشروع لأول مرة. المؤشر الذي يؤكد هذا السيناريو هو استمرار الإعلانات عن دخول مناطق جديدة إلى المشروع.</li>
+<li><strong>متفائل</strong>: قد يتم الإعلان عن مرحلة جديدة من المشروع في الأشهر القادمة، مع توسع أكبر في المدن المطروحة. المؤشر الذي يؤكد هذا السيناريو سيكون الإعلان الرسمي عن المرحلة الجديدة ومدنها الجديدة.</li>
+<li><strong>متحفظ</strong>: قد يتم تعديل شروط أو أسعار المشروع، مما قد يؤثر على استقباله من قبل المستثمرين. المؤشر الذي يؤكد هذا السيناريو سيكون أي إعلان رسمي عن تعديلات في الشروط أو الأسعار.</li>
+</ul>
+<h3>أماكن ومدن تستحق الانتباه</h3>
+<p>المدن المذكورة في الأخبار، مثل اكتوبر والقاهرة الجديدة، تستحق الانتباه بسبب وجودها في المشروع. بالإضافة إلى ذلك، شمال الرحاب واللوتس أصبحت من المناطق الجديدة المشمولة في المشروع، مما قد يفتح فرصًا جديدة للمستثمرين. كل مدينة مرشحة بسبب وجودها في إعلانات المشروع، ويمكن أن تعطّلها أي تغييرات في الشروط أو الأسعار.</p>
+<h3>إشارات إنذار</h3>
+<p>علامات مثل تأجيل موعد القرعة أو تغيير شروط المشروع أو تعديل أسعار الوحدات قد تكون تحذيرات حقيقية للمستثمرين. إذا ظهرت هذه العلامات، فقد يكون هناك حاجة إلى إعادة تقييم الاستثمار في مشروع بيت الوطن.</p>
+  </div>
+</section>
+<section class="block" id="steps">
+  <h2>خطوات عملية</h2>
+  <div class="block-body">
+<h3>لو الحجز مفتوح دلوقتي</h3>
+<ul>
+<li><strong>التأكد من فتح باب الحجز</strong>: يتحقق المصري المقيم بالخارج من فتح باب الحجز لمرحلة بيت الوطن 11 (يحتاج تأكيد من كراسة الشروط الرسمية).</li>
+<li><strong>دخول المنصة الإلكترونية</strong>: يذهب إلى المنصة الإلكترونية المخصصة لتقديم الطلبات (يحتاج تأكيد من كراسة الشروط الرسمية).</li>
+<li><strong>إدخال البيانات</strong>: يقوم بإدخال جميع البيانات المطلوبة بدقة (يحتاج تأكيد من كراسة الشروط الرسمية).</li>
+<li><strong>تحميل المستندات</strong>: يُحمل جميع المستندات المطلوبة حسب الشروط (يحتاج تأكيد من كراسة الشروط الرسمية).</li>
+</ul>
+<h3>لو لسه مفتحش</h3>
+<ul>
+<li><strong>متابعة الإعلانات</strong>: يتابع الإعلانات الرسمية عن موعد فتح باب الحجز (يحتاج تأكيد من كراسة الشروط الرسمية).</li>
+<li><strong>التأكد من الشروط</strong>: يتحقق من الشروط المطلوبة للتسجيل في المرحلة 11 (يحتاج تأكيد من كراسة الشروط الرسمية).</li>
+</ul>
+<h3>أوراق ومتطلبات لازم تكون جاهزة</h3>
+<ul>
+<li><strong>أوراق الهوية</strong>: يجب أن يكون لديه أوراق الهوية المصرية سارية (يحتاج تأكيد من كراسة الشروط الرسمية).</li>
+<li><strong>أوراق الإقامة</strong>: يجب أن يكون لديه أوراق الإقامة في البلد المقيم فيها (يحتاج تأكيد من كراسة الشروط الرسمية).</li>
+<li><strong>البيانات الشخصية</strong>: يجب أن يكون لديه جميع البيانات الشخصية المطلوبة (يحتاج تأكيد من كراسة الشروط الرسمية).</li>
+</ul>
+<h3>أخطاء شائعة تتجنبها</h3>
+<ul>
+<li><strong>التأخير في التقديم</strong>: يجب أن يتقدم في الوقت المناسب لتجنب انتهاء فترة التقديم (يحتاج تأكيد من كراسة الشروط الرسمية).</li>
+<li><strong>إدخال بيانات خاطئة</strong>: يجب أن يتحقق من دقة جميع البيانات المدخلة (يحتاج تأكيد من كراسة الشروط الرسمية).</li>
+<li><strong>نقص المستندات</strong>: يجب أن يتحقق من أن جميع المستندات المطلوبة متاحة وتم تحميلها بشكل صحيح (يحتاج تأكيد من كراسة الشروط الرسمية).</li>
+</ul>
+  </div>
+</section>
+<section class="block" id="sources">
+  <h2>المصادر المعتمدة في هذا الملف</h2>
+  <div class="block-body">
+<table><thead><tr><th>العنوان</th><th>الجهة</th><th>التاريخ</th></tr></thead><tbody>
+<tr><td><a href="https://www.youtube.com/watch?v=zZWiViPWPHE" target="_blank" rel="noopener">اراضي للبيع اكتوبر الجديده شمال المطار قرعه 2018 واراضي بيت الوطن اكتوبر الجديده 01000989933</a></td><td>عقارات 6أكتوبر حدائق اكتوبر واكتوبر الجديدة</td><td>منذ 2 يومًا</td></tr>
+<tr><td><a href="https://www.youtube.com/watch?v=z4BMqXSmjBA" target="_blank" rel="noopener">تفتكر شقة بسعر التكلفة نصب ولا حقيقة؟ | رحلة إنجاز على أرض الواقع | جميع سابقة الأعمال في فيديو واحد</a></td><td>كلام في المفيد — هاني الخميسي</td><td>منذ 5 يومًا</td></tr>
+<tr><td><a href="https://www.youtube.com/watch?v=deNhseBhPF8" target="_blank" rel="noopener">عاجل تسريبات بيت الوطن.. دخول شمال الرحاب واللوتس ومناطق جديدة لأول مرة! آخر معاد 25 يوليو</a></td><td>الاسكان لحظه بلحظه  </td><td>منذ 14 يومًا</td></tr>
+<tr><td><a href="https://www.youtube.com/watch?v=ys3qjk2mK7Q" target="_blank" rel="noopener">بيت الوطن | كما لم تراه من قبل | متوسط الاسعار و اخر التطورات</a></td><td>RAOF - MOUSSA REALESTATE </td><td>منذ 16 يومًا</td></tr>
+<tr><td><a href="https://www.youtube.com/shorts/K-SUpAz371U" target="_blank" rel="noopener">الانجاز الحقيقي في شقة بسعر التكلفة على أرض الواقع</a></td><td>كلام في المفيد — هاني الخميسي</td><td>منذ 17 يومًا</td></tr>
+</tbody></table>
+  </div>
+</section>
+<div class="disclaimer">
+  <b>تنويه منهجي.</b> كل البيانات في هذه الصفحة مستخرجة آليًا بالذكاء الاصطناعي
+  من أخبار ومصادر عامة، و<b>قابلة للخطأ</b>. المواعيد والأسعار والشروط
+  <b>لا يُعتمد عليها</b> إلا بعد التأكد من كراسة الشروط الرسمية ومنصة مصر العقارية.
+  هذا المحتوى للاطلاع فقط وليس استشارة مالية أو قانونية.
+  <div class="engines">محركات التحليل — Groq: 10✓/0✗ · Gemini: 0✓/0✗</div>
+</div>
+  </main>
+  <aside class="rail">
+<div class="box"><h4>محتويات الملف</h4><div class="toc">
+<a href="#brief">الملخص التنفيذي</a>
+<a href="#facts">البطاقة التعريفية</a>
+<a href="#dates">المواعيد الرسمية</a>
+<a href="#radar"><b>رادار الإشارات المبكرة</b></a>
+<a href="#places">المدن الأكثر ذكرًا</a>
+<a href="#timeline">الخط الزمني</a>
+<a href="#people">كلام الناس</a>
+<a href="#outlook">القراءة الاستشرافية</a>
+<a href="#steps">خطوات عملية</a>
+<a href="#sources">المصادر</a>
+</div></div>
+<div class="box"><h4>الرادار</h4><div class="r"><span>إشارات مرصودة</span><b>9</b></div><div class="r"><span>مش في الأخبار</span><b style="color:var(--gold)">9</b></div><div class="r"><span>اتأكدت رسميًا</span><b style="color:var(--green)">0</b></div></div>
+<div class="box"><h4>روابط الإجراء</h4>
+  <a class="lnk" href="https://reservations.realestate.gov.eg/ar" target="_blank" rel="noopener">منصة مصر العقارية — الحجز</a>
+  <a class="lnk" href="https://lands.nuca.gov.eg/" target="_blank" rel="noopener">هيئة المجتمعات العمرانية</a>
+  <a class="lnk" href="https://beitakfemisr.com/" target="_blank" rel="noopener">بيتك في مصر</a>
+</div>
+<div class="box"><h4>حالة البيانات</h4><div class="r"><span>آخر مزامنة</span><b>منذ دقائق</b></div><div class="r"><span>درجة الثقة</span><b>متوسطة</b></div><div class="r"><span>أحداث مرصودة</span><b>6</b></div></div>
+  </aside>
+</div>
+<script>
+document.querySelectorAll('[data-filters]').forEach(function(bar){
+  var scope = bar.closest('section');
+  var btns = bar.querySelectorAll('button');
+  btns.forEach(function(b){
+    b.addEventListener('click', function(){
+      btns.forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on');
+      var want = b.dataset.filter;
+      scope.querySelectorAll('[data-sec]').forEach(function(card){
+        card.classList.toggle('hidden', want !== 'all' && card.dataset.sec !== want);
+      });
+    });
+  });
+});
+
+(function(){
+  var el = document.getElementById('countdown');
+  if(!el || !el.dataset.deadline) return;
+  var target = new Date(el.dataset.deadline + 'T00:00:00+03:00').getTime();
+  var slots = el.querySelectorAll('.u .n');
+  function tick(){
+    var diff = target - Date.now();
+    if(diff < 0){ el.querySelector('.cd-units').innerHTML =
+      '<div style="font-size:16px;font-weight:600;color:#a52820">حلّ الموعد</div>'; return; }
+    var d = Math.floor(diff/86400000),
+        h = Math.floor(diff/3600000)%24,
+        m = Math.floor(diff/60000)%60,
+        s = Math.floor(diff/1000)%60;
+    [d,h,m,s].forEach(function(v,i){ if(slots[i]) slots[i].textContent = v; });
+    setTimeout(tick, 1000);
+  }
+  tick();
+})();
+</script>
+</body>
+</html>
