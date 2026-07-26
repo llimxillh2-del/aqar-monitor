@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="متابعة لحظية لمشروع بيت الوطن: المرحلة، المواعيد، الأسعار، الشروط، وتحليل">
+<meta name="robots" content="index,follow">
+<title>بيت الوطن — ملف متابعة | مرصد العقارات المصرية</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+
+:root{
+  --ink:#15181c; --body:#2f3640; --muted:#69727e; --faint:#98a1ad;
+  --line:#e0e4ea; --line-soft:#eef1f5; --bg:#f2f4f7; --paper:#ffffff;
+  --navy:#0f3557; --navy-2:#1b4f7d; --gold:#96702c; --gold-soft:#f6f1e6;
+  --red:#a52820; --red-soft:#fbeeed; --green:#17603f; --green-soft:#ecf5f0;
+  --amber:#8a5a00; --amber-soft:#fdf4e3;
+  --radius:4px;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0; background:var(--bg); color:var(--body);
+  font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;
+  font-size:15.5px; line-height:1.85; -webkit-font-smoothing:antialiased;
+}
+a{color:var(--navy-2); text-decoration:none;}
+a:hover{text-decoration:underline;}
+
+/* ---------- الترويسة ---------- */
+.masthead{background:var(--navy); color:#fff; border-bottom:4px solid var(--gold);}
+.masthead-in{max-width:1180px; margin:0 auto; padding:26px 24px 22px;}
+.eyebrow{font-size:11.5px; letter-spacing:2.6px; text-transform:uppercase;
+  color:#9fc0dd; margin-bottom:9px; font-weight:500;}
+.masthead h1{margin:0; font-size:27px; font-weight:700; letter-spacing:-.3px;}
+.masthead .lede{margin:7px 0 0; font-size:14px; color:#c6dbeb; font-weight:300;}
+.issue{margin-top:16px; padding-top:13px; border-top:1px solid rgba(255,255,255,.16);
+  display:flex; gap:22px; flex-wrap:wrap; font-size:12.5px; color:#b9d3e6;}
+.issue b{color:#fff; font-weight:600;}
+
+/* ---------- شريط التنقل ---------- */
+.topbar{position:sticky; top:0; z-index:60; background:var(--paper);
+  border-bottom:1px solid var(--line); box-shadow:0 1px 4px rgba(15,53,87,.07);}
+.topbar-in{max-width:1180px; margin:0 auto; padding:0 24px;
+  display:flex; align-items:center; gap:4px; flex-wrap:wrap;}
+.topbar a{display:inline-block; padding:12px 13px; font-size:13.5px;
+  font-weight:500; color:var(--muted); border-bottom:2px solid transparent;}
+.topbar a:hover{color:var(--navy); border-bottom-color:var(--line); text-decoration:none;}
+.topbar a.cta{margin-inline-start:auto; color:var(--gold); font-weight:600;}
+
+/* ---------- التخطيط ---------- */
+.wrap{max-width:1180px; margin:0 auto; padding:26px 24px 60px;
+  display:grid; grid-template-columns:1fr 268px; gap:26px; align-items:start;}
+@media(max-width:940px){ .wrap{grid-template-columns:1fr; padding:18px 15px 44px;} .rail{order:-1;} }
+
+/* ---------- المؤشرات ---------- */
+.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(132px,1fr));
+  gap:1px; background:var(--line); border:1px solid var(--line);
+  border-radius:var(--radius); overflow:hidden; margin-bottom:22px;}
+.kpi{background:var(--paper); padding:14px 16px;}
+.kpi .k-label{font-size:11.5px; color:var(--muted); letter-spacing:.4px;}
+.kpi .k-value{font-size:25px; font-weight:700; color:var(--navy); line-height:1.35;
+  font-variant-numeric:tabular-nums;}
+.kpi.alert .k-value{color:var(--red);}
+.kpi.good .k-value{color:var(--green);}
+
+/* ---------- الأقسام ---------- */
+.doc{counter-reset:sec;}
+section.block{background:var(--paper); border:1px solid var(--line);
+  border-radius:var(--radius); margin-bottom:22px; overflow:hidden;}
+section.block > h2{counter-increment:sec; margin:0; padding:15px 22px;
+  font-size:16.5px; font-weight:600; color:var(--navy);
+  background:linear-gradient(180deg,#fbfcfd,#f5f7fa);
+  border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:11px;}
+section.block > h2::before{content:counter(sec); font-size:12px; font-weight:700;
+  color:#fff; background:var(--navy); min-width:23px; height:23px; border-radius:3px;
+  display:inline-flex; align-items:center; justify-content:center; flex:none;
+  align-self:center; font-variant-numeric:tabular-nums;}
+.block-body{padding:19px 22px 22px;}
+.block-body > *:first-child{margin-top:0;}
+.block-body > *:last-child{margin-bottom:0;}
+
+h3{font-size:15px; font-weight:600; color:var(--navy-2); margin:20px 0 7px;
+  padding-inline-start:11px; border-inline-start:3px solid var(--gold);}
+h4{font-size:14px; font-weight:600; color:var(--gold); margin:15px 0 5px;}
+h5{font-size:13.5px; font-weight:600; color:var(--body); margin:12px 0 4px;}
+p{margin:9px 0;}
+ul{margin:9px 0; padding-inline-start:21px;}
+li{margin:5px 0;}
+
+/* ---------- الجداول ---------- */
+table{width:100%; border-collapse:collapse; font-size:14px; margin:12px 0;}
+th{background:#f6f8fa; text-align:start; padding:10px 12px; font-weight:600;
+  color:var(--navy); border-bottom:2px solid var(--line); font-size:13px;
+  white-space:nowrap;}
+td{padding:10px 12px; border-bottom:1px solid var(--line-soft); vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:#fafbfc;}
+td.k{font-weight:600; color:var(--ink); width:32%; white-space:nowrap;}
+.note-row td{background:#fbfcfd; color:var(--muted); font-size:13px; padding-top:0;}
+
+/* ---------- الشارات ---------- */
+.tag{display:inline-block; font-size:11.5px; font-weight:600; padding:2px 9px;
+  border-radius:3px; white-space:nowrap; line-height:1.7;}
+.tag.red{background:var(--red-soft); color:var(--red);}
+.tag.green{background:var(--green-soft); color:var(--green);}
+.tag.amber{background:var(--amber-soft); color:var(--amber);}
+.tag.navy{background:#eaf1f7; color:var(--navy);}
+.tag.gold{background:var(--gold-soft); color:var(--gold);}
+.tag.gray{background:#eff1f4; color:var(--muted);}
+
+/* ---------- الفيد ---------- */
+.filters{display:flex; gap:7px; flex-wrap:wrap; padding:13px 22px;
+  border-bottom:1px solid var(--line); background:#fafbfc;}
+.filters button{font-family:inherit; font-size:13px; font-weight:500;
+  padding:6px 14px; border:1px solid var(--line); background:var(--paper);
+  color:var(--muted); border-radius:100px; cursor:pointer; transition:.12s;}
+.filters button:hover{border-color:var(--navy); color:var(--navy);}
+.filters button.on{background:var(--navy); border-color:var(--navy); color:#fff;}
+
+.entry{padding:16px 22px; border-bottom:1px solid var(--line-soft);}
+.entry:last-child{border-bottom:none;}
+.entry-meta{display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  font-size:12px; color:var(--faint); margin-bottom:5px;}
+.entry-meta .src{font-weight:600; color:var(--muted);}
+.entry h3.t{border:none; padding:0; margin:0 0 5px; font-size:15.5px;
+  font-weight:600; line-height:1.6;}
+.entry h3.t a{color:var(--ink);}
+.entry h3.t a:hover{color:var(--navy-2);}
+.snip{font-size:13.5px; color:var(--muted); margin:5px 0 0;}
+.metrics{display:flex; gap:15px; font-size:12px; color:var(--faint);
+  margin-top:8px; font-variant-numeric:tabular-nums;}
+
+.ai-box{background:#f8fafc; border:1px solid var(--line);
+  border-inline-start:3px solid var(--navy-2); border-radius:var(--radius);
+  padding:12px 15px; margin-top:11px; font-size:13.5px;}
+.ai-box .ai-label{font-size:11px; font-weight:700; letter-spacing:1.1px;
+  color:var(--navy-2); text-transform:uppercase; margin-bottom:5px;}
+.ai-box.people{border-inline-start-color:var(--gold); background:#fdfbf7;}
+.ai-box.people .ai-label{color:var(--gold);}
+.ai-box p{margin:5px 0;} .ai-box ul{margin:5px 0; padding-inline-start:18px;}
+.ai-box h4{margin:9px 0 3px; font-size:13px;}
+
+.quotes{margin-top:11px; border-top:1px dashed var(--line); padding-top:10px;}
+.quotes .q-label{font-size:11.5px; font-weight:600; color:var(--faint); margin-bottom:8px;}
+.quote{display:flex; gap:9px; margin-bottom:9px;}
+.quote .av{width:27px; height:27px; border-radius:50%; flex:none; background:#e8ebef;
+  color:var(--muted); display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:600;}
+.quote .qb{flex:1; background:#f7f8fa; border-radius:var(--radius);
+  padding:8px 12px; font-size:13px;}
+.quote .qn{font-weight:600; font-size:12.5px; color:var(--ink);}
+.quote .ql{font-size:11.5px; color:var(--faint); margin-top:3px;}
+
+/* ---------- العمود الجانبي ---------- */
+.rail{position:sticky; top:60px;}
+@media(max-width:940px){ .rail{position:static;} }
+.rail .box{background:var(--paper); border:1px solid var(--line);
+  border-radius:var(--radius); padding:15px 17px; margin-bottom:16px;}
+.rail h4{margin:0 0 11px; font-size:12px; letter-spacing:1.1px; color:var(--muted);
+  text-transform:uppercase; font-weight:700;}
+.rail .r{display:flex; justify-content:space-between; gap:10px; font-size:13.5px;
+  padding:7px 0; border-bottom:1px solid var(--line-soft);}
+.rail .r:last-child{border-bottom:none;}
+.rail .r b{color:var(--navy); font-variant-numeric:tabular-nums;}
+.rail .lnk{display:block; padding:6px 0; font-size:13.5px;
+  border-bottom:1px solid var(--line-soft);}
+.rail .lnk:last-child{border-bottom:none;}
+.rail .toc a{display:block; padding:5px 0; font-size:13.5px; color:var(--body);}
+.rail .toc a:hover{color:var(--navy); text-decoration:none;}
+
+/* ---------- بانر بيت الوطن ---------- */
+.spotlight{background:linear-gradient(135deg,var(--navy) 0%,#154572 100%);
+  color:#fff; border-radius:var(--radius); padding:22px 24px; margin-bottom:22px;
+  border-inline-start:4px solid var(--gold);}
+.spotlight .sp-eyebrow{font-size:11px; letter-spacing:2.2px; color:#9fc0dd;
+  text-transform:uppercase; font-weight:600;}
+.spotlight h2{margin:6px 0 12px; font-size:21px; font-weight:700; color:#fff;}
+.spotlight .sp-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(128px,1fr));
+  gap:14px; margin:15px 0;}
+.spotlight .sp-cell .l{font-size:11.5px; color:#9fc0dd;}
+.spotlight .sp-cell .v{font-size:15px; font-weight:600; color:#fff; line-height:1.55;}
+.spotlight .sp-cta{display:inline-block; margin-top:6px; background:var(--gold);
+  color:#fff; padding:8px 19px; border-radius:3px; font-size:14px; font-weight:600;}
+.spotlight .sp-cta:hover{background:#ab8034; text-decoration:none;}
+
+/* ---------- العدّاد ---------- */
+.countdown{background:var(--gold-soft); border:1px solid #e5d9c0;
+  border-radius:var(--radius); padding:17px 20px; margin:14px 0; text-align:center;}
+.countdown .cd-label{font-size:12.5px; color:var(--gold); font-weight:600;
+  letter-spacing:.5px;}
+.countdown .cd-when{font-size:16px; font-weight:700; color:var(--ink); margin:5px 0;}
+.countdown .cd-units{display:flex; justify-content:center; gap:22px; margin-top:10px;}
+.countdown .u{min-width:56px;}
+.countdown .u .n{font-size:27px; font-weight:700; color:var(--navy);
+  font-variant-numeric:tabular-nums; line-height:1.2;}
+.countdown .u .s{font-size:11.5px; color:var(--muted);}
+
+/* ---------- الخط الزمني ---------- */
+.timeline{position:relative; padding-inline-start:22px; margin:12px 0;}
+.timeline::before{content:''; position:absolute; inset-inline-start:5px; top:6px;
+  bottom:6px; width:2px; background:var(--line);}
+.tl-item{position:relative; padding-bottom:16px;}
+.tl-item::before{content:''; position:absolute; inset-inline-start:-21px; top:7px;
+  width:10px; height:10px; border-radius:50%; background:var(--paper);
+  border:2px solid var(--navy-2);}
+.tl-item.new::before{background:var(--gold); border-color:var(--gold);}
+.tl-when{font-size:11.5px; color:var(--faint); font-variant-numeric:tabular-nums;}
+.tl-what{font-size:14px; margin-top:1px;}
+.tl-what b{color:var(--navy);}
+.tl-what s{color:var(--faint);}
+
+/* ---------- تذييل ---------- */
+.disclaimer{background:#fffdf7; border:1px solid #e8ddc4;
+  border-radius:var(--radius); padding:16px 20px; font-size:13px;
+  color:#6b5c3c; line-height:1.8;}
+.disclaimer b{color:#8a6d2f;}
+.engines{margin-top:11px; padding-top:10px; border-top:1px solid #e8ddc4;
+  font-size:11.5px; color:#9a8a68; font-family:ui-monospace,Menlo,Consolas,monospace;
+  direction:ltr; text-align:end;}
+.empty{padding:30px 22px; text-align:center; color:var(--faint); font-size:14px;}
+.hidden{display:none !important;}
+
+/* ---------- رادار الإشارات ---------- */
+.radar-intro{background:#f7f9fb; border:1px solid var(--line);
+  border-radius:var(--radius); padding:13px 16px; font-size:13.5px;
+  color:var(--muted); margin-bottom:16px;}
+.radar-intro b{color:var(--navy);}
+
+.signal{border:1px solid var(--line); border-radius:var(--radius);
+  margin-bottom:13px; overflow:hidden; background:var(--paper);}
+.signal.novel{border-inline-start:4px solid var(--gold); background:#fffdf8;}
+.signal.confirmed{border-inline-start:4px solid var(--green); background:#f8fcfa;}
+.signal.weak{opacity:.86;}
+.sig-head{padding:12px 15px 9px; display:flex; gap:9px;
+  align-items:flex-start; flex-wrap:wrap;}
+.sig-statement{flex:1 1 260px; font-size:15px; font-weight:600;
+  color:var(--ink); line-height:1.65; min-width:200px;}
+.sig-evidence{display:flex; gap:14px; flex-wrap:wrap; padding:0 15px 10px;
+  font-size:12.5px; color:var(--muted); font-variant-numeric:tabular-nums;}
+.sig-evidence b{color:var(--navy); font-weight:600;}
+.sig-quotes{background:#f8f9fb; border-top:1px solid var(--line-soft);
+  padding:10px 15px;}
+.sig-quote{font-size:13px; color:var(--body); padding:5px 0;
+  border-bottom:1px dotted var(--line); line-height:1.7;}
+.sig-quote:last-child{border-bottom:none;}
+.sig-quote .who{font-weight:600; color:var(--navy-2); font-size:12.5px;}
+.sig-quote .eye{color:var(--gold); font-size:11.5px; font-weight:600;}
+.sig-lead{background:var(--green-soft); color:var(--green); font-size:12.5px;
+  font-weight:600; padding:7px 15px; border-top:1px solid #d5e8de;}
+
+.gauge{display:grid; grid-template-columns:repeat(auto-fit,minmax(118px,1fr));
+  gap:1px; background:var(--line); border:1px solid var(--line);
+  border-radius:var(--radius); overflow:hidden; margin-bottom:18px;}
+.gauge .g{background:var(--paper); padding:12px 14px; text-align:center;}
+.gauge .g .n{font-size:23px; font-weight:700; color:var(--navy);
+  font-variant-numeric:tabular-nums; line-height:1.3;}
+.gauge .g .l{font-size:11.5px; color:var(--muted);}
+.gauge .g.gold .n{color:var(--gold);}
+.gauge .g.green .n{color:var(--green);}
+
+.qlist{margin:0; padding:0; list-style:none;}
+.qlist li{padding:8px 0; border-bottom:1px solid var(--line-soft);
+  font-size:13.5px;}
+.qlist li:last-child{border-bottom:none;}
+.qlist .meta{font-size:11.5px; color:var(--faint); margin-top:2px;}
+
+/* ---------- طباعة ---------- */
+@media print{
+  body{background:#fff; font-size:11.5pt;}
+  .topbar,.filters,.rail,.sp-cta{display:none !important;}
+  .wrap{display:block; max-width:100%; padding:0;}
+  section.block{border:1px solid #ccc; break-inside:avoid; margin-bottom:14px;
+    box-shadow:none;}
+  .masthead{background:#fff !important; color:#000; border-bottom:3px solid #000;}
+  .masthead .eyebrow,.masthead .lede,.issue{color:#444 !important;}
+  .masthead h1,.issue b{color:#000 !important;}
+  .spotlight{background:#fff !important; color:#000; border:2px solid #000;}
+  .spotlight h2,.spotlight .v{color:#000 !important;}
+  .spotlight .sp-eyebrow,.spotlight .l{color:#444 !important;}
+  a{color:#000; text-decoration:underline;}
+  .entry{break-inside:avoid;}
+}
+</style>
+</head>
+<body>
+<header class="masthead"><div class="masthead-in">
+  <div class="eyebrow">ملف متابعة مخصّص</div>
+  <h1>بيت الوطن — أراضي المصريين بالخارج</h1>
+  <p class="lede">رصد مستمر للمرحلة والمواعيد والأسعار والشروط · تحليل وقراءة استشرافية</p>
+  <div class="issue">
+    <span>آخر تحديث: <b>26 يوليو 2026 — 20:04 بتوقيت القاهرة</b></span>
+    <span>المرحلة: <b>المرحلة 11</b></span>
+    <span>حالة الحجز: <b>غير معروف</b></span>
+    <span>درجة الثقة: <b>متوسطة</b></span>
+  </div>
+</div></header>
+<nav class="topbar"><div class="topbar-in">
+  <a href="index.html">← التقرير العام</a>
+  <a href="#brief">الملخص</a>
+  <a href="#facts">البطاقة</a>
+  <a href="#dates">المواعيد</a>
+  <a href="#radar" style="color:var(--gold);font-weight:600">رادار الإشارات</a>
+  <a href="#places">المدن</a>
+  <a href="#timeline">الخط الزمني</a>
+  <a href="#people">كلام الناس</a>
+  <a href="#outlook">التوقعات</a>
+  <a href="#steps">خطوات عملية</a>
+</div></nav>
+<div class="wrap">
+  <main class="doc">
+<div class="kpis">
+  <div class="kpi "><div class="k-label">المرحلة الحالية</div><div class="k-value">المرحلة 11</div></div>
+  <div class="kpi "><div class="k-label">حالة الحجز</div><div class="k-value">غير معروف</div></div>
+  <div class="kpi "><div class="k-label">سعر المتر</div><div class="k-value">—</div></div>
+  <div class="kpi "><div class="k-label">أقرب موعد</div><div class="k-value">—</div></div>
+  <div class="kpi alert"><div class="k-label">إشارات مش في الأخبار</div><div class="k-value">9</div></div>
+</div>
+<section class="block" id="brief">
+  <h2>الملخص التنفيذي</h2>
+  <div class="block-body">
+<h3>الخلاصة في سطرين</h3>
+<p>ملف بيت الوطن في المرحلة 11 حاليًا، مع دخول مناطق جديدة مثل شمال الرحاب واللوتس. آخر التطورات تشير إلى توسع المدن المطروحة في المشروع.</p>
+<h3>آخر المستجدات</h3>
+<ul>
+<li>دخول شمال الرحاب واللوتس ومناطق جديدة لأول مرة في المشروع.</li>
+<li>توفير أراضي للبيع في اكتوبر الجديدة شمال المطار.</li>
+<li>إمكانية الحصول على شقق بسعر التكلفة على أرض الواقع.</li>
+</ul>
+<h3>المواعيد المهمة</h3>
+<p>موعد القرعة كان في 2018، ولا توجد مواعيد جديدة معلنة.</p>
+<h3>غموض ومعلومات ناقصة</h3>
+<p>درجة الثقة في المعلومات المتاحة هي متوسطة، ويتطلب إعلان رسمي لتوضيح بعض التفاصيل الغامضة.</p>
+  </div>
+</section>
+<section class="block" id="facts">
+  <h2>البطاقة التعريفية للمرحلة</h2>
+  <div class="block-body">
+<table><tbody>
+<tr><td class="k">المرحلة الحالية</td><td>المرحلة 11</td></tr>
+<tr><td class="k">حالة الحجز</td><td><span class="tag gray">غير معروف</span></td></tr>
+<tr><td class="k">سعر المتر</td><td><span style="color:var(--faint)">لم يُعلن رسميًا بعد</span></td></tr>
+<tr><td class="k">المساحات المتاحة</td><td><span style="color:var(--faint)">لم يُعلن رسميًا بعد</span></td></tr>
+<tr><td class="k">المدن المطروحة</td><td>اكتوبر, القاهرة الجديدة, شمال الرحاب, اللوتس</td></tr>
+<tr><td class="k">قيمة الجدية</td><td><span style="color:var(--faint)">لم يُعلن رسميًا بعد</span></td></tr>
+<tr><td class="k">طريقة السداد</td><td><span style="color:var(--faint)">لم يُعلن رسميًا بعد</span></td></tr>
+<tr><td class="k">شروط التقديم</td><td><span style="color:var(--faint)">لم يُعلن رسميًا بعد</span></td></tr>
+<tr><td class="k">آخر تطور</td><td>دخول شمال الرحاب واللوتس ومناطق جديدة لأول مرة</td></tr>
+</tbody></table>
+<p style="font-size:13px;color:var(--muted);margin-top:12px">البيانات مستخرجة آليًا من الأخبار والمصادر الرسمية المرصودة. <b>أي رقم أو موعد لازم يتأكد من كراسة الشروط الرسمية قبل أي إجراء.</b></p>
+  </div>
+</section>
+<section class="block" id="dates">
+  <h2>المواعيد الرسمية</h2>
+  <div class="block-body">
+<table><thead><tr><th>الموعد</th><th>كما ورد</th><th>الحالة</th><th>المتبقي</th></tr></thead><tbody>
+<tr><td class="k">القرعة / إعلان النتيجة</td><td>2018</td><td><span class="tag gray">غير محدد بدقة</span></td><td>—</td></tr>
+</tbody></table>
+  </div>
+</section>
+<section class="block" id="radar">
+  <h2>رادار الإشارات المبكرة — ما يقوله الناس قبل الأخبار</h2>
+  <div class="block-body">
+<div class="radar-intro">
+  الرادار بيقرا كلام الناس في تعليقات يوتيوب وقنوات تليجرام و Reddit، ويطلّع منه
+  <b>الادعاءات الواقعية</b> بس (مش الآراء). الادعاء اللي يتكرر من
+  <b>مصادر مستقلة مختلفة</b> بياخد ثقة أعلى. الإشارة المعلّمة
+  <b>«مش في الأخبار»</b> يعني ناس بتقولها ومحدش نشرها رسميًا لحد دلوقتي.
+  <br><b>ده كلام ناس على الإنترنت — مش مصدر رسمي، ومش كله صح.</b>
+</div>
+<div class="gauge"><div class="g "><div class="n">9</div><div class="l">إشارة مرصودة</div></div><div class="g gold"><div class="n">9</div><div class="l">مش في الأخبار</div></div><div class="g "><div class="n"></div><div class="l">قوية أو متقاطعة</div></div><div class="g green"><div class="n"></div><div class="l">اتأكدت رسميًا</div></div></div>
+<div class="ai-box people"><div class="ai-label">قراءة الرادار</div><h3>إيه اللي الناس بتقوله ومش في الأخبار</h3>
+<p>ناس بتقول إن أقل مقدم حجز متاح هو 8000 دولار، وقالها شخص واحد من مصدر مستقل، وده معلومات مش مؤكدة. كمان، هناك إشارة إن سعر 33 الف للمتر مربع، وقالها شخص واحد من مصدر مستقل، وده كمان معلومات مش مؤكدة. ناس تانية بتقول إن أقل سعر للمتر هو 45 الف بعد ارتفاع الأسعار، وقالها شخص واحد من مصدر مستقل، وده معلومات مش مؤكدة. ثقةنا في تلك المعلومات ضعيفة بسبب انها قالها شخص واحد من مصدر مستقل.</p>
+<h3>إشارات تستاهل متابعة</h3>
+<p>ناس بتقول إن المناطق في مرحلة الدراسة الفنية بنسبة 100%، وقالها شخص واحد من مصدر مستقل، وده معلومات مش مؤكدة. كمان، هناك إشارة إن مساحة الشقق على محور محمد بن زايد 160 متر، وقالها شخص واحد من مصدر مستقل، وده كمان معلومات مش مؤكدة. ناس تانية بتقول إن 65% من المشروع سيتم إنشاؤه في عام 2028، وقالها شخص واحد من مصدر مستقل، وده معلومات مش مؤكدة. تلك المعلومات لسه ضعيفة، nhưng لو اتأكدت، ممكن تكون مهمة.</p>
+<h3>تناقضات</h3>
+<p>مفيش تناقضات واضحة بين الإشارات، ولكن هناك اختلاف في الأسعار المذكورة، حيث إن هناك إشارة تقول إن سعر 33 الف للمتر مربع، وأخرى تقول إن أقل سعر للمتر هو 45 الف بعد ارتفاع الأسعار، وده يحتاج إلى توضيح.</p>
+<h3>فجوات المعلومات</h3>
+<p>ناس بتسأل عن تجهيز الملفات، ولكن مفيش إجابة واضحة، وده بيوضح غموض في المعلومات الرسمية.</p>
+<h3>قراءة عامة</h3>
+<p>كلام الناس ده بيوحي إن هناك اهتمام كبير بمشروع بيت الوطن، ولكن هناك معلومات مش مؤكدة ومتعارضة. الناس بتحاول تجمع معلومات عن المشروع، ولكن هناك فجوات في المعلومات الرسمية. ده بيوضح إن هناك حاجة للتوضيح الرسمي للمعلومات عن المشروع.</p></div>
+<h3>معلومات من الناس مش موجودة في الأخبار</h3>
+<p style="font-size:13px;color:var(--muted);margin-top:0">دي أهم حاجة في الرادار — كلام بيتقال ومحدش نشره رسميًا. <b>كل واحدة محتاجة تأكيد قبل ما تتصرف عليها.</b></p>
+<div class="signal novel weak">
+  <div class="sig-head">
+    <div class="sig-statement">أقل مقدم حجز متاح هو 8000 دولار</div>
+    <div><span class="tag gray">إشارة فردية</span><span class="tag gold">مش في الأخبار</span><span class="tag gray">سعر</span></div>
+  </div>
+  <div class="sig-evidence">
+    <span>قالها <b>1</b> شخص</span>
+    <span>من <b>1</b> مصدر مستقل</span>
+    <span><b>1</b> تفاعل</span>
+    <span>يوتيوب</span>
+    <span>أول رصد: منذ دقائق</span>
+  </div>
+  <div class="sig-quotes">
+    <div class="sig-quote"><span class="who"><a href="https://www.youtube.com/watch?v=deNhseBhPF8&amp;lc=UgwAudnuo5IG0EZeAud4AaABAg" target="_blank" rel="noopener">@اخبارالاسكان</a></span><br>«أقل مقدم حجز متاح على الموقع حالياً هو 8000 دولار في مدينة أخميم الجديدة.. أي مبلغ أقل من مقدمات الأراضي المتاحة لن يسجل»</div>
+  </div>
+</div>
+<div class="signal novel weak">
+  <div class="sig-head">
+    <div class="sig-statement">المناطق في مرحلة الدراسة الفنية بنسبة 100%</div>
+    <div><span class="tag gray">إشارة فردية</span><span class="tag gold">مش في الأخبار</span><span class="tag gray">إجراء</span></div>
+  </div>
+  <div class="sig-evidence">
+    <span>قالها <b>1</b> شخص</span>
+    <span>من <b>1</b> مصدر مستقل</span>
+    <span><b>1</b> تفاعل</span>
+    <span>يوتيوب</span>
+    <span>أول رصد: منذ دقائق</span>
+  </div>
+  <div class="sig-quotes">
+    <div class="sig-quote"><span class="who"><a href="https://www.youtube.com/watch?v=deNhseBhPF8&amp;lc=Ugwg8dDaNnxdqshvFkp4AaABAg" target="_blank" rel="noopener">@اخبارالاسكان</a></span><br>«المناطق دي لسه في مرحلة الدراسة الفنية بنسبة 100%، لكن التحركات جادة جداً لتوفير رقعة أرض قوية ترضي الطابور الطويل من الحجوزات»</div>
+  </div>
+</div>
+<div class="signal novel weak">
+  <div class="sig-head">
+    <div class="sig-statement">سعر 33 الف للمتر مربع</div>
+    <div><span class="tag gray">إشارة فردية</span><span class="tag gold">مش في الأخبار</span><span class="tag gray">سعر</span></div>
+  </div>
+  <div class="sig-evidence">
+    <span>قالها <b>1</b> شخص</span>
+    <span>من <b>1</b> مصدر مستقل</span>
+    <span>يوتيوب</span>
+    <span>أول رصد: منذ دقائق</span>
+  </div>
+  <div class="sig-quotes">
+    <div class="sig-quote"><span class="who"><a href="https://www.youtube.com/watch?v=ys3qjk2mK7Q&amp;lc=UgzyLQ3LBxGQmAns3tx4AaABAg.AZ5CUQ6PYw2AZ5en2xyX5n" target="_blank" rel="noopener">@RAOF-MOUSSArealestate</a></span><br>«مفيش المساحة ده من اول ٢٠٠ متر بسعر ٣٣ الف»</div>
+  </div>
+</div>
+<div class="signal novel weak">
+  <div class="sig-head">
+    <div class="sig-statement">أقل سعر للمتر هو 45 الف بعد ارتفاع الأسعار</div>
+    <div><span class="tag gray">إشارة فردية</span><span class="tag gold">مش في الأخبار</span><span class="tag gray">سعر</span></div>
+  </div>
+  <div class="sig-evidence">
+    <span>قالها <b>1</b> شخص</span>
+    <span>من <b>1</b> مصدر مستقل</span>
+    <span>يوتيوب</span>
+    <span>أول رصد: منذ دقائق</span>
+  </div>
+  <div class="sig-quotes">
+    <div class="sig-quote"><span class="who"><a href="https://www.youtube.com/watch?v=ys3qjk2mK7Q&amp;lc=Ugy-m0T30E-2yczIN6N4AaABAg" target="_blank" rel="noopener">@yasmeanali2101</a></span><br>«مافيش تسليم فوري ب ٣٠ الف دي خصوصا في الأماكن المميزة اقل سعر ٤٥ الف للمتر بعد ارتفاع سعر الأراضي للضعف»</div>
+  </div>
+</div>
+<div class="signal novel weak">
+  <div class="sig-head">
+    <div class="sig-statement">مساحة الشقق على محور محمد بن زايد 160 متر</div>
+    <div><span class="tag gray">إشارة فردية</span><span class="tag gold">مش في الأخبار</span><span class="tag gray">مكان</span></div>
+  </div>
+  <div class="sig-evidence">
+    <span>قالها <b>1</b> شخص</span>
+    <span>من <b>1</b> مصدر مستقل</span>
+    <span>يوتيوب</span>
+    <span>أول رصد: منذ دقائق</span>
+  </div>
+  <div class="sig-quotes">
+    <div class="sig-quote"><span class="who"><a href="https://www.youtube.com/watch?v=ys3qjk2mK7Q&amp;lc=UgzyLQ3LBxGQmAns3tx4AaABAg" target="_blank" rel="noopener">@naamatkamel7723</a></span><br>«الشقق اللي علي محور محمد بن زايد بكام لو مساحة نصلا ١٦٠ متر مثلا»</div>
+  </div>
+</div>
+<div class="signal novel weak">
+  <div class="sig-head">
+    <div class="sig-statement">65% من المشروع سيتم إنشاؤه في عام 2028</div>
+    <div><span class="tag gray">إشارة فردية</span><span class="tag gold">مش في الأخبار</span><span class="tag gray">موعد</span></div>
+  </div>
+  <div class="sig-evidence">
+    <span>قالها <b>1</b> شخص</span>
+    <span>من <b>1</b> مصدر مستقل</span>
+    <span>يوتيوب</span>
+    <span>أول رصد: منذ دقائق</span>
+  </div>
+  <div class="sig-quotes">
+    <div class="sig-quote"><span class="who"><a href="https://www.youtube.com/watch?v=ys3qjk2mK7Q&amp;lc=UgwUpRB2Q630LDZzcOV4AaABAg.AZNj0_pcQi-AZNmRZUTgqA" target="_blank" rel="noopener">@RAOF-MOUSSArealestate</a></span><br>«٦٥٪؜ انشاءات و على ٢٠٢٨ يكون فيه ناس كتير ساكنه»</div>
+  </div>
+</div>
+<div class="signal novel weak">
+  <div class="sig-head">
+    <div class="sig-statement">توفير تسهيلات من 20 إلى 25</div>
+    <div><span class="tag gray">إشارة فردية</span><span class="tag gold">مش في الأخبار</span><span class="tag gray">سعر</span></div>
+  </div>
+  <div class="sig-evidence">
+    <span>قالها <b>1</b> شخص</span>
+    <span>من <b>1</b> مصدر مستقل</span>
+    <span>يوتيوب</span>
+    <span>أول رصد: منذ دقائق</span>
+  </div>
+  <div class="sig-quotes">
+    <div class="sig-quote"><span class="who"><a href="https://www.youtube.com/watch?v=ys3qjk2mK7Q&amp;lc=UgxgO9knw9aBU2p8rM94AaABAg.AZ4fkrAffALAZ5eKNiwyqQ" target="_blank" rel="noopener">@RAOF-MOUSSArealestate</a></span><br>«٠١١١٢٥٢٧٤٢٤ تحت امرك من ٢٠ الى ٢٥ تسهيلات»</div>
+  </div>
+</div>
+<div class="signal novel weak">
+  <div class="sig-head">
+    <div class="sig-statement">لا توجد تقديمات أو تحويلات مالية إضافية حالياً</div>
+    <div><span class="tag gray">إشارة فردية</span><span class="tag gold">مش في الأخبار</span><span class="tag gray">إجراء</span></div>
+  </div>
+  <div class="sig-evidence">
+    <span>قالها <b>1</b> شخص</span>
+    <span>من <b>1</b> مصدر مستقل</span>
+    <span><b>1</b> تفاعل</span>
+    <span>يوتيوب</span>
+    <span>أول رصد: منذ دقائق</span>
+  </div>
+  <div class="sig-quotes">
+    <div class="sig-quote"><span class="who"><a href="https://www.youtube.com/watch?v=deNhseBhPF8&amp;lc=UgzAYF4OZbIX5vhPyr54AaABAg" target="_blank" rel="noopener">@اخبارالاسكان</a></span><br>«تذكر دائماً: مفيش أي تقديمات أو تحويلات مالية إضافية جديدة حالياً، المرحلة مقفولة وبتخدم فقط اللي حولوا بالفعل قبل كده!&quot; (p. 2)»</div>
+  </div>
+</div>
+<div class="signal novel weak">
+  <div class="sig-head">
+    <div class="sig-statement">لا يوجد قرار أو ترخيص لإنشاء دور رابع</div>
+    <div><span class="tag gray">إشارة فردية</span><span class="tag gold">مش في الأخبار</span><span class="tag gray">مشكلة</span></div>
+  </div>
+  <div class="sig-evidence">
+    <span>قالها <b>1</b> شخص</span>
+    <span>من <b>1</b> مصدر مستقل</span>
+    <span>يوتيوب</span>
+    <span>أول رصد: منذ دقائق</span>
+  </div>
+  <div class="sig-quotes">
+    <div class="sig-quote"><span class="who"><a href="https://www.youtube.com/watch?v=ys3qjk2mK7Q&amp;lc=UgyHaFZ-ilIwSpXaF3x4AaABAg" target="_blank" rel="noopener">@a_sh.9267</a></span><br>«هو ممكن يعلو دور رابع يعني أرضي واربعه ولا مفيش قرار ولا ترخيص من الجهاز؟»</div>
+  </div>
+</div>
+<h3>أسئلة الناس اللي مالهاش إجابة</h3>
+<p style="font-size:13px;color:var(--muted);margin-top:0">دي بتوضّح فين الغموض الرسمي — الحاجات اللي الناس محتاجة تعرفها والجهات ماوضّحتهاش.</p>
+<ul class="qlist">
+<li>هل تم تجهيز الملفات أم لا<div class="meta">يوتيوب · <a href="https://www.youtube.com/watch?v=deNhseBhPF8&amp;lc=UgxkPeZVN1JQXZz4wlJ4AaABAg" target="_blank" rel="noopener">المصدر</a></div></li>
+</ul>
+  </div>
+</section>
+<section class="block" id="places">
+  <h2>المدن الأكثر ذكرًا</h2>
+  <div class="block-body">
+<table><tbody>
+<tr><td class="k">القاهرة الجديدة</td><td><div style="background:#eaf1f7;border-radius:3px;height:19px;position:relative;min-width:60px"><div style="background:var(--navy-2);height:100%;width:100%;border-radius:3px"></div></div></td><td style="width:70px;text-align:center">3 ذكر</td></tr>
+<tr><td class="k">الشيخ زايد</td><td><div style="background:#eaf1f7;border-radius:3px;height:19px;position:relative;min-width:60px"><div style="background:var(--navy-2);height:100%;width:33%;border-radius:3px"></div></div></td><td style="width:70px;text-align:center">1 ذكر</td></tr>
+<tr><td class="k">بدر</td><td><div style="background:#eaf1f7;border-radius:3px;height:19px;position:relative;min-width:60px"><div style="background:var(--navy-2);height:100%;width:33%;border-radius:3px"></div></div></td><td style="width:70px;text-align:center">1 ذكر</td></tr>
+</tbody></table>
+<p style="font-size:13px;color:var(--muted)">ترتيب حسب تكرار ذكر المدينة في الأخبار المرصودة — مؤشر اهتمام إعلامي، <b>ليس تأكيدًا على الطرح</b>.</p>
+  </div>
+</section>
+<section class="block" id="timeline">
+  <h2>الخط الزمني للتغييرات المرصودة</h2>
+  <div class="block-body">
+<div class="timeline">
+<div class="tl-item new"><div class="tl-when">2026-07-26</div><div class="tl-what"><b>درجة الثقة في البيانات</b>: متوسطة <a href="https://www.youtube.com/watch?v=zZWiViPWPHE" target="_blank" rel="noopener" style="font-size:12px">[المصدر]</a></div></div>
+<div class="tl-item"><div class="tl-when">2026-07-26</div><div class="tl-what"><b>آخر تطور</b>: دخول شمال الرحاب واللوتس ومناطق جديدة لأول مرة <a href="https://www.youtube.com/watch?v=zZWiViPWPHE" target="_blank" rel="noopener" style="font-size:12px">[المصدر]</a></div></div>
+<div class="tl-item"><div class="tl-when">2026-07-26</div><div class="tl-what"><b>المدن المطروحة</b>: اكتوبر, القاهرة الجديدة, شمال الرحاب, اللوتس <a href="https://www.youtube.com/watch?v=zZWiViPWPHE" target="_blank" rel="noopener" style="font-size:12px">[المصدر]</a></div></div>
+<div class="tl-item"><div class="tl-when">2026-07-26</div><div class="tl-what"><b>موعد القرعة</b>: 2018 <a href="https://www.youtube.com/watch?v=zZWiViPWPHE" target="_blank" rel="noopener" style="font-size:12px">[المصدر]</a></div></div>
+<div class="tl-item"><div class="tl-when">2026-07-26</div><div class="tl-what"><b>المرحلة الحالية</b>: المرحلة 11 <a href="https://www.youtube.com/watch?v=zZWiViPWPHE" target="_blank" rel="noopener" style="font-size:12px">[المصدر]</a></div></div>
+</div>
+  </div>
+</section>
+<section class="block" id="outlook">
+  <h2>القراءة الاستشرافية</h2>
+  <div class="block-body">
+<h3>أين نحن الآن</h3>
+<p>الملف واقف حاليًا في المرحلة 11 من مشروع بيت الوطن، حيث تم تسجيل هذه المرحلة في 26 يوليو 2026. موعد القرعة كان في عام 2018، وقد شملت المدن المطروحة في المشروع مناطق مثل اكتوبر والقاهرة الجديدة وشمال الرحاب واللوتس. آخر التطورات المسجلة تشير إلى دخول شمال الرحاب واللوتس ومناطق جديدة للمشروع لأول مرة.</p>
+<h3>المتوقع في الأسابيع القادمة</h3>
+<p>من المتوقع أن تشهد الأسابيع القادمة استمرار التطورات في مشروع بيت الوطن، مع احتمال إعلان مزيد من التفاصيل حول دخول شمال الرحاب واللوتس ومناطق جديدة.然而، لا توجد معلومات محددة حول موعد أو خطوة محددة في الأفق، وبالتالي فإن هذا التوقع يعتمد على الترجيح وليس على خبر محدد.</p>
+<h3>سيناريوهات</h3>
+<ul>
+<li><strong>الأرجح</strong>: استمرار التطورات الحالية في المشروع، مع إمكانية إضافة مناطق جديدة أو تعديل شروط المشروع. المؤشر الذي يؤكد هذا السيناريو هو استمرار الإعلانات والتطورات حول المشروع.</li>
+<li><strong>متفائل</strong>: قد يشهد المشروع تقدمًا سريعًا في البناء والتسليم، مع إمكانية إضافة مزيد من المزايا أو تسهيلات للعملاء. المؤشر الذي يؤكد هذا السيناريو هو زيادة عدد الوحدات السكنية المتاحة وتسليمها في الوقت المناسب.</li>
+<li><strong>متحفظ</strong>: قد يواجه المشروع بعض التحديات أو التأخيرات، مما قد يؤثر على جدول التسليم أو شروط المشروع. المؤشر الذي يؤكد هذا السيناريو هو أي إعلانات عن تأخيرات أو تعديلات في المشروع.</li>
+</ul>
+<h3>أماكن ومدن تستحق الانتباه</h3>
+<p>المدن المذكورة في الأخبار، مثل اكتوبر والقاهرة الجديدة وشمال الرحاب واللوتس، تستحق الانتباه بسبب إمكانية النمو والتطور في هذه المناطق. كل مدينة مرشحة لreasons مختلفة، فمثلًا، قد تكون اكتوبر مرشحة بسبب موقعها الاستراتيجي، بينما قد تكون القاهرة الجديدة مرشحة بسبب تطورها الحضري.然而، لا توجد معلومات كافية لتحديد المدينة الأفضل، ويتعين على المستثمرين دراسة كل منطقة على حدة.</p>
+<h3>إشارات إنذار</h3>
+<p>علامات مثل تأجيل مواعيد التسليم أو تغيير شروط المشروع أو تعديل الأسعار قد تكون تحذيرات حقيقية للمستثمرين. إذا ظهرت هذه العلامات، فمن المهم للغاية تقييم الوضع بدقة ودراسة التأثير المحتمل على الاستثمار.</p>
+  </div>
+</section>
+<section class="block" id="steps">
+  <h2>خطوات عملية</h2>
+  <div class="block-body">
+<h3>لو الحجز مفتوح دلوقتي</h3>
+<ul>
+<li><strong>تأكيد حالة الحجز</strong>: يتحقق المصري المقيم بالخارج من حالة الحجز على الموقع الرسمي لبيت الوطن (يحتاج تأكيد من كراسة الشروط الرسمية).</li>
+<li><strong>تقديم الطلب</strong>: يقدم الطلب عبر الموقع الرسمي لبيت الوطن أو الجهة المعنية (يحتاج تأكيد من كراسة الشروط الرسمية).</li>
+</ul>
+<h3>لو لسه مفتحش</h3>
+<ul>
+<li><strong>متابعة الإعلانات</strong>: يتابع الإعلانات الرسمية على الموقع الرسمي لبيت الوطن أو منصات الإعلام الرسمية (يحتاج تأكيد من كراسة الشروط الرسمية).</li>
+<li><strong>التحقق من موعد فتح الحجز</strong>: يتحقق من موعد فتح الحجز القادم (يحتاج تأكيد من كراسة الشروط الرسمية).</li>
+</ul>
+<h3>أوراق ومتطلبات لازم تكون جاهزة</h3>
+<ul>
+<li><strong>استعداد الأوراق</strong>: يجب أن يكون لديه الأوراق والمستندات المطلوبة (يحتاج تأكيد من كراسة الشروط الرسمية).</li>
+<li><strong>دراسة الشروط</strong>: يدرّب على الشروط المعروفة لبيت الوطن (يحتاج تأكيد من كراسة الشروط الرسمية).</li>
+</ul>
+<h3>أخطاء شائعة تتجنبها</h3>
+<ul>
+<li><strong>التأكد من صحة المعلومات</strong>: يتأكد من صحة المعلومات قبل التقديم (يحتاج تأكيد من كراسة الشروط الرسمية).</li>
+<li><strong>الالتزام بالشروط</strong>: يلتزم بالشروط المعروفة لبيت الوطن (يحتاج تأكيد من كراسة الشروط الرسمية).</li>
+</ul>
+  </div>
+</section>
+<section class="block" id="sources">
+  <h2>المصادر المعتمدة في هذا الملف</h2>
+  <div class="block-body">
+<table><thead><tr><th>العنوان</th><th>الجهة</th><th>التاريخ</th></tr></thead><tbody>
+<tr><td><a href="https://www.youtube.com/watch?v=zZWiViPWPHE" target="_blank" rel="noopener">اراضي للبيع اكتوبر الجديده شمال المطار قرعه 2018 واراضي بيت الوطن اكتوبر الجديده 01000989933</a></td><td>عقارات 6أكتوبر حدائق اكتوبر واكتوبر الجديدة</td><td>منذ 2 يومًا</td></tr>
+<tr><td><a href="https://www.youtube.com/watch?v=z4BMqXSmjBA" target="_blank" rel="noopener">تفتكر شقة بسعر التكلفة نصب ولا حقيقة؟ | رحلة إنجاز على أرض الواقع | جميع سابقة الأعمال في فيديو واحد</a></td><td>كلام في المفيد — هاني الخميسي</td><td>منذ 4 يومًا</td></tr>
+<tr><td><a href="https://www.youtube.com/watch?v=deNhseBhPF8" target="_blank" rel="noopener">عاجل تسريبات بيت الوطن.. دخول شمال الرحاب واللوتس ومناطق جديدة لأول مرة! آخر معاد 25 يوليو</a></td><td>الاسكان لحظه بلحظه  </td><td>منذ 13 يومًا</td></tr>
+<tr><td><a href="https://www.youtube.com/watch?v=ys3qjk2mK7Q" target="_blank" rel="noopener">بيت الوطن | كما لم تراه من قبل | متوسط الاسعار و اخر التطورات</a></td><td>RAOF - MOUSSA REALESTATE </td><td>منذ 16 يومًا</td></tr>
+<tr><td><a href="https://www.youtube.com/shorts/K-SUpAz371U" target="_blank" rel="noopener">الانجاز الحقيقي في شقة بسعر التكلفة على أرض الواقع</a></td><td>كلام في المفيد — هاني الخميسي</td><td>منذ 17 يومًا</td></tr>
+</tbody></table>
+  </div>
+</section>
+<div class="disclaimer">
+  <b>تنويه منهجي.</b> كل البيانات في هذه الصفحة مستخرجة آليًا بالذكاء الاصطناعي
+  من أخبار ومصادر عامة، و<b>قابلة للخطأ</b>. المواعيد والأسعار والشروط
+  <b>لا يُعتمد عليها</b> إلا بعد التأكد من كراسة الشروط الرسمية ومنصة مصر العقارية.
+  هذا المحتوى للاطلاع فقط وليس استشارة مالية أو قانونية.
+  <div class="engines">محركات التحليل — Groq: 9✓/2✗ · Gemini: 0✓/1✗ (موقوف)</div>
+</div>
+  </main>
+  <aside class="rail">
+<div class="box"><h4>محتويات الملف</h4><div class="toc">
+<a href="#brief">الملخص التنفيذي</a>
+<a href="#facts">البطاقة التعريفية</a>
+<a href="#dates">المواعيد الرسمية</a>
+<a href="#radar"><b>رادار الإشارات المبكرة</b></a>
+<a href="#places">المدن الأكثر ذكرًا</a>
+<a href="#timeline">الخط الزمني</a>
+<a href="#people">كلام الناس</a>
+<a href="#outlook">القراءة الاستشرافية</a>
+<a href="#steps">خطوات عملية</a>
+<a href="#sources">المصادر</a>
+</div></div>
+<div class="box"><h4>الرادار</h4><div class="r"><span>إشارات مرصودة</span><b>9</b></div><div class="r"><span>مش في الأخبار</span><b style="color:var(--gold)">9</b></div><div class="r"><span>اتأكدت رسميًا</span><b style="color:var(--green)">0</b></div></div>
+<div class="box"><h4>روابط الإجراء</h4>
+  <a class="lnk" href="https://reservations.realestate.gov.eg/ar" target="_blank" rel="noopener">منصة مصر العقارية — الحجز</a>
+  <a class="lnk" href="https://lands.nuca.gov.eg/" target="_blank" rel="noopener">هيئة المجتمعات العمرانية</a>
+  <a class="lnk" href="https://beitakfemisr.com/" target="_blank" rel="noopener">بيتك في مصر</a>
+</div>
+<div class="box"><h4>حالة البيانات</h4><div class="r"><span>آخر مزامنة</span><b>منذ دقائق</b></div><div class="r"><span>درجة الثقة</span><b>متوسطة</b></div><div class="r"><span>أحداث مرصودة</span><b>5</b></div></div>
+  </aside>
+</div>
+<script>
+document.querySelectorAll('[data-filters]').forEach(function(bar){
+  var scope = bar.closest('section');
+  var btns = bar.querySelectorAll('button');
+  btns.forEach(function(b){
+    b.addEventListener('click', function(){
+      btns.forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on');
+      var want = b.dataset.filter;
+      scope.querySelectorAll('[data-sec]').forEach(function(card){
+        card.classList.toggle('hidden', want !== 'all' && card.dataset.sec !== want);
+      });
+    });
+  });
+});
+
+(function(){
+  var el = document.getElementById('countdown');
+  if(!el || !el.dataset.deadline) return;
+  var target = new Date(el.dataset.deadline + 'T00:00:00+03:00').getTime();
+  var slots = el.querySelectorAll('.u .n');
+  function tick(){
+    var diff = target - Date.now();
+    if(diff < 0){ el.querySelector('.cd-units').innerHTML =
+      '<div style="font-size:16px;font-weight:600;color:#a52820">حلّ الموعد</div>'; return; }
+    var d = Math.floor(diff/86400000),
+        h = Math.floor(diff/3600000)%24,
+        m = Math.floor(diff/60000)%60,
+        s = Math.floor(diff/1000)%60;
+    [d,h,m,s].forEach(function(v,i){ if(slots[i]) slots[i].textContent = v; });
+    setTimeout(tick, 1000);
+  }
+  tick();
+})();
+</script>
+</body>
+</html>
