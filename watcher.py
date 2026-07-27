@@ -148,6 +148,11 @@ def check_all(verbose=True, pages=None):
 
     for page in (pages or config.WATCH_PAGES):
         name, url = page["name"], page["url"]
+        if page.get("skip_diff"):
+            # صفحة بتتغير أرقامها الطبيعي (عدادات، لوحات حية) — رصد التغيير
+            # النصي عليها هيغرقنا بتنبيهات كاذبة. نتجاهلها هنا تمامًا؛
+            # بياناتها بتتجاب بطريقة تانية (مثلاً bit_mzayasoft.py).
+            continue
         if verbose:
             print(f"    - {name}")
 
@@ -234,6 +239,8 @@ def health(state=None):
     state = state if state is not None else load_state()
     rows = []
     for page in config.WATCH_PAGES:
+        if page.get("skip_diff"):
+            continue
         rec = state.get(page["url"]) or {}
         fails = int(rec.get("fail_count", 0))
         if rec.get("count"):

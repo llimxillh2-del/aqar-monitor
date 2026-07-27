@@ -206,6 +206,36 @@ a:hover{color:var(--navy-3);}
   display:grid; grid-template-columns:1fr 300px; gap:30px; align-items:start;}
 @media(max-width:1000px){ .wrap{grid-template-columns:1fr; padding:22px 16px 50px;} .rail{order:-1;} }
 
+/* ---------- خلاصة "الأهم دلوقتي" ---------- */
+.now-digest{background:linear-gradient(135deg,#fff9ec,#fdf3dc);
+  border:1px solid #e9d9ac; border-inline-start:5px solid var(--gold-2);
+  border-radius:var(--radius); padding:16px 20px; margin-bottom:20px;
+  box-shadow:var(--shadow-sm);}
+.now-digest-label{font-size:12px; font-weight:800; letter-spacing:.6px;
+  color:var(--gold); text-transform:uppercase; margin-bottom:7px;}
+.now-digest-body{font-size:15.5px; line-height:1.85; color:var(--ink);}
+.now-digest-body p{margin:5px 0;}
+.now-digest-body ul{margin:5px 0; padding-inline-start:20px;}
+
+.plots-box{background:#f8fafc; border:1px solid var(--line);
+  border-radius:var(--radius); padding:14px 18px; margin-bottom:20px;}
+.plots-label{font-size:12.5px; font-weight:600; color:var(--muted);}
+.plots-label a{margin-inline-start:8px; font-size:12px;}
+
+/* ---------- طيّ الأقسام الثانوية ---------- */
+.collapsible > summary{cursor:pointer; list-style:none; user-select:none;}
+.collapsible > summary::-webkit-details-marker{display:none;}
+.collapsible > summary.toggle-head{display:flex; align-items:center; gap:10px;
+  padding:18px 24px; font-size:17px; font-weight:700; color:var(--navy);
+  background:linear-gradient(180deg,#fcfdff,#f5f8fc);
+  border-bottom:1px solid transparent; font-family:'Cairo','IBM Plex Sans Arabic',sans-serif;}
+.collapsible[open] > summary.toggle-head{border-bottom-color:var(--line);}
+.collapsible > summary.toggle-head::after{content:'▸'; margin-inline-start:auto;
+  color:var(--muted); font-size:13px; transition:transform .15s;}
+.collapsible[open] > summary.toggle-head::after{transform:rotate(90deg);}
+.collapsible > summary.toggle-head .hint{font-size:12px; font-weight:500;
+  color:var(--faint); margin-inline-start:6px;}
+
 /* ---------- المؤشرات ---------- */
 .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
   gap:12px; margin-bottom:24px;}
@@ -228,7 +258,7 @@ a:hover{color:var(--navy-3);}
 
 /* ---------- الأقسام ---------- */
 .doc{counter-reset:sec;}
-section.block{background:var(--paper); border:1px solid var(--line);
+.block{background:var(--paper); border:1px solid var(--line);
   border-radius:var(--radius); margin-bottom:22px; overflow:hidden;
   box-shadow:var(--shadow-sm);}
 section.block > h2{counter-increment:sec; margin:0; padding:18px 24px;
@@ -241,6 +271,7 @@ section.block > h2::before{content:counter(sec); font-size:12px; font-weight:800
   min-width:26px; height:26px; border-radius:6px;
   display:inline-flex; align-items:center; justify-content:center; flex:none;
   font-variant-numeric:tabular-nums;}
+details.collapsible.block > summary.toggle-head{counter-increment:sec;}
 .block-body{padding:22px 24px 24px;}
 .block-body > *:first-child{margin-top:0;}
 .block-body > *:last-child{margin-bottom:0;}
@@ -556,7 +587,7 @@ __RAIL__
 
 JS = """
 document.querySelectorAll('[data-filters]').forEach(function(bar){
-  var scope = bar.closest('section');
+  var scope = bar.closest('section') || bar.closest('details') || bar.parentElement;
   var btns = bar.querySelectorAll('button');
   btns.forEach(function(b){
     b.addEventListener('click', function(){
@@ -607,6 +638,21 @@ def _block(title, body, anchor=None):
     a = f' id="{anchor}"' if anchor else ""
     return (f'<section class="block"{a}>\n  <h2>{esc(title)}</h2>\n'
             f'  <div class="block-body">\n{body}\n  </div>\n</section>')
+
+
+def _block_collapsed(title, body, anchor=None, hint="", open_=False):
+    """
+    نفس _block لكن قابل للطي (details/summary) — للأقسام الثانوية اللي
+    مش لازم تظهر مفتوحة بالكامل من أول وهلة (فيد الأخبار، جدول المصادر،
+    إشارات ضعيفة...). بيشتغل بدون JS، ومحتواه مقروء لو JS متعطّل أو
+    لمحركات البحث.
+    """
+    a = f' id="{anchor}"' if anchor else ""
+    open_attr = " open" if open_ else ""
+    hint_html = f'<span class="hint">{esc(hint)}</span>' if hint else ""
+    return (f'<details class="collapsible block"{a}{open_attr}>\n'
+            f'  <summary class="toggle-head">{esc(title)}{hint_html}</summary>\n'
+            f'  <div class="block-body">\n{body}\n  </div>\n</details>')
 
 
 def _kpis(pairs):
@@ -861,6 +907,30 @@ def _radar_body(intel, limit=24, compact=False):
                     + md_to_html(intel["digest"]) + '</div>')
 
     novel = intel.get("novel") or []
+    confirmed = intel.get("confirmed") or []
+    others = [s for s in (intel.get("signals") or [])
+              if s not in novel and s not in confirmed]
+
+    if compact:
+        # وضع مختصر (الصفحة الرئيسية): أقوى ٣-٤ إشارات بس كسطر واحد،
+        # والباقي وراء رابط. الهدف صفحة قصيرة تُقرأ في ثوانٍ.
+        top = (confirmed + novel)[:4]
+        if top:
+            body.append("<h3>أهم الإشارات</h3>")
+            body.append('<ul class="qlist">')
+            for sig in top:
+                icon = "✅" if sig in confirmed else "🆕"
+                body.append(
+                    f'<li>{icon} <b>{esc(sig.get("statement", ""))}</b>'
+                    f'<div class="meta">قالها {sig.get("mentions", 0)} شخص من '
+                    f'{sig.get("independence", 0)} مصدر مستقل'
+                    f'{" · اتأكدت رسميًا" if sig in confirmed else ""}</div></li>')
+            body.append('</ul>')
+        elif not (novel or confirmed or others):
+            body.append('<div class="empty">لسه مفيش إشارات مرصودة. '
+                        'الرادار محتاج دورة أو اتنين عشان يجمع كلام كفاية.</div>')
+        return "\n".join(body)
+
     if novel:
         body.append("<h3>معلومات من الناس مش موجودة في الأخبار</h3>")
         body.append('<p style="font-size:13px;color:var(--muted);margin-top:0">'
@@ -869,7 +939,6 @@ def _radar_body(intel, limit=24, compact=False):
         for sig in novel[:limit]:
             body.append(_signal_card(sig))
 
-    confirmed = intel.get("confirmed") or []
     if confirmed:
         body.append("<h3>إشارات اتأكدت رسميًا</h3>")
         body.append('<p style="font-size:13px;color:var(--muted);margin-top:0">'
@@ -878,27 +947,24 @@ def _radar_body(intel, limit=24, compact=False):
         for sig in confirmed[:10]:
             body.append(_signal_card(sig))
 
-    others = [s for s in (intel.get("signals") or [])
-              if s not in novel and s not in confirmed]
     if others:
-        body.append("<h3>باقي الإشارات</h3>")
-        for sig in others[:limit]:
-            body.append(_signal_card(sig))
+        others_html = "\n".join(_signal_card(sig) for sig in others[:limit])
+        body.append(_block_collapsed(
+            "باقي الإشارات", others_html, hint=f"{len(others)} إشارة أضعف"))
 
     questions = intel.get("questions") or []
-    if questions and not compact:
-        body.append("<h3>أسئلة الناس اللي مالهاش إجابة</h3>")
-        body.append('<p style="font-size:13px;color:var(--muted);margin-top:0">'
-                    'دي بتوضّح فين الغموض الرسمي — الحاجات اللي الناس محتاجة '
-                    'تعرفها والجهات ماوضّحتهاش.</p>')
-        body.append('<ul class="qlist">')
+    if questions:
+        q_html = ['<ul class="qlist">']
         for q in questions[:14]:
             src = PLATFORM_LABEL.get(q.get("platform"), q.get("platform", ""))
             link = (f' · <a href="{esc(q["url"])}" target="_blank" '
                     f'rel="noopener">المصدر</a>' if q.get("url") else "")
-            body.append(f'<li>{esc(q.get("text", ""))}'
-                        f'<div class="meta">{esc(src)}{link}</div></li>')
-        body.append('</ul>')
+            q_html.append(f'<li>{esc(q.get("text", ""))}'
+                          f'<div class="meta">{esc(src)}{link}</div></li>')
+        q_html.append('</ul>')
+        body.append(_block_collapsed(
+            "أسئلة الناس اللي مالهاش إجابة", "\n".join(q_html),
+            hint="بتوضّح فين الغموض الرسمي"))
 
     if not (novel or confirmed or others or questions):
         body.append('<div class="empty">لسه مفيش إشارات مرصودة. '
@@ -1035,10 +1101,23 @@ def _updates_block(latest):
 #  الصفحة الرئيسية
 # ============================================================
 
+def _now_digest_block(now_digest, more_href="#updates"):
+    """
+    شريط الخلاصة العاجلة — أول حاجة يشوفها القارئ فوق الصفحة. لو مفيش
+    مستجدات حقيقية من آخر دورة، مابيظهرش خالص بدل فقرة عامة فاضية.
+    """
+    if not now_digest or not str(now_digest).strip():
+        return ""
+    return f"""<div class="now-digest">
+  <div class="now-digest-label">⚡ الأهم من آخر تحديث</div>
+  <div class="now-digest-body">{md_to_html(now_digest)}</div>
+</div>"""
+
+
 def build_index(sections, brief, new_links, top_links, urgent_links,
                 engines_note, forecast=None, market_rows=None,
                 health_rows=None, beit=None, official_changes=None,
-                intel=None):
+                intel=None, now_digest=None):
     total = sum(len(v) for v in sections.values())
     official_ok = sum(1 for r in (health_rows or []) if r["status"] == "يعمل")
     novel_count = ((intel or {}).get("counts") or {}).get("novel", 0)
@@ -1079,7 +1158,12 @@ def build_index(sections, brief, new_links, top_links, urgent_links,
     if intel:
         kpi_cells.append(("إشارات مش في الأخبار", str(novel_count),
                           "warn" if novel_count else ""))
-    main = [_kpis(kpi_cells)]
+
+    main = []
+    digest_html = _now_digest_block(now_digest)
+    if digest_html:
+        main.append(digest_html)
+    main.append(_kpis(kpi_cells))
 
     # بانر بيت الوطن (Hero)
     if beit:
@@ -1148,8 +1232,9 @@ def build_index(sections, brief, new_links, top_links, urgent_links,
     if forecast:
         main.append(_block("الاستشراف وقراءة السوق", md_to_html(forecast), "outlook"))
 
-    # الرصد الرسمي
+    # الرصد الرسمي — التغييرات (لو فيه) ظاهرة دايمًا، جدول الحالة مطوي
     official_body = []
+    has_official_changes = bool(official_changes)
     if official_changes:
         official_body.append("<h3>تغييرات مرصودة في هذه الدورة</h3>")
         for ch in official_changes[:8]:
@@ -1168,9 +1253,14 @@ def build_index(sections, brief, new_links, top_links, urgent_links,
                              'لا توجد تغييرات مرصودة في المصادر الرسمية خلال هذه الدورة.</p>')
     official_body.append("<h3>حالة المصادر المراقَبة</h3>")
     official_body.append(_official_table(health_rows or []))
-    main.append(_block("الرصد الرسمي", "\n".join(official_body), "official"))
+    if has_official_changes:
+        main.append(_block("الرصد الرسمي", "\n".join(official_body), "official"))
+    else:
+        main.append(_block_collapsed("الرصد الرسمي", "\n".join(official_body),
+                                     "official", hint="مفيش تغييرات جديدة"))
 
-    # الفيد
+    # الفيد — مطوي افتراضيًا: قسم "آخر التحديثات" فوق بيغطي الجديد والعاجل
+    # بالفعل، ده أرشيف كامل لمن يريد التفاصيل
     buttons = ['<button class="on" data-filter="all">الكل</button>']
     for name, items in sections.items():
         if items:
@@ -1182,11 +1272,14 @@ def build_index(sections, brief, new_links, top_links, urgent_links,
             entries.append(_entry(item, name, new_links, top_links, urgent_links))
 
     feed_html = "\n".join(entries) or '<div class="empty">لا توجد عناصر مرصودة.</div>'
-    main.append(f"""<section class="block" id="feed">
-  <h2>الرصد الإخباري</h2>
+    main.append(f"""<details class="collapsible block" id="feed">
+  <summary class="toggle-head">الرصد الإخباري الكامل
+    <span class="hint">كل العناصر — {total} عنصر</span></summary>
+  <div class="block-body">
   <div class="filters" data-filters>{''.join(buttons)}</div>
 {feed_html}
-</section>""")
+  </div>
+</details>""")
 
     main.append(f"""<div class="disclaimer">
   <b>تنويه منهجي.</b> تُجمَع المصادر آليًا وتُلخَّص بالذكاء الاصطناعي.
@@ -1196,17 +1289,8 @@ def build_index(sections, brief, new_links, top_links, urgent_links,
   <div class="engines">{esc(engines_note or "")}</div>
 </div>""")
 
-    # العمود الجانبي
-    rail = ['<div class="box"><h4>محتويات التقرير</h4><div class="toc">',
-            '<a href="#summary">الملخص التنفيذي</a>',
-            '<a href="#status">حالة الملفات</a>']
-    if intel:
-        rail.append('<a href="#radar">رادار الإشارات المبكرة</a>')
-    rail += ['<a href="#outlook">الاستشراف وقراءة السوق</a>',
-             '<a href="#official">الرصد الرسمي</a>',
-             '<a href="#feed">الرصد الإخباري</a>',
-             '<a href="beit-alwatan.html"><b>ملف بيت الوطن</b></a>',
-             '</div></div>']
+    # العمود الجانبي — عناصر فعلية بس، بلا تكرار للتنقل اللي فوق أصلًا
+    rail = []
 
     if intel and novel_count:
         rail.append(f"""<div class="box" style="border-color:#e5d9c0;background:#fffdf8">
@@ -1218,12 +1302,6 @@ def build_index(sections, brief, new_links, top_links, urgent_links,
   <a href="#radar" style="display:inline-block;margin-top:8px;font-size:13.5px">
     شوفها ←</a>
 </div>""")
-
-    rail.append('<div class="box"><h4>توزيع العناصر</h4>')
-    for name, items in sections.items():
-        if items:
-            rail.append(f'<div class="r"><span>{esc(name)}</span><b>{len(items)}</b></div>')
-    rail.append('</div>')
 
     rail.append(f"""<div class="box"><h4>مصادر رسمية</h4>
   <a class="lnk" href="{esc(config.BEIT_ALWATAN["authority_url"])}" target="_blank" rel="noopener">هيئة المجتمعات العمرانية</a>
@@ -1240,7 +1318,7 @@ def build_index(sections, brief, new_links, top_links, urgent_links,
 #  صفحة بيت الوطن
 # ============================================================
 
-def build_beit_page(d, engines_note, intel=None):
+def build_beit_page(d, engines_note, intel=None, now_digest=None):
     """d = beit_alwatan.dashboard(state) · intel = intel.board(state)"""
     booking = d.get("booking") or "غير معروف"
     novel_count = ((intel or {}).get("counts") or {}).get("novel", 0)
@@ -1274,6 +1352,26 @@ def build_beit_page(d, engines_note, intel=None):
 </div></nav>"""
 
     main = []
+
+    digest_html = _now_digest_block(now_digest)
+    if digest_html:
+        main.append(digest_html)
+
+    # لوحة القطع المتاحة/المحجوزة — مصدر مجتمعي حي (bit.mzayasoft)
+    plots = d.get("plots")
+    if plots:
+        cells = []
+        for label, key in (("الإجمالي", "total"), ("المحجوز", "reserved"),
+                           ("المتبقي", "remaining"), ("اليوم", "today")):
+            if key in plots:
+                cells.append(f'<div class="kpi"><div class="k-label">{esc(label)}</div>'
+                             f'<div class="k-value">{plots[key]:,}</div></div>')
+        if cells:
+            main.append(f"""<div class="plots-box">
+  <div class="plots-label">لوحة القطع الحية — مصدر مجتمعي (غير رسمي)
+    <a href="{esc(plots.get("source_url", "#"))}" target="_blank" rel="noopener">bit.mzayasoft.com ↗</a></div>
+  <div class="kpis" style="margin:10px 0 0">{"".join(cells)}</div>
+</div>""")
 
     nxt = d.get("next")
     kpi_cells = [
@@ -1417,7 +1515,7 @@ def build_beit_page(d, engines_note, intel=None):
     if d.get("checklist"):
         main.append(_block("خطوات عملية", md_to_html(d["checklist"]), "steps"))
 
-    # المصادر
+    # المصادر — مطوية افتراضيًا، مرجع مش قراءة أساسية
     srcs = d.get("sources") or []
     if srcs:
         lst = ['<table><thead><tr><th>العنوان</th><th>الجهة</th>'
@@ -1428,7 +1526,9 @@ def build_beit_page(d, engines_note, intel=None):
                 f'{esc(s["title"])}</a></td><td>{esc(s.get("source", ""))}</td>'
                 f'<td>{esc(ago(s.get("published", "")))}</td></tr>')
         lst.append('</tbody></table>')
-        main.append(_block("المصادر المعتمدة في هذا الملف", "\n".join(lst), "sources"))
+        main.append(_block_collapsed("المصادر المعتمدة في هذا الملف",
+                                     "\n".join(lst), "sources",
+                                     hint=f"{len(srcs)} مصدر"))
 
     main.append(f"""<div class="disclaimer">
   <b>تنويه منهجي.</b> كل البيانات في هذه الصفحة مستخرجة آليًا بالذكاء الاصطناعي
@@ -1438,19 +1538,16 @@ def build_beit_page(d, engines_note, intel=None):
   <div class="engines">{esc(engines_note or "")}</div>
 </div>""")
 
-    rail = ['<div class="box"><h4>محتويات الملف</h4><div class="toc">',
-            '<a href="#brief">الملخص التنفيذي</a>',
-            '<a href="#facts">البطاقة التعريفية</a>',
-            '<a href="#dates">المواعيد الرسمية</a>']
-    if intel:
-        rail.append('<a href="#radar"><b>رادار الإشارات المبكرة</b></a>')
-    rail += ['<a href="#places">المدن الأكثر ذكرًا</a>',
-             '<a href="#timeline">الخط الزمني</a>',
-             '<a href="#people">كلام الناس</a>',
-             '<a href="#outlook">القراءة الاستشرافية</a>',
-             '<a href="#steps">خطوات عملية</a>',
-             '<a href="#sources">المصادر</a>',
-             '</div></div>']
+    # العمود الجانبي — بس اللي فيه فعل ممكن تاخده، بلا تكرار للتنقل فوق
+    rail = []
+
+    if nxt:
+        rail.append(f"""<div class="box"><h4>أقرب موعد</h4>
+  <div style="font-size:15px;font-weight:600;color:var(--navy)">{esc(nxt["label"])}</div>
+  <div style="font-size:13.5px;color:var(--muted);margin-top:3px">{esc(nxt["raw"])}</div>
+  <div style="font-size:26px;font-weight:700;color:var(--gold);margin-top:7px">
+    {nxt["days_left"]} <span style="font-size:13px;color:var(--muted)">يومًا</span></div>
+</div>""")
 
     if intel:
         st = intel.get("stats") or {}
@@ -1470,28 +1567,11 @@ def build_beit_page(d, engines_note, intel=None):
         rail.append('<div class="box"><h4>الرادار</h4>' + "".join(rows) +
                     '</div>')
 
-    if nxt:
-        rail.append(f"""<div class="box"><h4>أقرب موعد</h4>
-  <div style="font-size:15px;font-weight:600;color:var(--navy)">{esc(nxt["label"])}</div>
-  <div style="font-size:13.5px;color:var(--muted);margin-top:3px">{esc(nxt["raw"])}</div>
-  <div style="font-size:26px;font-weight:700;color:var(--gold);margin-top:7px">
-    {nxt["days_left"]} <span style="font-size:13px;color:var(--muted)">يومًا</span></div>
-</div>""")
-
     rail.append(f"""<div class="box"><h4>روابط الإجراء</h4>
   <a class="lnk" href="{esc(config.BEIT_ALWATAN["booking_url"])}" target="_blank" rel="noopener">منصة مصر العقارية — الحجز</a>
   <a class="lnk" href="{esc(config.BEIT_ALWATAN["authority_url"])}" target="_blank" rel="noopener">هيئة المجتمعات العمرانية</a>
   <a class="lnk" href="{esc(config.BEIT_ALWATAN["official_url"])}" target="_blank" rel="noopener">بيتك في مصر</a>
 </div>""")
-
-    updated = d.get("updated")
-    if updated:
-        rail.append(f'<div class="box"><h4>حالة البيانات</h4>'
-                    f'<div class="r"><span>آخر مزامنة</span><b>{esc(ago(updated))}</b></div>'
-                    f'<div class="r"><span>درجة الثقة</span>'
-                    f'<b>{esc(d.get("confidence"))}</b></div>'
-                    f'<div class="r"><span>أحداث مرصودة</span>'
-                    f'<b>{len(d.get("timeline") or [])}</b></div></div>')
 
     return _page("بيت الوطن — ملف متابعة | مرصد العقارات المصرية",
                  "متابعة لحظية لمشروع بيت الوطن: المرحلة، المواعيد، الأسعار، الشروط، وتحليل",

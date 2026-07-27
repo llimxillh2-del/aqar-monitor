@@ -258,9 +258,26 @@ def _check_telegram_bot(rep):
         rep.add(FAIL, "التنبيهات", "بوت تليجرام", str(exc)[:70], "")
 
 
+def _check_bit_mzayasoft(rep):
+    if not config.BIT_MZAYASOFT_ENABLED:
+        rep.add(OFF, "بيت الوطن (مجتمعي)", "bit.mzayasoft.com", "متوقّف")
+        return
+    import bit_mzayasoft
+    summary = bit_mzayasoft.fetch_summary()
+    if summary:
+        line = bit_mzayasoft.format_line(summary)
+        rep.add(OK, "بيت الوطن (مجتمعي)", "bit.mzayasoft.com", line)
+    else:
+        rep.add(WARN, "بيت الوطن (مجتمعي)", "bit.mzayasoft.com",
+                "الاتصال تم بس الأرقام مش واضحة في الصفحة",
+                "الموقع غيّر تصميمه أو بيبني الأرقام بجافاسكريبت — "
+                "شوف bit_mzayasoft.fetch_summary() وعدّل الأنماط لو لزم")
+
+
 CHECKS = [
     ("official", _check_official), ("news", _check_news),
-    ("youtube", _check_youtube), ("tg-public", _check_telegram_public),
+    ("youtube", _check_youtube), ("bit-mzayasoft", _check_bit_mzayasoft),
+    ("tg-public", _check_telegram_public),
     ("tg-account", _check_telegram_account), ("facebook", _check_facebook),
     ("reddit", _check_reddit), ("ai", _check_ai), ("bot", _check_telegram_bot),
 ]

@@ -841,22 +841,44 @@ def _bw_pack_videos(videos, limit=6):
     return "\n\n".join(lines)
 
 
-def extract(ai, items, videos, official_lines):
+def _bw_pack_utterances(utterances, limit=60):
+    """
+    يجهّز كلام الناس (كومنتات يوتيوب + تليجرام + Reddit اللي جمعه الرادار)
+    في شكل مضغوط للـ AI. ده المصدر الفعلي لتفاصيل زي السعر والمقدم
+    والمواعيد — الأخبار الرسمية بطيئة وبتتأخر، الناس بتقول التفاصيل دي
+    في التعليقات قبل ما تتنشر رسميًا بكتير.
+    """
+    lines = []
+    for i, u in enumerate((utterances or [])[:limit], 1):
+        text = (u.get("text") or "").strip()[:280]
+        if not text:
+            continue
+        src = u.get("platform", "") or "؟"
+        lines.append(f"{i}. [{src}] {text}")
+    return "\n".join(lines)
+
+
+def extract(ai, items, videos, official_lines, utterances=None):
     """
     استخراج حقائق منظمة عن بيت الوطن باستخدام AI.
     بيرجّع dict بالحقول اللي في config.BEIT_ALWATAN['tracked_fields'].
+
+    utterances: كلام ناس خام (من human_sources.harvest عبر رادار الإشارات) —
+    ده المصدر الأغنى فعليًا، لأن التفاصيل الدقيقة (السعر، المقدم، الموعد)
+    غالبًا بتتقال في التعليقات قبل ما تتنشر رسميًا بأيام أو أسابيع.
     """
-    if not ai or not items:
+    if not ai or not (items or utterances):
         return {}
     tracked = _config.BEIT_ALWATAN.get("tracked_fields", [])
-    news_txt = _bw_pack_items(items)
+    news_txt = _bw_pack_items(items) if items else ""
     vids_txt = _bw_pack_videos(videos)
     official_txt = "\n".join((official_lines or [])[:15])
+    utts_txt = _bw_pack_utterances(utterances)
 
-    prompt = f"""من الأخبار والفيديوهات والمصادر الرسمية دي عن مشروع بيت الوطن:
+    prompt = f"""من الأخبار والفيديوهات والمصادر الرسمية وكلام الناس دي عن مشروع بيت الوطن:
 
 الأخبار:
-{news_txt}
+{news_txt or '—'}
 
 الفيديوهات (ملخصاتها):
 {vids_txt or '—'}
@@ -864,8 +886,14 @@ def extract(ai, items, videos, official_lines):
 المصادر الرسمية (سطور رصدت):
 {official_txt or '—'}
 
+كلام الناس (تعليقات يوتيوب/تليجرام/Reddit — غير رسمي، لكن غالبًا فيه
+تفاصيل دقيقة زي الأسعار والمقدمات قبل ما تتنشر رسميًا):
+{utts_txt or '—'}
+
 استخرج الحقائق التالية فقط بصيغة JSON. لأي حقل مالوش معلومة صريحة، سيبه null.
 مفيش تخمين — اللي مش موجود في النص = null.
+لو المعلومة جاية من كلام الناس بس (مش مصدر رسمي أو خبر)، اكتب القيمة
+وحطها في "درجة_الثقة" = "منخفضة" حتى لو باقي الحقول من مصدر أقوى.
 
 الحقول:
 {json.dumps(tracked, ensure_ascii=False)}

@@ -457,3 +457,64 @@ def write_executive_brief(ai, news_items, video_summaries):
 
 قواعد مهمة: اعتمد فقط على المعلومات اللي فوق، ماتخترعش أرقام أو تواريخ، وماتديش نصيحة استثمارية مباشرة — اعرض المعلومة وخليه هو يقرر."""
     return ai.ask(prompt, SYSTEM_AR)
+
+
+def write_now_digest(ai, beit_changes, market_changes, official_changes,
+                     urgent_items, novel_signals):
+    """
+    خلاصة قصيرة جدًا (2-4 جمل) بس "إيه الجديد والمهم من آخر مرة" —
+    الهدف إنها تبقى أول حاجة يقراها المستخدم فوق الصفحة، فتغنيه عن قراءة
+    باقي الصفحة لو مالوش وقت. لو مفيش حاجة جديدة فعلًا بيرجع None صراحة
+    (أحسن من فقرة عامة مالهاش معنى).
+    """
+    has_anything = (beit_changes or market_changes or official_changes
+                    or urgent_items or novel_signals)
+    if not has_anything:
+        return None
+
+    parts = []
+    if beit_changes:
+        lines = "\n".join(
+            f"- {c.get('field', '').replace('_', ' ')}: "
+            f"{'كان ' + str(c['from']) + ' وبقى ' if c.get('from') else ''}"
+            f"{c.get('to', '')}"
+            for c in beit_changes[:8])
+        parts.append(f"تغييرات في ملف بيت الوطن:\n{lines}")
+
+    if official_changes:
+        lines = "\n".join(
+            f"- {ch['name']}: " + " · ".join(ch.get("added", [])[:3])[:200]
+            for ch in official_changes[:5])
+        parts.append(f"تغييرات في مصادر رسمية:\n{lines}")
+
+    if market_changes:
+        lines = "\n".join(
+            f"- {c.get('topic', '')} — {c.get('field', '').replace('_', ' ')}: "
+            f"{c.get('to', '')}"
+            for c in market_changes[:6])
+        parts.append(f"تغييرات في ملفات السوق المتابَعة:\n{lines}")
+
+    if urgent_items:
+        lines = "\n".join(f"- {it['title']}" for it in urgent_items[:6])
+        parts.append(f"أخبار عاجلة جديدة:\n{lines}")
+
+    if novel_signals:
+        lines = "\n".join(f"- {s['statement']}" for s in novel_signals[:5])
+        parts.append(f"كلام ناس مهم لسه مش في الأخبار الرسمية:\n{lines}")
+
+    if not ai or not ai.available:
+        # بدون AI: نرجّع أول سطرين خام كخلاصة بسيطة بدل ما نسيب الصفحة فاضية
+        flat = "\n".join(parts)
+        return flat[:400]
+
+    body = "\n\n".join(parts)
+    prompt = f"""دي كل التغييرات والمستجدات اللي حصلت من آخر تحديث للمرصد:
+
+{body}
+
+اكتب خلاصة قصيرة جدًا (2-4 جمل بس، مش أكتر) بالعربية المصرية تقول
+للمصري المغترب "إيه الجديد اللي يستاهل انتباهك من كل ده". لو حاجة فيها
+موعد أو رقم مهم، اذكره بالظبط. ابدأ بأهم حاجة على الإطلاق.
+ماتكتبش عنوان ولا مقدمة، ابدأ في الموضوع على طول. ماتخترعش أي معلومة
+مش موجودة فوق."""
+    return ai.ask(prompt, SYSTEM_AR, fast=True)

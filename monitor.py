@@ -30,12 +30,13 @@ import sources
 import watcher
 import market_state
 import beit_alwatan
+import bit_mzayasoft
 import human_sources
 import intel
 import render
 from ai_engine import (MultiAI, summarize_video, triage, analyze_comments,
                        predict_and_advise, analyze_news_batch,
-                       write_executive_brief)
+                       write_executive_brief, write_now_digest)
 
 try:
     import requests
@@ -338,48 +339,13 @@ def full_cycle(ai, use_ai=True, notify=True, force=False):
             print(f"    → {len(market_changes)} تغيير")
     market_rows = market_state.summary_rows(mstate)
 
-    # ---------- 9) ملف بيت الوطن ----------
-    beit_state = beit_alwatan.load()
-    beit_items = beit_alwatan.filter_items(all_items)
-    beit_changes = []
-    print(f"\n[*] بيت الوطن — {len(beit_items)} عنصر مطابق")
-
-    if beit_items:
-        if use_ai and ai.available:
-            print("    - استخراج الحقائق")
-            beit_vids = [(t, s) for t, s in video_summaries
-                         if any(w in t for w in config.BEIT_ALWATAN["match_words"])]
-            facts = beit_alwatan.extract(ai, beit_items, beit_vids or video_summaries,
-                                         official_lines)
-            beit_changes = beit_alwatan.diff_and_update(beit_state, facts, beit_items)
-            if beit_changes:
-                print(f"    → {len(beit_changes)} تغيير مرصود")
-
-            # كلام الناس — من كل الكومنتات المتعلقة
-            beit_comments = []
-            for vid in videos:
-                if any(w in vid["title"] for w in config.BEIT_ALWATAN["match_words"]):
-                    beit_comments.extend(vid.get("_all_comments") or [])
-            if not beit_comments:
-                for vid in videos:
-                    beit_comments.extend(vid.get("_all_comments") or [])
-            if beit_comments:
-                print("    - تحليل كلام الناس")
-                beit_state["people"] = beit_alwatan.people_pulse(ai, beit_comments)
-
-            print("    - الملخص والتوقعات والخطوات")
-            beit_state["summary"] = beit_alwatan.summarize(ai, beit_state, beit_items)
-            beit_state["forecast"] = beit_alwatan.forecast(
-                ai, beit_state, beit_items, beit_state.get("people"))
-            beit_state["checklist"] = beit_alwatan.checklist(ai, beit_state)
-        else:
-            beit_alwatan.diff_and_update(beit_state, {}, beit_items)
-
-        beit_alwatan.save(beit_state)
-
-    beit_view = beit_alwatan.dashboard(beit_state)
-
-    # ---------- 9-ب) رادار الإشارات المبكرة ----------
+    # ---------- 9) رادار الإشارات المبكرة (قبل بيت الوطن عمدًا) ----------
+    # لازم يشتغل قبل استخراج حقائق بيت الوطن عشان كلام الناس اللي بيجمعه
+    # (كومنتات يوتيوب المعمّقة + تليجرام + Reddit) يتغذّى بيه الاستخراج تحت.
+    # النسخة القديمة كانت بتستخرج حقائق بيت الوطن من عناوين الأخبار
+    # والفيديوهات بس، وده قليل جدًا وعمومًا فاضي — بينما نفس الدورة كانت
+    # بتجمع مئات كومنتات الناس (رادار الإشارات) من غير ما تستخدمها هنا.
+    utts = []
     intel_view = None
     intel_msgs = []
     if config.INTEL_ENABLED:
@@ -399,7 +365,7 @@ def full_cycle(ai, use_ai=True, notify=True, force=False):
 
             istate, fresh, strengthened, confirmed = intel.run(
                 ai, utts, analyze_pool, official_lines,
-                beit_state.get("facts"), use_ai=use_ai)
+                beit_alwatan.load().get("facts"), use_ai=use_ai)
 
             intel_view = intel.board(istate)
             intel_msgs = intel.alerts(fresh, strengthened, confirmed)
@@ -411,6 +377,79 @@ def full_cycle(ai, use_ai=True, notify=True, force=False):
             except Exception:
                 intel_view = None
 
+    # ---------- 9-ب) ملف بيت الوطن ----------
+    beit_state = beit_alwatan.load()
+    beit_items = beit_alwatan.filter_items(all_items)
+    # كلام الناس اللي جمعه الرادار فوق — ده المصدر الحقيقي للتفاصيل
+    # (أسعار، مقدمات، مواعيد) اللي مش بتتنشر في عناوين الأخبار.
+    beit_utts = [u for u in utts if any(
+        w in u.get("text", "") or w in u.get("context", "")
+        for w in config.BEIT_ALWATAN["match_words"])] or utts
+    beit_changes = []
+    print(f"\n[*] بيت الوطن — {len(beit_items)} عنصر مطابق"
+          f" · {len(beit_utts)} كلام ناس")
+
+    if beit_items or beit_utts:
+        if use_ai and ai.available:
+            print("    - استخراج الحقائق")
+            beit_vids = [(t, s) for t, s in video_summaries
+                         if any(w in t for w in config.BEIT_ALWATAN["match_words"])]
+            facts = beit_alwatan.extract(ai, beit_items, beit_vids or video_summaries,
+                                         official_lines, utterances=beit_utts)
+            beit_changes = beit_alwatan.diff_and_update(beit_state, facts, beit_items)
+            if beit_changes:
+                print(f"    → {len(beit_changes)} تغيير مرصود")
+
+            # كلام الناس — كومنتات الفيديوهات + كل حصاد الرادار (تليجرام/Reddit/ردود)
+            beit_comments = []
+            for vid in videos:
+                if any(w in vid["title"] for w in config.BEIT_ALWATAN["match_words"]):
+                    beit_comments.extend(vid.get("_all_comments") or [])
+            if not beit_comments:
+                for vid in videos:
+                    beit_comments.extend(vid.get("_all_comments") or [])
+            # ضيف كلام الرادار (نص موحّد الشكل) كمان لو الكومنتات قليلة
+            if beit_utts:
+                beit_comments.extend(
+                    {"author": u.get("author") or u.get("channel", ""),
+                     "text": u.get("text", ""), "likes": u.get("likes", 0)}
+                    for u in beit_utts)
+            if beit_comments:
+                print("    - تحليل كلام الناس")
+                beit_state["people"] = beit_alwatan.people_pulse(ai, beit_comments)
+
+            print("    - الملخص والتوقعات والخطوات")
+            beit_state["summary"] = beit_alwatan.summarize(ai, beit_state, beit_items)
+            beit_state["forecast"] = beit_alwatan.forecast(
+                ai, beit_state, beit_items, beit_state.get("people"))
+            beit_state["checklist"] = beit_alwatan.checklist(ai, beit_state)
+        else:
+            beit_alwatan.diff_and_update(beit_state, {}, beit_items)
+
+        beit_alwatan.save(beit_state)
+
+    # لوحة القطع المتاحة/المحجوزة الحية — مصدر مجتمعي غير رسمي
+    print("    - لوحة bit.mzayasoft (مجتمعي)")
+    plots_summary = bit_mzayasoft.fetch_summary()
+    if plots_summary:
+        line = bit_mzayasoft.format_line(plots_summary)
+        print(f"      → {line}")
+
+    beit_view = beit_alwatan.dashboard(beit_state)
+    beit_view["plots"] = plots_summary
+
+    # ---------- 9-ج) خلاصة "الأهم دلوقتي" ----------
+    # فقرة قصيرة جدًا (2-4 جمل) بترجّع بس لو فيه حاجة جديدة فعلًا —
+    # الهدف إنها تبقى أول حاجة تظهر فوق الصفحة، تغني القارئ عن السكرول
+    # الطويل لو مالوش وقت. لو مفيش جديد، مابتظهرش قسم فاضي.
+    print("[*] خلاصة الأهم دلوقتي")
+    urgent_items_for_digest = [it for it in all_items if it["link"] in urgent_links][:8]
+    novel_signals = [s for s in ((intel_view or {}).get("novel") or [])
+                     if s.get("status") != "مؤكدة رسميًا"][:6]
+    now_digest = write_now_digest(
+        ai if use_ai else None, beit_changes, market_changes,
+        official_changes, urgent_items_for_digest, novel_signals)
+
     # ---------- 10) الصفحات ----------
     print("\n[*] توليد الصفحات")
     health = watcher.health()
@@ -420,11 +459,12 @@ def full_cycle(ai, use_ai=True, notify=True, force=False):
         sections, brief, new_links, top_links, urgent_links, engines,
         forecast=forecast, market_rows=market_rows, health_rows=health,
         beit=beit_view, official_changes=official_changes,
-        intel=intel_view))
+        intel=intel_view, now_digest=now_digest))
     print(f"    ✓ {config.OUTPUT_HTML}")
 
     write_text(config.BEIT_HTML,
-               render.build_beit_page(beit_view, engines, intel=intel_view))
+               render.build_beit_page(beit_view, engines, intel=intel_view,
+                                      now_digest=now_digest))
     print(f"    ✓ {config.BEIT_HTML}")
 
     # ---------- 11) latest.json (للبوت) ----------
@@ -434,6 +474,7 @@ def full_cycle(ai, use_ai=True, notify=True, force=False):
 
     save_json(config.LATEST_JSON, {
         "updated": datetime.now(timezone.utc).isoformat(),
+        "now_digest": now_digest,
         "brief": brief,
         "forecast": forecast,
         "market": market_rows,
@@ -455,6 +496,7 @@ def full_cycle(ai, use_ai=True, notify=True, force=False):
             "forecast": beit_view.get("forecast"),
             "checklist": beit_view.get("checklist"),
             "timeline": (beit_view.get("timeline") or [])[:15],
+            "plots": beit_view.get("plots"),
         },
         "intel": {
             "counts": (intel_view or {}).get("counts", {}),
