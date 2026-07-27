@@ -77,6 +77,36 @@ a:hover{color:var(--navy-3);}
   display:grid; grid-template-columns:1fr 300px; gap:30px; align-items:start;}
 @media(max-width:1000px){ .wrap{grid-template-columns:1fr; padding:22px 16px 50px;} .rail{order:-1;} }
 
+/* ---------- خلاصة "الأهم دلوقتي" ---------- */
+.now-digest{background:linear-gradient(135deg,#fff9ec,#fdf3dc);
+  border:1px solid #e9d9ac; border-inline-start:5px solid var(--gold-2);
+  border-radius:var(--radius); padding:16px 20px; margin-bottom:20px;
+  box-shadow:var(--shadow-sm);}
+.now-digest-label{font-size:12px; font-weight:800; letter-spacing:.6px;
+  color:var(--gold); text-transform:uppercase; margin-bottom:7px;}
+.now-digest-body{font-size:15.5px; line-height:1.85; color:var(--ink);}
+.now-digest-body p{margin:5px 0;}
+.now-digest-body ul{margin:5px 0; padding-inline-start:20px;}
+
+.plots-box{background:#f8fafc; border:1px solid var(--line);
+  border-radius:var(--radius); padding:14px 18px; margin-bottom:20px;}
+.plots-label{font-size:12.5px; font-weight:600; color:var(--muted);}
+.plots-label a{margin-inline-start:8px; font-size:12px;}
+
+/* ---------- طيّ الأقسام الثانوية ---------- */
+.collapsible > summary{cursor:pointer; list-style:none; user-select:none;}
+.collapsible > summary::-webkit-details-marker{display:none;}
+.collapsible > summary.toggle-head{display:flex; align-items:center; gap:10px;
+  padding:18px 24px; font-size:17px; font-weight:700; color:var(--navy);
+  background:linear-gradient(180deg,#fcfdff,#f5f8fc);
+  border-bottom:1px solid transparent; font-family:'Cairo','IBM Plex Sans Arabic',sans-serif;}
+.collapsible[open] > summary.toggle-head{border-bottom-color:var(--line);}
+.collapsible > summary.toggle-head::after{content:'▸'; margin-inline-start:auto;
+  color:var(--muted); font-size:13px; transition:transform .15s;}
+.collapsible[open] > summary.toggle-head::after{transform:rotate(90deg);}
+.collapsible > summary.toggle-head .hint{font-size:12px; font-weight:500;
+  color:var(--faint); margin-inline-start:6px;}
+
 /* ---------- المؤشرات ---------- */
 .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
   gap:12px; margin-bottom:24px;}
@@ -99,7 +129,7 @@ a:hover{color:var(--navy-3);}
 
 /* ---------- الأقسام ---------- */
 .doc{counter-reset:sec;}
-section.block{background:var(--paper); border:1px solid var(--line);
+.block{background:var(--paper); border:1px solid var(--line);
   border-radius:var(--radius); margin-bottom:22px; overflow:hidden;
   box-shadow:var(--shadow-sm);}
 section.block > h2{counter-increment:sec; margin:0; padding:18px 24px;
@@ -112,6 +142,7 @@ section.block > h2::before{content:counter(sec); font-size:12px; font-weight:800
   min-width:26px; height:26px; border-radius:6px;
   display:inline-flex; align-items:center; justify-content:center; flex:none;
   font-variant-numeric:tabular-nums;}
+details.collapsible.block > summary.toggle-head{counter-increment:sec;}
 .block-body{padding:22px 24px 24px;}
 .block-body > *:first-child{margin-top:0;}
 .block-body > *:last-child{margin-bottom:0;}
@@ -405,7 +436,7 @@ td.k{font-weight:600; color:var(--ink); width:32%; white-space:nowrap;}
   <h1>بيت الوطن — أراضي المصريين بالخارج</h1>
   <p class="lede">رصد مستمر للمرحلة والمواعيد والأسعار والشروط · تحليل وقراءة استشرافية</p>
   <div class="issue">
-    <span>آخر تحديث: <b>27 يوليو 2026 — 07:35 بتوقيت القاهرة</b></span>
+    <span>آخر تحديث: <b>27 يوليو 2026 — 09:01 بتوقيت القاهرة</b></span>
     <span>المرحلة: <b>المرحلة 11</b></span>
     <span>حالة الحجز: <b>غير معروف</b></span>
     <span>درجة الثقة: <b>متوسطة</b></span>
@@ -425,6 +456,15 @@ td.k{font-weight:600; color:var(--ink); width:32%; white-space:nowrap;}
 </div></nav>
 <div class="wrap">
   <main class="doc">
+<div class="now-digest">
+  <div class="now-digest-label">⚡ الأهم من آخر تحديث</div>
+  <div class="now-digest-body"><p>المصري المغترب، إحنا نقوللك أنك لازم تعرف إن حجز أراضي مسكن 7 المتوسطة والمميزة ب17 مدينة جديدة بدأ اليوم 27 يوليو. ويمكنك الحجز الإلكتروني من خلال رابط كراسة الشروط، والتقديم يبدأ من اليوم نفسه.</p></div>
+</div>
+<div class="plots-box">
+  <div class="plots-label">لوحة القطع الحية — مصدر مجتمعي (غير رسمي)
+    <a href="https://bit.mzayasoft.com/" target="_blank" rel="noopener">bit.mzayasoft.com ↗</a></div>
+  <div class="kpis" style="margin:10px 0 0"><div class="kpi"><div class="k-label">الإجمالي</div><div class="k-value">2</div></div><div class="kpi"><div class="k-label">المحجوز</div><div class="k-value">2</div></div><div class="kpi"><div class="k-label">المتبقي</div><div class="k-value">2</div></div><div class="kpi"><div class="k-label">اليوم</div><div class="k-value">2</div></div></div>
+</div>
 <div class="kpis">
   <div class="kpi "><div class="k-label">المرحلة الحالية</div><div class="k-value">المرحلة 11</div></div>
   <div class="kpi "><div class="k-label">حالة الحجز</div><div class="k-value">غير معروف</div></div>
@@ -435,7 +475,7 @@ td.k{font-weight:600; color:var(--ink); width:32%; white-space:nowrap;}
 <section class="block" id="brief">
   <h2>الملخص التنفيذي</h2>
   <div class="block-body">
-<p>الوضع دلوقتي في مشروع بيت الوطن هو المرحلة 11، والمدن المطروحة هي القاهرة الجديدة، ودخلت شمال الرحاب واللوتس للمرة الأولى. المصري المغترب محتاج يعرف أن هناك تطورات جديدة في المشروع، زي دخول مناطق جديدة وتنقل حجز القطع والمربعات الجديدة. يوجد أيضًا أخبار عن إنجازات جهاز المدينة في المنطقة، وشركات تسويق عقاري متخصصة في بيع وشراء الأراضي في المناطق الجديدة.</p>
+<p>المصري المغترب محتاج يعرف أن حالة ملف بيت الوطن حاليًا في المرحلة 11، وبالتالي يوجد فرص جديدة للمشاركة في المشروع. دخول شمال الرحاب واللوتس ومناطق جديدة لأول مرة في المرحلة الحالية يفتح أبوابًا جديدة للمستثمرين. يُفضل على المصريين المغتربين متابعة آخر التطورات والتحديثات حول المشروع لتكون على إطلاع دائم بالفرص المتاحة.</p>
   </div>
 </section>
 <section class="block" id="facts">
@@ -446,11 +486,11 @@ td.k{font-weight:600; color:var(--ink); width:32%; white-space:nowrap;}
 <tr><td class="k">حالة الحجز</td><td><span class="tag gray">غير معروف</span></td></tr>
 <tr><td class="k">سعر المتر</td><td><span style="color:var(--faint)">لم يُعلن رسميًا بعد</span></td></tr>
 <tr><td class="k">المساحات المتاحة</td><td><span style="color:var(--faint)">لم يُعلن رسميًا بعد</span></td></tr>
-<tr><td class="k">المدن المطروحة</td><td>القاهرة الجديدة، الشيخ زايد، بدر</td></tr>
+<tr><td class="k">المدن المطروحة</td><td>القاهرة الجديدة، الشيخ زايد، بدر، العبور</td></tr>
 <tr><td class="k">قيمة الجدية</td><td><span style="color:var(--faint)">لم يُعلن رسميًا بعد</span></td></tr>
 <tr><td class="k">طريقة السداد</td><td><span style="color:var(--faint)">لم يُعلن رسميًا بعد</span></td></tr>
 <tr><td class="k">شروط التقديم</td><td><span style="color:var(--faint)">لم يُعلن رسميًا بعد</span></td></tr>
-<tr><td class="k">آخر تطور</td><td>دخول شمال الرحاب واللوتس</td></tr>
+<tr><td class="k">آخر تطور</td><td>دخول شمال الرحاب واللوتس ومناطق جديدة</td></tr>
 </tbody></table>
 <p style="font-size:13px;color:var(--muted);margin-top:12px">البيانات مستخرجة آليًا من الأخبار والمصادر الرسمية المرصودة. <b>أي رقم أو موعد لازم يتأكد من كراسة الشروط الرسمية قبل أي إجراء.</b></p>
   </div>
@@ -479,9 +519,10 @@ td.k{font-weight:600; color:var(--ink); width:32%; white-space:nowrap;}
   <h2>المدن الأكثر ذكرًا</h2>
   <div class="block-body">
 <table><tbody>
-<tr><td class="k">القاهرة الجديدة</td><td><div style="background:#eaf1f7;border-radius:3px;height:19px;position:relative;min-width:60px"><div style="background:var(--navy-2);height:100%;width:100%;border-radius:3px"></div></div></td><td style="width:70px;text-align:center">6 ذكر</td></tr>
-<tr><td class="k">الشيخ زايد</td><td><div style="background:#eaf1f7;border-radius:3px;height:19px;position:relative;min-width:60px"><div style="background:var(--navy-2);height:100%;width:33%;border-radius:3px"></div></div></td><td style="width:70px;text-align:center">2 ذكر</td></tr>
-<tr><td class="k">بدر</td><td><div style="background:#eaf1f7;border-radius:3px;height:19px;position:relative;min-width:60px"><div style="background:var(--navy-2);height:100%;width:33%;border-radius:3px"></div></div></td><td style="width:70px;text-align:center">2 ذكر</td></tr>
+<tr><td class="k">القاهرة الجديدة</td><td><div style="background:#eaf1f7;border-radius:3px;height:19px;position:relative;min-width:60px"><div style="background:var(--navy-2);height:100%;width:100%;border-radius:3px"></div></div></td><td style="width:70px;text-align:center">9 ذكر</td></tr>
+<tr><td class="k">الشيخ زايد</td><td><div style="background:#eaf1f7;border-radius:3px;height:19px;position:relative;min-width:60px"><div style="background:var(--navy-2);height:100%;width:33%;border-radius:3px"></div></div></td><td style="width:70px;text-align:center">3 ذكر</td></tr>
+<tr><td class="k">بدر</td><td><div style="background:#eaf1f7;border-radius:3px;height:19px;position:relative;min-width:60px"><div style="background:var(--navy-2);height:100%;width:33%;border-radius:3px"></div></div></td><td style="width:70px;text-align:center">3 ذكر</td></tr>
+<tr><td class="k">العبور</td><td><div style="background:#eaf1f7;border-radius:3px;height:19px;position:relative;min-width:60px"><div style="background:var(--navy-2);height:100%;width:11%;border-radius:3px"></div></div></td><td style="width:70px;text-align:center">1 ذكر</td></tr>
 </tbody></table>
 <p style="font-size:13px;color:var(--muted)">ترتيب حسب تكرار ذكر المدينة في الأخبار المرصودة — مؤشر اهتمام إعلامي، <b>ليس تأكيدًا على الطرح</b>.</p>
   </div>
@@ -494,24 +535,14 @@ td.k{font-weight:600; color:var(--ink); width:32%; white-space:nowrap;}
 <div class="tl-item"><div class="tl-when">2026-07-27</div><div class="tl-what"><b>المدن المطروحة</b>: القاهرة الجديدة <a href="https://www.youtube.com/watch?v=deNhseBhPF8" target="_blank" rel="noopener" style="font-size:12px">[المصدر]</a></div></div>
 <div class="tl-item"><div class="tl-when">2026-07-27</div><div class="tl-what"><b>آخر تطور</b>: دخول شمال الرحاب واللوتس <a href="https://www.youtube.com/watch?v=deNhseBhPF8" target="_blank" rel="noopener" style="font-size:12px">[المصدر]</a></div></div>
 <div class="tl-item"><div class="tl-when">2026-07-27</div><div class="tl-what"><b>درجة الثقة</b>: متوسطة <a href="https://www.youtube.com/watch?v=deNhseBhPF8" target="_blank" rel="noopener" style="font-size:12px">[المصدر]</a></div></div>
+<div class="tl-item"><div class="tl-when">2026-07-27</div><div class="tl-what"><b>آخر تطور</b>: <s>دخول شمال الرحاب واللوتس</s> ← دخول شمال الرحاب واللوتس ومناطق جديدة <a href="https://www.youtube.com/watch?v=deNhseBhPF8" target="_blank" rel="noopener" style="font-size:12px">[المصدر]</a></div></div>
 </div>
   </div>
 </section>
-<section class="block" id="outlook">
-  <h2>القراءة الاستشرافية</h2>
+<section class="block" id="people">
+  <h2>كلام الناس — قراءة تعليقات الجمهور</h2>
   <div class="block-body">
-<p>نحن الآن في المرحلة الحالية 11 من مشروع بيت الوطن في القاهرة الجديدة، حيث شهدت دخول شمال الرحاب واللوتس ومناطق جديدة لأول مرة. هذا التطور يظهر أن هناك نشاطًا عقاريًا متزايدًا في المنطقة.</p>
-<p>في الأسابيع القادمة، يمكن توقع حدوث تطورات جديدة في مشروع بيت الوطن، مع تحفظات صريحة حول سرعة وnature هذه التطورات. قد تشمل هذه التطورات إضافة مناطق جديدة أو تقدم في مشاريع البناء الحالية، ولكن لا يمكن التأكد من ذلك بدون معلومات إضافية.</p>
-<p>سيناريوهات المستقبل هي:</p>
-<p>· الأرجح: استمرار التطورات الحالية في مشروع بيت الوطن.</p>
-<p>· متفائل: تسارع وتيرة التطورات وزيادة الإقبال على المشروع.</p>
-<p>· متحفظ: تباطؤ أو تقلبات في السوق العقاري قد تؤثر على تقدم المشروع.</p>
-  </div>
-</section>
-<section class="block" id="steps">
-  <h2>خطوات عملية</h2>
-  <div class="block-body">
-<p>[&#x27;جمع المستندات اللازمة.&#x27;, &#x27;تحديث بياناتك الشخصية.&#x27;, &#x27;تحديد الخيار الأمثل من المشاريع.&#x27;, &#x27;التأكد من إمكانية السداد.&#x27;, &#x27;متابعة الإعلانات الرسمية.&#x27;, &#x27;التواصل مع الوكالات المعنية.&#x27;]</p>
+<p>المزاج العام للمتابعين هو مزاج متفائل بشكل عام، حيث يعبّر العديد منهم عن تطلعاتهم وتمنياتهم لبدء السكن في الأحياء الجديدة قريباً، ويظهر ذلك من خلال تعليقات مثل &quot;ان شاء الله قريبا&quot; و&quot;خير باذن الله&quot; و&quot;اللهم أمين&quot;.然而، هناك بعض المخاوف المتكررة حول تسليم الوحدات السكنية في الوقت المناسب، حيث يسأل بعض المتابعين عن موعد التسليم المتوقع، كما يظهر قلق من ارتفاع أسعار الأراضي والوحدات السكنية. من بين الأسئلة التي لم ترد عليها بعد، هناك سؤال حول دخول الكهرباء واكتمال المرافق في الحي التكميلي حرف C، وسؤال آخر حول موعد تسليم الحي السادس.</p><p style="font-size:13px;color:var(--muted);margin-top:14px">⚠️ هذا القسم مبني على تعليقات أفراد على الإنترنت. <b>ليس مصدرًا رسميًا</b> ولا يُبنى عليه قرار.</p>
   </div>
 </section>
 <div class="disclaimer">
@@ -519,22 +550,10 @@ td.k{font-weight:600; color:var(--ink); width:32%; white-space:nowrap;}
   من أخبار ومصادر عامة، و<b>قابلة للخطأ</b>. المواعيد والأسعار والشروط
   <b>لا يُعتمد عليها</b> إلا بعد التأكد من كراسة الشروط الرسمية ومنصة مصر العقارية.
   هذا المحتوى للاطلاع فقط وليس استشارة مالية أو قانونية.
-  <div class="engines">محركات التحليل — Groq: 9✓/0✗ · Gemini: 0✓/0✗</div>
+  <div class="engines">محركات التحليل — Groq: 9✓/2✗ · Gemini: 0✓/1✗ (موقوف)</div>
 </div>
   </main>
   <aside class="rail">
-<div class="box"><h4>محتويات الملف</h4><div class="toc">
-<a href="#brief">الملخص التنفيذي</a>
-<a href="#facts">البطاقة التعريفية</a>
-<a href="#dates">المواعيد الرسمية</a>
-<a href="#radar"><b>رادار الإشارات المبكرة</b></a>
-<a href="#places">المدن الأكثر ذكرًا</a>
-<a href="#timeline">الخط الزمني</a>
-<a href="#people">كلام الناس</a>
-<a href="#outlook">القراءة الاستشرافية</a>
-<a href="#steps">خطوات عملية</a>
-<a href="#sources">المصادر</a>
-</div></div>
 <div class="box"><h4>الرادار</h4><div class="r"><span>إشارات مرصودة</span><b>0</b></div><div class="r"><span>مش في الأخبار</span><b style="color:var(--gold)">0</b></div><div class="r"><span>اتأكدت رسميًا</span><b style="color:var(--green)">0</b></div></div>
 <div class="box"><h4>روابط الإجراء</h4>
   <a class="lnk" href="https://reservations.realestate.gov.eg/ar" target="_blank" rel="noopener">منصة مصر العقارية — الحجز</a>
@@ -545,7 +564,7 @@ td.k{font-weight:600; color:var(--ink); width:32%; white-space:nowrap;}
 </div>
 <script>
 document.querySelectorAll('[data-filters]').forEach(function(bar){
-  var scope = bar.closest('section');
+  var scope = bar.closest('section') || bar.closest('details') || bar.parentElement;
   var btns = bar.querySelectorAll('button');
   btns.forEach(function(b){
     b.addEventListener('click', function(){
