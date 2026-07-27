@@ -66,8 +66,8 @@
    "العمرانية الجديدة - تحت رعاية وزارة الإتصالات وتكنولوجيا المعلومات"
   ],
   "count": 30,
-  "checked": "2026-07-27T09:31:51.005641+00:00",
-  "fail_count": 1,
+  "checked": "2026-07-27T10:51:59.063227+00:00",
+  "fail_count": 0,
   "last_error": "تعذّر الوصول: HTTPSConnectionPool(host='lands.nuca.gov.eg', port=443): Max retries exceeded with url: /ar/Home.asp"
  },
  "https://lands.nuca.gov.eg/ar/News.aspx": {
@@ -93,8 +93,8 @@
    "العمرانية الجديدة - تحت رعاية وزارة الإتصالات وتكنولوجيا المعلومات"
   ],
   "count": 8,
-  "checked": "2026-07-27T09:31:51.005641+00:00",
-  "fail_count": 1,
+  "checked": "2026-07-27T10:51:59.063227+00:00",
+  "fail_count": 0,
   "last_error": "تعذّر الوصول: HTTPSConnectionPool(host='lands.nuca.gov.eg', port=443): Max retries exceeded with url: /ar/News.asp"
  },
  "https://lands.nuca.gov.eg/": {
@@ -164,8 +164,8 @@
    "العمرانية الجديدة - تحت رعاية وزارة الإتصالات وتكنولوجيا المعلومات"
   ],
   "count": 30,
-  "checked": "2026-07-27T09:31:51.005641+00:00",
-  "fail_count": 1,
+  "checked": "2026-07-27T10:51:59.063227+00:00",
+  "fail_count": 0,
   "last_error": "تعذّر الوصول: HTTPSConnectionPool(host='lands.nuca.gov.eg', port=443): Max retries exceeded with url: / (Caused by"
  },
  "http://www.newcities.gov.eg/": {
@@ -256,13 +256,13 @@
    "(32 – 85) من القانون رقم 182"
   ],
   "count": 41,
-  "checked": "2026-07-27T09:31:51.005641+00:00",
+  "checked": "2026-07-27T10:51:59.063227+00:00",
   "fail_count": 0
  },
  "https://reservations.realestate.gov.eg/ar": {
   "last_error": "تعذّر الوصول: 522 Server Error: <none> for url: https://reservations.realestate.gov.eg/ar",
-  "checked": "2026-07-27T09:31:51.005641+00:00",
-  "fail_count": 4
+  "checked": "2026-07-27T10:51:59.063227+00:00",
+  "fail_count": 5
  },
  "https://beitakfemisr.com/": {
   "fp": "8edbd1749a5d16bd7635cc664be78ec9fe6bf1fd4da24db8e297dd4e389b5ad3",
@@ -273,12 +273,12 @@
    "امتلك منزلك في مصر بسهولة من الخارج | بيتك في مصر"
   ],
   "count": 1,
-  "checked": "2026-07-27T09:31:51.005641+00:00",
+  "checked": "2026-07-27T10:51:59.063227+00:00",
   "fail_count": 0
  },
  "https://www.mhuc.gov.eg/": {
   "last_error": "تعذّر الوصول: HTTPSConnectionPool(host='www.mhuc.gov.eg', port=443): Max retries exceeded with url: / (Caused by P",
-  "checked": "2026-07-27T09:31:51.005641+00:00",
-  "fail_count": 4
+  "checked": "2026-07-27T10:51:59.063227+00:00",
+  "fail_count": 5
  }
 }
