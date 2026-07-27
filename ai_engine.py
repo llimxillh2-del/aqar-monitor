@@ -460,15 +460,18 @@ def write_executive_brief(ai, news_items, video_summaries):
 
 
 def write_now_digest(ai, beit_changes, market_changes, official_changes,
-                     urgent_items, novel_signals):
+                     urgent_items, novel_signals, new_ads=None):
     """
     خلاصة قصيرة جدًا (2-4 جمل) بس "إيه الجديد والمهم من آخر مرة" —
     الهدف إنها تبقى أول حاجة يقراها المستخدم فوق الصفحة، فتغنيه عن قراءة
     باقي الصفحة لو مالوش وقت. لو مفيش حاجة جديدة فعلًا بيرجع None صراحة
     (أحسن من فقرة عامة مالهاش معنى).
+
+    new_ads: إعلانات بيع/شراء جديدة فعليًا من bit.mzayasoft.com (مصدر
+    مجتمعي غير رسمي) — سوق حقيقي بأسعار حقيقية، مهم يظهر هنا فورًا.
     """
     has_anything = (beit_changes or market_changes or official_changes
-                    or urgent_items or novel_signals)
+                    or urgent_items or novel_signals or new_ads)
     if not has_anything:
         return None
 
@@ -501,6 +504,18 @@ def write_now_digest(ai, beit_changes, market_changes, official_changes,
     if novel_signals:
         lines = "\n".join(f"- {s['statement']}" for s in novel_signals[:5])
         parts.append(f"كلام ناس مهم لسه مش في الأخبار الرسمية:\n{lines}")
+
+    if new_ads:
+        lines = []
+        for a in new_ads[:5]:
+            bits = [a.get("status") or "إعلان"]
+            if a.get("area_m2"):
+                bits.append(f"{a['area_m2']} م²")
+            if a.get("premium"):
+                bits.append(f"الأوفر {a['premium']:,} جنيه")
+            lines.append("- " + " — ".join(bits))
+        parts.append("إعلانات قطع جديدة على bit.mzayasoft (سوق حقيقي، "
+                     "مصدر مجتمعي غير رسمي):\n" + "\n".join(lines))
 
     if not ai or not ai.available:
         # بدون AI: نرجّع أول سطرين خام كخلاصة بسيطة بدل ما نسيب الصفحة فاضية

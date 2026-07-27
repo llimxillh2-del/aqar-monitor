@@ -1359,6 +1359,7 @@ def build_beit_page(d, engines_note, intel=None, now_digest=None):
 
     # لوحة القطع المتاحة/المحجوزة — مصدر مجتمعي حي (bit.mzayasoft)
     plots = d.get("plots")
+    mzaya_url = d.get("mzaya_source_url") or (plots or {}).get("source_url") or config.BIT_MZAYASOFT_URL
     if plots:
         cells = []
         for label, key in (("الإجمالي", "total"), ("المحجوز", "reserved"),
@@ -1369,9 +1370,88 @@ def build_beit_page(d, engines_note, intel=None, now_digest=None):
         if cells:
             main.append(f"""<div class="plots-box">
   <div class="plots-label">لوحة القطع الحية — مصدر مجتمعي (غير رسمي)
-    <a href="{esc(plots.get("source_url", "#"))}" target="_blank" rel="noopener">bit.mzayasoft.com ↗</a></div>
+    <a href="{esc(mzaya_url)}" target="_blank" rel="noopener">bit.mzayasoft.com ↗</a></div>
   <div class="kpis" style="margin:10px 0 0">{"".join(cells)}</div>
 </div>""")
+
+    # إعلانات جديدة فعليًا (لو فيه) — أهم حاجة، تظهر فوق فورًا
+    new_ads = d.get("mzaya_new_ads")
+    if new_ads:
+        rows_html = []
+        for a in new_ads[:8]:
+            bits = []
+            if a.get("status"):
+                bits.append(f'<span class="tag {"good" if a["status"]=="معروض للبيع" else "alert"}">{esc(a["status"])}</span>')
+            if a.get("area_m2"):
+                bits.append(f'{a["area_m2"]:,} م²')
+            if a.get("paid"):
+                bits.append(f'مدفوع {a["paid"]:,} ج')
+            if a.get("premium"):
+                bits.append(f'الأوفر {a["premium"]:,} ج')
+            phone_html = (f' · <a href="tel:{esc(a["phone"])}">{esc(a["phone"])}</a>'
+                         if a.get("phone") else "")
+            rows_html.append(f'<li>{" · ".join(bits)}{phone_html}</li>')
+        main.append(f"""<div class="plots-box" style="border-inline-start:4px solid var(--gold-2)">
+  <div class="plots-label">🆕 إعلانات قطع جديدة على bit.mzayasoft ({len(new_ads)})</div>
+  <ul style="margin:10px 0 0; padding-inline-start:20px; font-size:14px; line-height:1.9">
+    {"".join(rows_html)}
+  </ul>
+</div>""")
+
+    # البرشامة — نطاق أقل/أعلى مقدم فعلي عبر كل المناطق + جدول تفصيلي
+    price_range = d.get("mzaya_price_range")
+    divisions = d.get("mzaya_divisions") or []
+    if price_range or divisions:
+        pr_html = ""
+        if price_range and price_range.get("lowest") and price_range.get("highest"):
+            pr_html = (f'<div class="kpis" style="margin:10px 0">'
+                       f'<div class="kpi"><div class="k-label">أقل مقدم مسجّل</div>'
+                       f'<div class="k-value">{price_range["lowest"]:,} ج</div></div>'
+                       f'<div class="kpi"><div class="k-label">أعلى مقدم مسجّل</div>'
+                       f'<div class="k-value">{price_range["highest"]:,} ج</div></div>'
+                       f'<div class="kpi"><div class="k-label">عدد المناطق المرصودة</div>'
+                       f'<div class="k-value">{price_range["divisions_count"]}</div></div>'
+                       f'</div>')
+
+        table_rows = []
+        for div in divisions[:25]:
+            name = esc(div.get("name") or "—")
+            plot_count = div.get("plot_count") or "—"
+            min_d = f'{div["min_deposit_n"]:,}' if div.get("min_deposit_n") else "—"
+            max_d = f'{div["max_deposit_n"]:,}' if div.get("max_deposit_n") else "—"
+            avg_area = esc(div.get("avg_area") or "—")
+            link = div.get("link")
+            name_html = (f'<a href="{esc(link)}" target="_blank" rel="noopener">{name}</a>'
+                        if link else name)
+            table_rows.append(f"<tr><td>{name_html}</td><td>{avg_area}</td>"
+                             f"<td>{plot_count}</td><td>{min_d}</td><td>{max_d}</td></tr>")
+
+        table_html = ""
+        if table_rows:
+            table_html = (f'<table><thead><tr><th>المنطقة/المرحلة</th>'
+                         f'<th>متوسط المساحة</th><th>عدد القطع</th>'
+                         f'<th>أقل مقدم (ج)</th><th>أعلى مقدم (ج)</th></tr></thead>'
+                         f'<tbody>{"".join(table_rows)}</tbody></table>')
+
+        body = pr_html + table_html
+        main.append(_block_collapsed(
+            "البرشامة — أقل وأعلى مقدم فعلي لكل منطقة (مصدر مجتمعي)",
+            body, anchor="divisions",
+            hint=f"{len(divisions)} منطقة مرصودة", open_=bool(price_range)))
+
+    ads_stats = d.get("mzaya_ads_stats")
+    if ads_stats and ads_stats.get("total"):
+        parts = [f'{ads_stats["total"]} إعلان نشط']
+        if ads_stats.get("sell_count") is not None:
+            parts.append(f'{ads_stats["sell_count"]} معروض للبيع')
+        if ads_stats.get("buy_count") is not None:
+            parts.append(f'{ads_stats["buy_count"]} مطلوب للشراء')
+        if ads_stats.get("avg_premium"):
+            parts.append(f'متوسط الأوفر {ads_stats["avg_premium"]:,} ج')
+        land_ads_url = mzaya_url.rstrip("/") + "/LandAds"
+        main.append(f'<p class="hint" style="margin:-6px 0 14px">'
+                   f'سوق القطع الحالي على bit.mzayasoft: {" · ".join(parts)} — '
+                   f'<a href="{esc(land_ads_url)}" target="_blank" rel="noopener">كل الإعلانات ↗</a></p>')
 
     nxt = d.get("next")
     kpi_cells = [

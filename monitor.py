@@ -428,15 +428,28 @@ def full_cycle(ai, use_ai=True, notify=True, force=False):
 
         beit_alwatan.save(beit_state)
 
-    # لوحة القطع المتاحة/المحجوزة الحية — مصدر مجتمعي غير رسمي
+    # لوحة bit.mzayasoft (مجتمعي) — كروت الصفحة الرئيسية + البرشامة
+    # (أقل/أعلى مقدم لكل منطقة) + إعلانات بيع/شراء فعلية بأسعار حقيقية
     print("    - لوحة bit.mzayasoft (مجتمعي)")
-    plots_summary = bit_mzayasoft.fetch_summary()
-    if plots_summary:
-        line = bit_mzayasoft.format_line(plots_summary)
-        print(f"      → {line}")
+    mzaya = bit_mzayasoft.fetch_all()
+    if mzaya:
+        if mzaya.get("summary"):
+            print(f"      → {bit_mzayasoft.format_line(mzaya['summary'])}")
+        if mzaya.get("price_range"):
+            pr = mzaya["price_range"]
+            print(f"      → نطاق المقدم في {pr['divisions_count']} منطقة: "
+                  f"{pr['lowest']:,} - {pr['highest']:,} جنيه")
+        if mzaya.get("new_ads"):
+            print(f"      → {len(mzaya['new_ads'])} إعلان جديد فعليًا")
 
     beit_view = beit_alwatan.dashboard(beit_state)
-    beit_view["plots"] = plots_summary
+    beit_view["plots"] = (mzaya or {}).get("summary")
+    beit_view["mzaya_divisions"] = (mzaya or {}).get("divisions")
+    beit_view["mzaya_price_range"] = (mzaya or {}).get("price_range")
+    beit_view["mzaya_land_ads"] = (mzaya or {}).get("land_ads")
+    beit_view["mzaya_ads_stats"] = (mzaya or {}).get("ads_stats")
+    beit_view["mzaya_new_ads"] = (mzaya or {}).get("new_ads")
+    beit_view["mzaya_source_url"] = config.BIT_MZAYASOFT_URL
 
     # ---------- 9-ج) خلاصة "الأهم دلوقتي" ----------
     # فقرة قصيرة جدًا (2-4 جمل) بترجّع بس لو فيه حاجة جديدة فعلًا —
@@ -448,7 +461,8 @@ def full_cycle(ai, use_ai=True, notify=True, force=False):
                      if s.get("status") != "مؤكدة رسميًا"][:6]
     now_digest = write_now_digest(
         ai if use_ai else None, beit_changes, market_changes,
-        official_changes, urgent_items_for_digest, novel_signals)
+        official_changes, urgent_items_for_digest, novel_signals,
+        new_ads=beit_view.get("mzaya_new_ads"))
 
     # ---------- 10) الصفحات ----------
     print("\n[*] توليد الصفحات")
@@ -497,6 +511,10 @@ def full_cycle(ai, use_ai=True, notify=True, force=False):
             "checklist": beit_view.get("checklist"),
             "timeline": (beit_view.get("timeline") or [])[:15],
             "plots": beit_view.get("plots"),
+            "mzaya_divisions": (beit_view.get("mzaya_divisions") or [])[:30],
+            "mzaya_price_range": beit_view.get("mzaya_price_range"),
+            "mzaya_ads_stats": beit_view.get("mzaya_ads_stats"),
+            "mzaya_new_ads": beit_view.get("mzaya_new_ads"),
         },
         "intel": {
             "counts": (intel_view or {}).get("counts", {}),

@@ -266,12 +266,35 @@ def _check_bit_mzayasoft(rep):
     summary = bit_mzayasoft.fetch_summary()
     if summary:
         line = bit_mzayasoft.format_line(summary)
-        rep.add(OK, "بيت الوطن (مجتمعي)", "bit.mzayasoft.com", line)
+        rep.add(OK, "بيت الوطن (مجتمعي) — الرئيسية", "bit.mzayasoft.com", line)
     else:
-        rep.add(WARN, "بيت الوطن (مجتمعي)", "bit.mzayasoft.com",
+        rep.add(WARN, "بيت الوطن (مجتمعي) — الرئيسية", "bit.mzayasoft.com",
                 "الاتصال تم بس الأرقام مش واضحة في الصفحة",
                 "الموقع غيّر تصميمه أو بيبني الأرقام بجافاسكريبت — "
                 "شوف bit_mzayasoft.fetch_summary() وعدّل الأنماط لو لزم")
+
+    divisions = bit_mzayasoft.fetch_divisions()
+    if divisions:
+        pr = bit_mzayasoft.divisions_price_range(divisions)
+        line = (f"{len(divisions)} منطقة — مقدم {pr['lowest']:,}-{pr['highest']:,} ج"
+               if pr and pr.get("lowest") else f"{len(divisions)} منطقة")
+        rep.add(OK, "بيت الوطن (مجتمعي) — البرشامة", "bit.mzayasoft.com/Divisions/Divisions", line)
+    else:
+        rep.add(WARN, "بيت الوطن (مجتمعي) — البرشامة",
+                "bit.mzayasoft.com/Divisions/Divisions",
+                "جدول المناطق مش واضح أو الموقع غيّر شكله",
+                "شوف bit_mzayasoft._parse_divisions_table() وعدّل أسماء الأعمدة لو لزم")
+
+    ads = bit_mzayasoft.fetch_land_ads()
+    if ads:
+        stats = bit_mzayasoft.land_ads_price_stats(ads)
+        line = f"{stats['total']} إعلان ({stats['sell_count']} بيع / {stats['buy_count']} شراء)"
+        rep.add(OK, "بيت الوطن (مجتمعي) — إعلانات القطع", "bit.mzayasoft.com/LandAds", line)
+    else:
+        rep.add(WARN, "بيت الوطن (مجتمعي) — إعلانات القطع",
+                "bit.mzayasoft.com/LandAds",
+                "مفيش إعلانات اتقرت أو الموقع غيّر شكل الكروت",
+                "شوف bit_mzayasoft._parse_land_ads_cards() وعدّل الأنماط لو لزم")
 
 
 CHECKS = [
