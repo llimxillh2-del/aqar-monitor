@@ -77,29 +77,29 @@
  ],
  "dates": [],
  "cities": {
-  "القاهرة الجديدة": 12,
-  "الشيخ زايد": 4,
-  "بدر": 4,
+  "القاهرة الجديدة": 15,
+  "الشيخ زايد": 5,
+  "بدر": 5,
   "العبور": 1
  },
  "sources": [
-  "https://news.google.com/rss/articles/CBMiR0FVX3lxTE1pWk5zMFEtdzhnLXBhYVRYa0xkNlFUQXZKbkU4TWNLeUdCSGtwejh2ODJ6Ym1GMHF5YjF1WlRFd0FzWUk3cS00?oc=5",
-  "https://www.youtube.com/watch?v=z4BMqXSmjBA",
-  "https://www.youtube.com/shorts/K-SUpAz371U",
-  "https://www.youtube.com/watch?v=ys3qjk2mK7Q",
   "https://www.youtube.com/watch?v=zZWiViPWPHE",
-  "https://www.youtube.com/watch?v=deNhseBhPF8"
+  "https://www.youtube.com/shorts/K-SUpAz371U",
+  "https://www.youtube.com/watch?v=deNhseBhPF8",
+  "https://www.youtube.com/watch?v=z4BMqXSmjBA",
+  "https://news.google.com/rss/articles/CBMiR0FVX3lxTE1pWk5zMFEtdzhnLXBhYVRYa0xkNlFUQXZKbkU4TWNLeUdCSGtwejh2ODJ6Ym1GMHF5YjF1WlRFd0FzWUk3cS00?oc=5",
+  "https://www.youtube.com/watch?v=ys3qjk2mK7Q"
  ],
  "summary": null,
  "forecast": null,
  "checklist": [
-  "جمع جميع الأوراق والمستندات اللازمة.",
-  "تحديث بياناتك الشخصية على الموقع الرسمي.",
-  "إعداد الشروط والمتطلبات المالية.",
-  "اختيار الشقة أو الوحدة السكنية المناسبة.",
-  "إعداد حساب بنكي مناسب للتعاملات المالية.",
-  "متابعة الإعلانات الرسمية عن فتح الحجز."
+  "يتأكد من توافر جميع الوثائق المطلوبة.",
+  "يتحقق من شروط المشروع والمتطلبات الأساسية.",
+  "يختار المساحة المناسبة لمشروعه السكني.",
+  "يتحقق من إمكانية الدفع والخيارات المتاحة.",
+  "يختار الموقع المناسب لمشروعه السكني.",
+  "يتابع أخبار المشروع وتحديثات الحجز."
  ],
- "updated": "2026-07-27T09:42:40.354086+00:00",
+ "updated": "2026-07-27T12:46:59.086441+00:00",
  "people": null
 }

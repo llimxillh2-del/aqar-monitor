@@ -1,7 +1,7 @@
 {
- "updated": "2026-07-27T09:42:57.499425+00:00",
- "now_digest": "حجز أراضي برنامج \"مسكن\" 2026 في مصر بدأ اليوم، 27 يوليو، عبر هيئة المجتمعات العمرانية. كما طرحت وزارة الإسكان أراضي جديدة في القاهرة والمحافظات، مع بدء التقدم في طروحات أراضي وزارة الإسكان. بالإضافة إلى ذلك، أعلنت منصة مصر العقارية عن إطلاق خدمات رقمية جديدة للتمويل العقاري.",
- "brief": "## الوضع الحالي\nتُقدم وزارة الإسكان والمرافق والمجتمعات العمرانية مبادرات جديدة للمصريين بالخارج، وتطرح أراضي سكنية في 17 مدينة جديدة. بدأ التقديم لحجز 2898 قطعة أرض سكنية صغيرة، ويمكن الحصول على كراسة الشروط وموعد الحجز الإلكتروني. هناك أيضًا طرح محلات ووحدات تجارية بمدينة بورسعيد الجديدة بالمزاد.\n\n## فرص تستاهل الانتباه\n- طرح أراضي سكنية في 17 مدينة جديدة.\n- كراسة شروط حجز الأراضي المتوسطة في 10 مدن جديدة.\n- حجز أراضي سكنية يبدأ، ويمكن الحصول على كراسة الشروط وموعد الحجز الإلكتروني.\n- طرح محلات ووحدات تجارية بمدينة بورسعيد الجديدة بالمزاد.\n\n## مخاطر وتحذيرات\n- أسعار العقارات تواصل الارتفاع في مصر.\n- يجب الانتباه إلى شروط الحجز ومتطلباته.\n- يجب مراعاة التغييرات المحتملة في أسعار الفائدة وآثاره على السوق العقاري.\n\n## الخلاصة\nيُشير الوضع الحالي إلى فرص جديدة في السوق العقاري المصري، ويجب على المصريين المغتربين الانتباه إلى شروط الحجز وفرص الاستثمار المتاحة. يجب علىهم أيضًا مراعاة التغييرات المحتملة في السوق العقاري وآثارها على الاستثمارات.",
+ "updated": "2026-07-27T12:47:04.525063+00:00",
+ "now_digest": "أهم حاجة جديدة هي بدء حجز أراضي برنامج \"مسكن\" 2026 في مصر عبر هيئة المجتمعات العمرانية، وستكون هذه الأراضي متاحة للشراء عبر منصة مصر العقارية.",
+ "brief": "## الوضع الحالي\nتعد وزارة الإسكان والمرافق والمجتمعات العمرانية تنفيذ مراحل المبادرة الرئاسية \"سكن لكل المصريين\"، بما يعكس جهود الدولة في توفير السكن الملائم للمواطنين. هناك طرح جديد للأراضي السكنية في 17 مدينة، وبدء حجز أراضي برنامج «مسكن» 2026 في مصر عبر هيئة المجتمعات العمرانية. أسعار العقارات تواصل الارتفاع في مصر رغم استقرار الطلب وثبات الفائدة.\n\n## فرص تستاهل الانتباه\n- طرح أراضي مسكن 7 في 17 مدينة جديدة.\n- مبادرات للمصريين بالخارج.\n- حجز أراضي مسكن 7 يبدأ، وطرح محلات ووحدات تجارية بمدينة بورسعيد الجديدة بالمزاد.\n- كراسة شروط حجز الأراضى المتوسطة في 10 مدن جديدة.\n\n## مخاطر وتحذيرات\n- أسعار العقارات تواصل الارتفاع في مصر.\n- مصر ترفع أسعار أراضي العاصمة الإدارية 15% مع الطروحات الجديدة.\n- لازم ياخد باله من التغيرات في أسعار الفائدة وآثارها على السوق العقاري.\n\n## الخلاصة\nالوضع الحالي في السوق العقاري المصري يتميز بطرح أراضي سكنية جديدة وفرص استثمارية، ولكن ي伴يه مخاطر مثل ارتفاع أسعار العقارات. يعتمد على المصري المغترب دراسة الفرص والمخاطر بعناية قبل اتخاذ أي قرار استثماري.",
  "forecast": null,
  "market": [
   {
@@ -20,17 +20,17 @@
   },
   {
    "topic": "طروحات أراضي وزارة الإسكان",
-   "stage": "بدء التقدم",
+   "stage": "مفتوح",
    "status": "مفتوح",
    "next": "27 يوليو",
-   "last": "طرح 2898 قطعة أرض سكنية"
+   "last": "بدء حجز أراضي برنامج مسكن 2026"
   },
   {
    "topic": "منصة مصر العقارية",
    "stage": "إطلاق خدمات رقمية",
    "status": "مفتوح",
    "next": "—",
-   "last": "خدمات رقمية جديدة للتمويل العقاري"
+   "last": "إطلاق خدمات رقمية جديدة"
   }
  ],
  "beit": {
@@ -46,21 +46,21 @@
   "dates": [],
   "next": null,
   "cities": {
-   "القاهرة الجديدة": 12,
-   "الشيخ زايد": 4,
-   "بدر": 4,
+   "القاهرة الجديدة": 15,
+   "الشيخ زايد": 5,
+   "بدر": 5,
    "العبور": 1
   },
   "summary": null,
   "people": null,
   "forecast": null,
   "checklist": [
-   "جمع جميع الأوراق والمستندات اللازمة.",
-   "تحديث بياناتك الشخصية على الموقع الرسمي.",
-   "إعداد الشروط والمتطلبات المالية.",
-   "اختيار الشقة أو الوحدة السكنية المناسبة.",
-   "إعداد حساب بنكي مناسب للتعاملات المالية.",
-   "متابعة الإعلانات الرسمية عن فتح الحجز."
+   "يتأكد من توافر جميع الوثائق المطلوبة.",
+   "يتحقق من شروط المشروع والمتطلبات الأساسية.",
+   "يختار المساحة المناسبة لمشروعه السكني.",
+   "يتحقق من إمكانية الدفع والخيارات المتاحة.",
+   "يختار الموقع المناسب لمشروعه السكني.",
+   "يتابع أخبار المشروع وتحديثات الحجز."
   ],
   "timeline": [
    {
@@ -558,7 +558,7 @@
    "confirmed": 0
   },
   "stats": {
-   "cycles": 4,
+   "cycles": 5,
    "utterances": 121,
    "confirmed": 0,
    "avg_lead_days": null
@@ -584,24 +584,14 @@
    "source": "صدى البلد"
   },
   {
-   "title": "تبدأ اليوم.. شروط حجز أراضي وزارة الإسكان الجديدة في القاهرة والمحافظات",
-   "link": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE1JNS1CeC05N1BlQmRDUG44TUduUHFDZ2FiU2hoZENSS1ZqcUJXcG0tOVZMWGxoOFl6OS1ITXFUamtJRlg5MDZ3MVRZdDRBelJQdGZfU25kRG1KOGtB?oc=5",
-   "source": "الوطن"
-  },
-  {
-   "title": "ننشر كراسة شروط حجز أراضي الإسكان بـ 17 مدينة.. والتقديم يبدأ 27 يوليو",
-   "link": "https://news.google.com/rss/articles/CBMisARBVV95cUxOTEoyQ0FDQnVycndXSk5BSFVJWjE3Z2hmSWlnVHdmWUd2cGJ0ZXQ0SXpUaFV4bjNaVmhoZHgzTVVsVk5Za20tcUI0VDJQUzJJSlJOWVlBbTAwOVRlQVpMQTVJdlEwYWFPZ3JxWm0wdlN1dUtfTEZjaUpUX3BjUUdnY0E5Zzc1RkJkZzA1S1h4TzhQTlJfRkhCaWlaRG9IbGptV21mN09NSDBmR0c4ZWhURFByNXhKUVN0ajBiYVZNUWZEdWI2aldqVEtLQ0U1RVhSN3NkMGhIQXo2UUNXNURQRHEyT2J4RUdNdVNJY1h4SHVnTXVOLW5JbHowZl9rbmJybjR1dmhkcXJrMDQyWExNSlpRUVFXSFJsekNSdlRZbS1qX3JRazFMRW1CQktKV3BFSWlZSjlWWHZMb1hGTGM0dzRQUEZ6UXZ5Zm5Fazd3bVl5N1JMbzFvVTYyQ056QzI1R2R0aDA5UEw3eUFPXzBaXzVHMDVKTmd6S3FDUGRwZDl0djVNWWtSVkNDZnlsRGRFWE5wN3NlZXF1UU9PY3VmX1JoOW9fVkQ2dGpSV0UwS0tTZjg5TXhNTFdDT21YMzZmVm1YcldiVEtoSGhjbmVXVy1RQlE0Ni1kT2tTQ3I0MHhrX2pzODhMVzlzNy1qN0hVSTExRU1jZUIzODkwRVhXdURHRFowelJseW1zblFNLWpxbTN3bHdicG9ocWdfWXpyWDd3N0NOcnY2QnpPRE5fd9IBtgRBVV95cUxPQnlnUVg0eHZGTVI0SWNSdDdCZy00TVZPblRVdlpRemxrdDlrc003azc0d1I1eFFqTHF2M0lXSXZmOTNzZW1pTV9IUUg3SDVGckNXSHFENEdQampYVTBOVXQ3am9pbmxQcWNhOFl3dnRMQ2RJS2s1NnVRcnZLamx4b3Q5SVlrOTdGQlhYMXpoa1BnRnN2SFVoLVp5RUs1UExQVHJyX1N4ektuYlZmYVRhcjgzaXRtdDBWLXd5MktOd29GUHRVR2dPbWR2a1NJOXVpREFCOGpPQjRyZ2VTYXRnblBvd2ZXdjZGVEl5QmhtYlpnWVNHdE95VlZtejlnRjl1YVJtLVoyYnUwM2VOZ3RTUlNLYVRHLTBOLXlxREtEdFZnN3V2T3BtQjhRVS1pRzhXVTdOQW9UMWw4UFhacll1UG5HSTJSYXd6R180MXVaYWNzTE0yRXpBeVR0c3FGUGdIQXl2aWZ4RDI4YWRyV2VCeXZNbGFKMUY4dTJHV1dNZjRucHFWaUs3c2hMbnpITERTeVB4N2VSOXJ0ZTdSYzliQTg4SlZVX3pvOU9obEVqSEczZDlfcjRJOUhsVHdoNV9MUUVORENKWjZhaEJnT04zWnB6Tjc1RmUxMXptX1lNSVUzc1RESXg4R1dfV3RiS1Utc2RsN1M2cmlHYnBrMXhHRXEtRzB2YjkxMEIxbDNpeHRMLUttZmZpeXZfLVdYLV9fNG9YRkJoclVqQ1BLUHVoYTM2SUJndw?oc=5",
-   "source": "Masrawy"
+   "title": "الإسكان تبدأ استقبال طلبات حجز 2898 قطعة أرض سكنية ضمن برنامج «مسكن»| تفاصيل",
+   "link": "https://news.google.com/rss/articles/CBMiVkFVX3lxTFA0NXZWX1dXY3kwV1BkeWM5X3BmT040ZkFwemc1VHRQdndaWVAwWjdWZWJnNzZSTkQ4WjlZd2VySmpUaFZ3TXFhVHJab3BOcUhEVGppS253?oc=5",
+   "source": "بوابة الأهرام"
   },
   {
    "title": "بدء حجز أراضي برنامج «مسكن» 2026 في مصر عبر هيئة المجتمعات العمرانية",
    "link": "https://news.google.com/rss/articles/CBMihgRBVV95cUxORkxtekpyTjJBY01QTl8xVkU5WHVTV2JiN2tBZjZ4WVFMNTU3TGFwVXJlbENYbmNObFhlTVQya1JTYnRILUhlNUpUSlc1WTRLR1RENDFQYkg2em5qSlhmVmZJcHUzc0U3MkpBelI1MlZ5aC0tMUozblBYZWJFYVpXQXVNS2lWZVJvdWgwdGlWNk5lc2dTU2RpN0pMY3lLLUoxOGZOVU5mS0xNM0lTUlE1RGRpSGRoZnhLMkxLcXJRRGhFZG4wMlNfZDlUdHlkWThMM2xtaFNBWU1NREJHUmd2VzZ0QVJOd3RVYlhTU0VWbzdFOHpOcEJGcmRJbGVyUHJsc3RPbVpPY0VNRHR4OV9FU01hNmlNZTNxaE9mNWpqTFB6bW54TmhlX1hKZFZOOHpKS0NTRld4Zks4UXRiZDI2alpOeXJfbE5OTUhPQVF2eUFwZkJPSi1YaXRXT0NuemhQWGVQLVVZNzFub0JuOTlFMU02bWF6ZWZtZEI4YTFJckNOdGY5MUw1c0Z0NW5uTnR0aWFXZF9LbU04VDVKVk9tcVdSVjNtRktGdmxqVXI3N1ZIMDJ1Z3NTUTZBeGlTdllNT1JtQ3RfVW9zbjNLeGVrMFdLd1hVVjZkLTVFZldYR013RHRfMkZXMks5LVU3el82RmtMMWN0NnFLaWx4dXkxN1FEZFRMdw?oc=5",
    "source": "CNN الاقتصادية"
-  },
-  {
-   "title": "الإسكان المصرية: غداً بدء التقدم لحجز 2898 قطعة أرض سكنية صغيرة",
-   "link": "https://news.google.com/rss/articles/CBMikARBVV95cUxOV3JsckhWOW9DSHl6N1JoT3Y2azI4bFRDMlhLaVZYM3JxSVpWekozVE1COEc3TWh1UFZ6TWNOYVZwZUhEd1FBUTd6S1ZFZzFGR3ZEUzJSNFB4OUZEWTZLN0hVTl9VNG5xdE1XMXdBYmFkdWNDRmpyOXNOcmEzemxtZnFGVHMzek5hLTVoLUZoVUMzeUItazJmWXp5UkNQNFAxT2F2YzRfa0FROFBlc0hRZkxncFhhLS1sZE1QV2VGY3daNm9LU0JHVklqRlZjS2RyZHMta2VTRUFGMEUtakVfUEc3Ung5NHFDYmoxOW80MVhjMnphZkIwZ1lOdVhhYW1ybDdDbC1sSjlDVDgtQU5yWWZpYlZfTmRuNVlGak1GN29Kbk5vU0E3MzV2ZGJSbW9XRHFyTGE0bVlsY1RGMzFMdE51R0dDc3VUazZaUTNUXzVFLS1mb3BPR3ZSblRtNU9QTk94Qnd1TlZPSVZ0b2NOYUdZMXlVTzJSaGhOWGR6d05rZzdwYy1fUFJRb3l0dUJXclVCM3ZjbzN2UWx5cmlKcUFjbTVFYU91SDVqMVg1T3UwdVNMR3U4QjlkbkhMdjh6NmNSYXpVbWxCNTUzcWU0bk1FcHNNV1JFWG5CSjVwTl83el9PNTNyQ2lsT2Q1RlZQVnRiVC1mRHZLdHJJc0NVZDJkSVlNODA4OXI2UlBRVW0?oc=5",
-   "source": "معلومات مباشر"
   }
  ],
  "top": [
@@ -621,19 +611,14 @@
    "source": "اليوم السابع"
   },
   {
-   "title": "2898 قطعة أرض سكنية.. تفاصيل طرح هيئة المجتمعات العمرانية في مصر",
-   "link": "https://news.google.com/rss/articles/CBMifkFVX3lxTE04TTdmWHN5ejdUTlFqWGpObXBIQnZmZFhWd0dHMzZ3Sm1wLWU2WkxhbGpua05SUDdjUDBlWFdBYmRyUzhaQXJ2b0p2R21aOTh6QmxEUHNSMUd4Nng3UlViM2h0Mkpxek9NOVlOM1Y5SDZpcHpxVlBYWkhPWHlPQQ?oc=5",
-   "source": "العين الإخبارية"
-  },
-  {
-   "title": "بدء حجز أراضي برنامج «مسكن» 2026 في مصر عبر هيئة المجتمعات العمرانية",
-   "link": "https://news.google.com/rss/articles/CBMihgRBVV95cUxORkxtekpyTjJBY01QTl8xVkU5WHVTV2JiN2tBZjZ4WVFMNTU3TGFwVXJlbENYbmNObFhlTVQya1JTYnRILUhlNUpUSlc1WTRLR1RENDFQYkg2em5qSlhmVmZJcHUzc0U3MkpBelI1MlZ5aC0tMUozblBYZWJFYVpXQXVNS2lWZVJvdWgwdGlWNk5lc2dTU2RpN0pMY3lLLUoxOGZOVU5mS0xNM0lTUlE1RGRpSGRoZnhLMkxLcXJRRGhFZG4wMlNfZDlUdHlkWThMM2xtaFNBWU1NREJHUmd2VzZ0QVJOd3RVYlhTU0VWbzdFOHpOcEJGcmRJbGVyUHJsc3RPbVpPY0VNRHR4OV9FU01hNmlNZTNxaE9mNWpqTFB6bW54TmhlX1hKZFZOOHpKS0NTRld4Zks4UXRiZDI2alpOeXJfbE5OTUhPQVF2eUFwZkJPSi1YaXRXT0NuemhQWGVQLVVZNzFub0JuOTlFMU02bWF6ZWZtZEI4YTFJckNOdGY5MUw1c0Z0NW5uTnR0aWFXZF9LbU04VDVKVk9tcVdSVjNtRktGdmxqVXI3N1ZIMDJ1Z3NTUTZBeGlTdllNT1JtQ3RfVW9zbjNLeGVrMFdLd1hVVjZkLTVFZldYR013RHRfMkZXMks5LVU3el82RmtMMWN0NnFLaWx4dXkxN1FEZFRMdw?oc=5",
-   "source": "CNN الاقتصادية"
+   "title": "رسميا.. كراسة شروط أراضي الإسكان المتوسط والمتميز في 17 مدينة",
+   "link": "https://news.google.com/rss/articles/CBMi1ARBVV95cUxOVDlrdjNOUncybHFJQ3RRcnBiLTFHSHlSc3EyOFNsem1CMmNrSDh0WUEycGdLSjU1clh4SnhUS3V3ZWJrTFdPQXZQNzRBU1pfTWpJRVFoSTcxaUpGVWZaSlk0elZkY2VUc05uLUQ0MW0zNHp2RzNVTExEbTlHR1c2NkgzRzdicVZicXJTYUwxbE1GYmhOMXJNR0hEQmR3UFh5NXd0Ml91ellZa0N6ZVduWHhjdy1JekYtVG5ubmxwTlNjWUpYUUdhckpnQ2IwZnprLWNwMEZGU1p1TTROOTFTVGc2MHVPTlVlUlVHMHgxNFYtVUlRUHhVVGZqbDVBN3BYZUs5dHFDM0tXSV9JdTFQbDZMeUhEVUR0eEJiTUFTM0ZLd1BERWJrX19Uc0dCTFB0OWs1dUhCSGJiVUJPYVZrc2hjeEFSSGRKWjAwWjZnYXBqWXRBeFE3SFBJNVAxQ2F5R3ZXUmlkYzZFS1YyU0o4a29TdjdFUFhLU1VMb1VxVC1Yak45Y2FPSnVtVVF6S2J0eXdaTTdKanVKS3FVWW5WZG5DcDN3dVFCOTlyU0VWSHhVWVdaczBvOGN4Vzg4el9HREc4RnJ6UWpKMEdFeE5BOFB6OVFPendMUGRKOG1QV21CZHpMQVM5VWdtMTg4YW5kQ1RKQXJNcmp3Um1kanM4N3gtcmwwUGRUMmdCcS1Jb2w0djFxR2lzbUkyUWQ4dG4yaVVzbEJWOG1YZXZ1ejc1OW4tdmh0RWppMHBWMVhKNUQ5Z3dxeldNUUJNZXhvU2dBOEdYUdIBjwRBVV95cUxNcVM0Z3llbUZSVjhERHR6WWhiM2N6TDZVcTY5VXEwZ0tiZTRGbXV1YmJOM2pwa3A4TlVONVZkSnVnNXdZNmYxY3BaZjV0M3Z6ZVhBWTNsTEdMVVdWQWpMZ0VRV0ZxaHdsZEFPTUppUHlwSUZ6VkVPNk1YalhRbWhOMmp4aVVHcXk5UkF2c3FNNDA1WjdteVRpWVBTTENqY2RhVG1xT0lpX2Y0WF92NUtjV1lZUk4yWGw3aExiT2dJaGw0blRKRl9qQ25aajBDUk80OVZZVGNKWHBGMUcxXzJDaXA3a1lUUEZaZWpPS1ZjVktvR1lXbjRucEYzcmx6WVRZU29HUEdWdE90MHZZM1RiLXRhMkoyTUhqSXdyOHZJZGphVEctbDA4Xzg1d1RnUFE2ZFJVd1N2Ujk1amtaSExUME1zeVpJNV85R09BYmsydnc4ejJIZTdSUjIweEtTeDF4Qk1wLXZ0V09LZ2tGallfSEpDb0JOWEJLaFFybExhM1dwa3lUWjdNZnQ4NVN5dkp0V1oyMXpDNDlrY2JKSTBPYVFJek5jc000bTdGeE1NY0c4X1hYNWJLaExISmIwX2pHOEF5LXZqQm51XzVVek9IYVJUZDVLVE0wNm5SWDAwdGFramM3OWJkNFlXdlhtaUs1bVA3QjY2QnZnMVZxWHZ2VjZLNlNVY2pqa3pzNzFQWQ?oc=5",
+   "source": "Masrawy"
   }
  ],
  "counts": {
-  "total": 52,
-  "new": 8,
+  "total": 51,
+  "new": 3,
   "beit": 5
  }
 }
