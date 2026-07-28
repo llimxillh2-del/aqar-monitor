@@ -125,6 +125,12 @@ LATEST_JSON = "latest.json"
 OUTPUT_HTML = "index.html"
 BEIT_HTML = "beit-alwatan.html"
 
+# رابط الموقع المنشور على GitHub Pages — بيتحط في آخر رسالة تليجرام
+# كرابط "شوف التفاصيل الكاملة والمقارنات على الموقع" بدل ما نحشر كل
+# حاجة جوه الرسالة نفسها.
+SITE_BASE_URL = os.environ.get(
+    "SITE_BASE_URL", "https://llimxillh2-del.github.io/aqar-monitor").strip().rstrip("/")
+
 
 # ============================================================
 #  6) المصادر الرسمية — رصد التغيير (أهم طبقة)

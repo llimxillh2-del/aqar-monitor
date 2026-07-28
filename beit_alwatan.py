@@ -841,18 +841,30 @@ def _bw_pack_videos(videos, limit=6):
     return "\n\n".join(lines)
 
 
-def _bw_pack_utterances(utterances, limit=60):
+def _bw_pack_utterances(utterances, limit=80):
     """
     يجهّز كلام الناس (كومنتات يوتيوب + تليجرام + Reddit اللي جمعه الرادار)
     في شكل مضغوط للـ AI. ده المصدر الفعلي لتفاصيل زي السعر والمقدم
     والمواعيد — الأخبار الرسمية بطيئة وبتتأخر، الناس بتقول التفاصيل دي
     في التعليقات قبل ما تتنشر رسميًا بكتير.
+
+    مهم: قبل كده كنا بناخد أول N (بترتيب الأحدث فبس) — أي كومنت فيه رقم
+    أو معلومة حقيقية بس مش من أول ٦٠ كان بيتقطع ومايوصلش لل AI خالص.
+    دلوقتي بنرتب بالمحتوى الأغنى أولًا (باستخدام نفس منطق تقييم رادار
+    الإشارات) عشان الكومنتات اللي فيها أرقام وأسعار ومواعيد توصل أول حاجة.
     """
+    try:
+        from intel import informativeness
+    except Exception:
+        informativeness = None
+
+    pool = [u for u in (utterances or []) if (u.get("text") or "").strip()]
+    if informativeness is not None:
+        pool.sort(key=informativeness, reverse=True)
+
     lines = []
-    for i, u in enumerate((utterances or [])[:limit], 1):
-        text = (u.get("text") or "").strip()[:280]
-        if not text:
-            continue
+    for i, u in enumerate(pool[:limit], 1):
+        text = u["text"].strip()[:280]
         src = u.get("platform", "") or "؟"
         lines.append(f"{i}. [{src}] {text}")
     return "\n".join(lines)
@@ -1091,10 +1103,15 @@ def checklist(ai, state):
 
     prompt = f"""حالة الحجز في بيت الوطن حاليًا: {booking or 'غير معلومة'}
 
-اكتب قائمة من ٤-٦ خطوات عملية مباشرة يعملها المصري المغترب دلوقتي
-عشان يكون جاهز لما الحجز يفتح (لو مقفول)، أو يتقدم صح (لو مفتوح).
-كل خطوة سطر واحد قصير مباشر يبدأ برقم.
-بدون شرح طويل."""
+اكتب قائمة من ٤-٦ خطوات عملية مباشرة للمصري المغترب دلوقتي عشان يكون
+جاهز لما الحجز يفتح (لو مقفول)، أو يتقدم صح (لو مفتوح).
+
+مهم جدًا: كل خطوة لازم تكون بصيغة الأمر المباشر (فعل أمر)، يعني
+"تحقق من..." أو "جهّز..." أو "راجع..." — مش "يتحقق من..." أو
+"يجمع...". اكتب الخطوة كأنك بتقوله هو بالظبط إيه يعمل، مش بتوصف
+هو بيعمل إيه.
+
+كل خطوة سطر واحد قصير يبدأ برقم. بدون شرح طويل."""
     text = ai.ask(prompt, system=SYSTEM_AR_BW)
     if not text:
         return None
@@ -1225,7 +1242,7 @@ def dashboard(state):
         "stage":      _v("المرحلة_الحالية"),
         "booking":    _v("حالة_الحجز"),
         "price":      _v("سعر_المتر"),
-        "deposit":    _v("قيمة_الجدية"),
+        "deposit":    _v("قيمة_الجدية"),  # لو null، monitor.py بيملاها من bit.mzayasoft (نطاق مقدم حقيقي)
         "areas":      _v("المساحات_المتاحة"),
         "payment":    _v("شروط_التقديم"),
         "conditions": _v("شروط_التقديم"),

@@ -53,6 +53,7 @@ HELP = """🏛️ <b>مرصد العقارات المصرية</b>
 /المواعيد — كل المواعيد والعدّ التنازلي
 /الخطوات — إيه اللي تعمله دلوقتي
 /الناس — خلاصة كلام الناس ومخاوفهم
+/فيديوهات — آخر الفيديوهات وملخص كل واحد بالـ AI
 
 <b>عام</b>
 /الحالة — حالة كل الملفات المتابَعة
@@ -198,10 +199,54 @@ def reply_beit(chat_id):
         top = "، ".join(list(cities)[:8])
         lines += ["", f"📍 <b>المدن الأكثر ذكرًا:</b> {html.escape(top)}"]
 
+    mz_range = b.get("mzaya_price_range")
+    mz_ads = b.get("mzaya_ads_stats")
+    if mz_range or mz_ads:
+        lines += ["", "🧮 <b>سوق القطع الحي — bit.mzayasoft (مصدر مجتمعي)</b>"]
+        if mz_range and mz_range.get("lowest"):
+            lines.append(f"   نطاق المقدم: {mz_range['lowest']:,}–"
+                        f"{mz_range['highest']:,} جنيه عبر {mz_range['divisions_count']} منطقة")
+        if mz_ads and mz_ads.get("total"):
+            lines.append(f"   {mz_ads['total']} إعلان نشط "
+                        f"({mz_ads.get('sell_count', 0)} بيع / {mz_ads.get('buy_count', 0)} شراء)")
+
     lines += ["", f"<i>درجة الثقة في البيانات: {html.escape(str(b.get('confidence') or '—'))}</i>"]
 
     if b.get("summary"):
         lines += ["", "───────────", md_to_tg(b["summary"])]
+
+    send(chat_id, "\n".join(lines) + _stale_note(data))
+
+
+def reply_videos(chat_id):
+    data = load_latest()
+    videos = data.get("videos") or []
+    if not videos:
+        send(chat_id, "مفيش فيديوهات جديدة اتلخصت لسه — شغّل /تحديث.")
+        return
+
+    lines = ["🎬 <b>آخر الفيديوهات وتحليلاتها</b>", ""]
+    shown = 0
+    for v in videos:
+        if not v.get("summary"):
+            continue
+        shown += 1
+        lines.append(f"▸ <b><a href=\"{html.escape(v['link'])}\">"
+                     f"{html.escape(v['title'][:120])}</a></b>")
+        if v.get("channel"):
+            lines.append(f"  <i>{html.escape(v['channel'])}</i>")
+        lines.append(md_to_tg(str(v["summary"])[:500]))
+        lines.append("")
+        if shown >= 5:
+            break
+
+    if not shown:
+        titles = "\n".join(f"• <a href=\"{html.escape(v['link'])}\">"
+                           f"{html.escape(v['title'][:120])}</a>"
+                           for v in videos[:6])
+        lines = ["🎬 <b>آخر الفيديوهات</b>", "",
+                 "لسه مفيش ملخص AI جاهز ليها، بس دي آخر الفيديوهات اللي ظهرت:",
+                 "", titles]
 
     send(chat_id, "\n".join(lines) + _stale_note(data))
 
@@ -470,6 +515,45 @@ def reply_ai(chat_id, question, ai):
         ctx.append("مواعيد بيت الوطن:\n" + "\n".join(
             f"- {d['label']}: {d['raw']} ({d.get('status', '')})"
             for d in b["dates"]))
+
+    # بيانات bit.mzayasoft (مصدر مجتمعي غير رسمي) — أرقام حقيقية عن
+    # المقدم والأسعار الفعلية، مش موجودة في أي مصدر رسمي. مهم جدًا
+    # نديها للـ AI عشان يقدر يرد على أسئلة زي "كام المقدم؟"
+    mz_divisions = b.get("mzaya_divisions") or []
+    mz_range = b.get("mzaya_price_range")
+    if mz_range and mz_range.get("lowest"):
+        ctx.append(
+            f"نطاق المقدم الفعلي المرصود (مصدر مجتمعي bit.mzayasoft، "
+            f"غير رسمي، لكن بيانات سوق حقيقية):\n"
+            f"- أقل مقدم: {mz_range['lowest']:,} جنيه\n"
+            f"- أعلى مقدم: {mz_range['highest']:,} جنيه\n"
+            f"- عدد المناطق المرصودة: {mz_range['divisions_count']}")
+    if mz_divisions:
+        top_divs = mz_divisions[:8]
+        ctx.append("تفاصيل المقدم لكل منطقة (bit.mzayasoft، غير رسمي):\n"
+                   + "\n".join(
+                       f"- {d.get('name', '')}: مقدم من "
+                       f"{d.get('min_deposit', '؟')} لـ {d.get('max_deposit', '؟')} جنيه"
+                       + (f" · {d.get('plot_count')} قطعة" if d.get('plot_count') else "")
+                       for d in top_divs))
+    mz_ads_stats = b.get("mzaya_ads_stats")
+    if mz_ads_stats and mz_ads_stats.get("total"):
+        ctx.append(
+            f"سوق القطع الحالي على bit.mzayasoft (غير رسمي):\n"
+            f"- {mz_ads_stats['total']} إعلان نشط "
+            f"({mz_ads_stats.get('sell_count', 0)} معروض للبيع، "
+            f"{mz_ads_stats.get('buy_count', 0)} مطلوب للشراء)"
+            + (f"\n- متوسط الفرق فوق المدفوع (الأوفر): "
+               f"{mz_ads_stats['avg_premium']:,} جنيه"
+               if mz_ads_stats.get('avg_premium') else ""))
+    mz_new_ads = b.get("mzaya_new_ads") or []
+    if mz_new_ads:
+        ctx.append(f"إعلانات قطع جديدة ظهرت مؤخرًا ({len(mz_new_ads)}):\n"
+                   + "\n".join(
+                       f"- {a.get('status', '')}: {a.get('area_m2', '؟')} م²"
+                       + (f"، الأوفر {a['premium']:,} جنيه" if a.get('premium') else "")
+                       for a in mz_new_ads[:5]))
+
     intel = data.get("intel") or {}
     novel = [s for s in (intel.get("signals") or [])
              if s.get("novel") and s.get("status") != "مؤكدة رسميًا"]
@@ -494,17 +578,25 @@ def reply_ai(chat_id, question, ai):
 
     context = "\n\n".join(ctx) or "لا توجد بيانات محدّثة متاحة."
 
-    prompt = f"""دي أحدث المعلومات المرصودة عندنا عن السوق العقاري المصري وبيت الوطن:
+    prompt = f"""إنت مساعد متخصص في مرصد عقاري بيتابع بيت الوطن والسوق المصري
+بدقة عالية. دي أحدث المعلومات المرصودة عندنا فعليًا (مش معلومات عامة —
+دي بيانات حقيقية جمعناها من مصادر رسمية، أخبار، وموقع bit.mzayasoft
+المجتمعي):
 
 {context}
 
 سؤال المستخدم: {question}
 
-جاوب بالعربية المصرية باختصار (7 أسطر كحد أقصى).
-- اعتمد على المعلومات فوق. لو مش موجودة فيها، قول إنك مش متأكد واقترح مصدر رسمي يراجعه.
-- **فرّق بوضوح بين المؤكد رسميًا وبين "إشارات من كلام الناس"** — لو ردك مبني على
-  إشارة، قول صراحة "ده كلام ناس مش مؤكد رسميًا" واذكر قوة الإشارة.
-- ماتخترعش أرقام أو مواعيد.
+جاوب بالعربية المصرية، مباشر ومحدد (لغاية 8 أسطر).
+- لو السؤال عن رقم (سعر، مقدم، موعد) وعندك رقم فعلي فوق، اذكره بالظبط
+  بدل ما ترد بعمومية زي "الأسعار بتختلف حسب المنطقة" — ده رد ضعيف
+  ومحبط للمستخدم اللي محتاج رقم حقيقي.
+- **فرّق بوضوح بين 3 مستويات**: (1) مؤكد رسميًا، (2) بيانات bit.mzayasoft
+  (مصدر مجتمعي حقيقي بس مش رسمي)، (3) إشارات من كلام الناس (الأضعف).
+  اذكر المستوى بوضوح مع أي رقم بتديه.
+- لو مفيش معلومة كافية فعلاً في أي مستوى، قول صراحة "مفيش بيانات كافية
+  عن ده دلوقتي" واقترح مصدر رسمي يراجعه — بدون رد عام مايقولش حاجة.
+- ماتخترعش أرقام أو مواعيد مش موجودة فوق.
 - ماتديش نصيحة استثمارية مباشرة."""
 
     send(chat_id, "🤔 لحظة...")
@@ -526,6 +618,7 @@ ROUTES = {
     ("/دقة", "/الدقة", "/accuracy"): lambda cid, ai: reply_accuracy(cid),
     ("/الرادار", "/digest"): lambda cid, ai: reply_radar_digest(cid),
     ("/بيتالوطن", "/بيت_الوطن", "/beit"): lambda cid, ai: reply_beit(cid),
+    ("/فيديوهات", "/فيديو", "/videos"): lambda cid, ai: reply_videos(cid),
     ("/المواعيد", "/مواعيد", "/dates"): lambda cid, ai: reply_dates(cid),
     ("/الخطوات", "/خطوات", "/steps"): lambda cid, ai: reply_steps(cid),
     ("/الناس", "/ناس", "/people"): lambda cid, ai: reply_people(cid),

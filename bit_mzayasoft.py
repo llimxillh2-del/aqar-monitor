@@ -379,7 +379,7 @@ def _load_state():
                 return json.load(f)
         except Exception:
             pass
-    return {"seen_ad_ids": []}
+    return {"seen_ad_ids": [], "last_summary": None}
 
 
 def _save_state(state):
@@ -416,6 +416,31 @@ def detect_new_ads(ads):
     return new_ads, state
 
 
+def summary_delta(summary):
+    """
+    يقارن كروت الصفحة الرئيسية (إجمالي/محجوز/متبقي) بالدورة اللي فاتت،
+    ويرجّع dict فيه التغيّر لكل رقم (موجب = زيادة). بيسجّل القيم الحالية
+    كـ"آخر قراءة" عشان الدورة الجاية تقارن بيها. أول قراءة بترجع None
+    (مفيش حاجة نقارنها بيها لسه).
+    """
+    if not summary:
+        return None
+    state = _load_state()
+    prev = state.get("last_summary")
+    state["last_summary"] = {k: v for k, v in summary.items() if k != "source_url"}
+    _save_state(state)
+
+    if not prev:
+        return None
+    delta = {}
+    for key in ("total", "reserved", "remaining", "today"):
+        if key in summary and key in prev:
+            d = summary[key] - prev[key]
+            if d != 0:
+                delta[key] = d
+    return delta or None
+
+
 # ============================================================
 #  تجميع: كل حاجة من مزايا سوفت في نداء واحد
 # ============================================================
@@ -443,11 +468,19 @@ def fetch_all():
         except Exception as exc:
             print(f"    - bit.mzayasoft (رصد الجديد): {str(exc)[:70]}")
 
+    delta = None
+    if summary:
+        try:
+            delta = summary_delta(summary)
+        except Exception as exc:
+            print(f"    - bit.mzayasoft (رصد التغيّر بالأرقام): {str(exc)[:70]}")
+
     if not any([summary, divisions, land_ads]):
         return None
 
     return {
         "summary": summary,
+        "summary_delta": delta,
         "divisions": divisions,
         "price_range": price_range,
         "land_ads": land_ads,

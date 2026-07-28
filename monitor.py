@@ -193,6 +193,75 @@ def watch_cycle(verbose=True, notify=True):
     return changes
 
 
+def fast_check(notify=True, verbose=True):
+    """
+    فحص خفيف وسريع (بدون AI، بدون فيديوهات، بدون تحليل) — الهدف إنه
+    يشتغل كل 15-30 دقيقة (بدل انتظار الدورة الكاملة كل 4 ساعات) ويبعت
+    تنبيه فوري لو ظهر خبر بيت الوطن جديد أو تغيّر في المصادر الرسمية.
+
+    بيستخدم نفس seen.json بتاع الدورة الكاملة، فأي خبر يتبعت هنا
+    مش هيتكرر تاني لما الدورة الكاملة تشتغل بعد كده — العكس صحيح
+    كمان، لو الدورة الكاملة سبقت وبعتت الخبر، الفحص السريع مش هيكرره.
+
+    ملحوظة: بيغطي بس أخبار بيت الوطن (أهم موضوع للمستخدم) — مش كل
+    أقسام الأخبار العامة، عشان يفضل فعلاً سريع وخفيف على الحد المجاني.
+    """
+    if verbose:
+        print("\n" + "=" * 62)
+        print(f"  فحص سريع (بدون AI) — {render.stamp()}")
+        print("=" * 62)
+
+    _ensure_dirs()
+    seen = set(load_json(config.SEEN_FILE, []))
+
+    # 1) المصادر الرسمية — رخيص، بيستخدم watch_state.json الخاص بيه
+    official_changes = watch_cycle(verbose=verbose, notify=notify)
+
+    # 2) أخبار بيت الوطن بس (أهم قسم) — من غير باقي الأقسام العامة
+    if verbose:
+        print("[*] فحص أخبار بيت الوطن")
+    items = []
+    for q in config.BEIT_ALWATAN["queries"]:
+        items.extend(sources.google_news(q))
+        time.sleep(0.5)
+
+    dedup, out = set(), []
+    for it in items:
+        if it["link"] in dedup:
+            continue
+        dedup.add(it["link"])
+        out.append(it)
+    items = out
+
+    new_items = [it for it in items if it["link"] not in seen]
+    if verbose:
+        print(f"    → {len(items)} خبر إجمالي · {len(new_items)} جديد")
+
+    if new_items and notify:
+        lines = [f"⚡ <b>خبر بيت الوطن جديد ({len(new_items)})</b>", _SUB_FAST]
+        for it in new_items[:6]:
+            title = render.esc(str(it.get("title", ""))[:180])
+            link = render.esc(it.get("link", ""))
+            src = render.esc(it.get("source", ""))
+            lines.append(f'• <a href="{link}">{title}</a>')
+            if src:
+                lines.append(f'  ↳ <i>{src}</i>')
+        msg = "\n".join(lines)
+        telegram(msg, preview=False)
+        if verbose:
+            print(f"    ↗ تنبيه فوري مُرسل ({len(new_items)} خبر)")
+
+    # بنسجّل كل حاجة شفناها (مش بس اللي بعتناها) عشان الدورة الكاملة
+    # بعد كده متكررش نفس الأخبار
+    seen.update(it["link"] for it in items)
+    save_json(config.SEEN_FILE, list(seen)[-6000:])
+
+    return {"official_changes": len(official_changes), "new_news": len(new_items)}
+
+
+_SUB_FAST = "─" * 18
+
+
 # ============================================================
 #  طبقة 2 — الدورة الكاملة
 # ============================================================
@@ -449,7 +518,20 @@ def full_cycle(ai, use_ai=True, notify=True, force=False):
     beit_view["mzaya_land_ads"] = (mzaya or {}).get("land_ads")
     beit_view["mzaya_ads_stats"] = (mzaya or {}).get("ads_stats")
     beit_view["mzaya_new_ads"] = (mzaya or {}).get("new_ads")
+    beit_view["mzaya_summary_delta"] = (mzaya or {}).get("summary_delta")
     beit_view["mzaya_source_url"] = config.BIT_MZAYASOFT_URL
+
+    # سد فجوة "مقدم الجدية" الفاضية — الأخبار الرسمية بتتأخر تنشر رقم
+    # المقدم أسابيع، لكن bit.mzayasoft عنده نطاق حقيقي مرصود من 30+
+    # منطقة. لو الحقل الرسمي فاضي، بنعرض النطاق ده بدل "لم يُعلن بعد"
+    # (موسوم صراحة كمصدر مجتمعي، مش رسمي، عشان مايتلخبطش مع بيانات مؤكدة).
+    if not beit_view.get("deposit") and beit_view.get("mzaya_price_range"):
+        pr = beit_view["mzaya_price_range"]
+        if pr.get("lowest") and pr.get("highest"):
+            beit_view["deposit"] = (
+                f"{pr['lowest']:,}–{pr['highest']:,} جنيه "
+                f"(نطاق مرصود من {pr['divisions_count']} منطقة — "
+                f"مصدر مجتمعي bit.mzayasoft، مش رسمي)")
 
     # ---------- 9-ج) خلاصة "الأهم دلوقتي" ----------
     # فقرة قصيرة جدًا (2-4 جمل) بترجّع بس لو فيه حاجة جديدة فعلًا —
@@ -537,6 +619,13 @@ def full_cycle(ai, use_ai=True, notify=True, force=False):
         } if intel_view else {},
         "urgent": _slim([i for i in all_items if i["link"] in urgent_links])[:15],
         "top": _slim([i for i in all_items if i["link"] in top_links])[:15],
+        "videos": [
+            {"title": v.get("title", ""), "link": v.get("link", ""),
+             "channel": v.get("source", v.get("channel", "")),
+             "published": v.get("published", ""),
+             "summary": v.get("ai_summary", "")}
+            for v in (videos or []) if v.get("title")
+        ][:12],
         "counts": {"total": len(all_items), "new": len(new_items),
                    "beit": len(beit_items)},
     })
@@ -567,6 +656,11 @@ def full_cycle(ai, use_ai=True, notify=True, force=False):
             }
             engines_line = ai.report() if use_ai else "معطّل"
 
+            site_links = [
+                ("التقرير الكامل والمقارنات", config.SITE_BASE_URL + "/index.html"),
+                ("ملف بيت الوطن التفصيلي", config.SITE_BASE_URL + "/beit-alwatan.html"),
+            ]
+
             messages = render.build_unified_telegram(
                 new_by_section=new_by_section,
                 brief=brief,
@@ -578,6 +672,7 @@ def full_cycle(ai, use_ai=True, notify=True, force=False):
                 intel_view=intel_view,
                 counts=counts_footer,
                 engines=engines_line,
+                site_links=site_links,
             )
 
             for i, msg in enumerate(messages, 1):
@@ -646,6 +741,9 @@ def main():
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--once", action="store_true", help="دورة كاملة واحدة")
     mode.add_argument("--watch", action="store_true", help="المصادر الرسمية فقط")
+    mode.add_argument("--fast-check", action="store_true",
+                      help="فحص سريع بدون AI — أخبار بيت الوطن + المصادر "
+                           "الرسمية بس، للتشغيل كل 15-30 دقيقة")
     mode.add_argument("--daemon", action="store_true", help="تشغيل مستمر")
     mode.add_argument("--test", action="store_true",
                       help="دورة بدون AI وبدون تليجرام")
@@ -686,6 +784,12 @@ def main():
     if args.watch:
         changes = watch_cycle(verbose=True, notify=notify)
         print(f"[✓] {len(changes)} تغيير مرصود")
+        return
+
+    if args.fast_check:
+        result = fast_check(verbose=True, notify=notify)
+        print(f"[✓] فحص سريع خلص — {result['official_changes']} تغيير رسمي "
+              f"· {result['new_news']} خبر جديد")
         return
 
     if args.daemon:
