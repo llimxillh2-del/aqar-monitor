@@ -64,7 +64,7 @@
    "العمرانية الجديدة - تحت رعاية وزارة الإتصالات وتكنولوجيا المعلومات"
   ],
   "count": 29,
-  "checked": "2026-08-04T11:15:12.009829+00:00",
+  "checked": "2026-08-04T11:57:45.641114+00:00",
   "fail_count": 0
  },
  "https://lands.nuca.gov.eg/ar/News.aspx": {
@@ -90,7 +90,7 @@
    "العمرانية الجديدة - تحت رعاية وزارة الإتصالات وتكنولوجيا المعلومات"
   ],
   "count": 8,
-  "checked": "2026-08-04T11:15:12.009829+00:00",
+  "checked": "2026-08-04T11:57:45.641114+00:00",
   "fail_count": 0,
   "last_error": "تعذّر الوصول: HTTPSConnectionPool(host='lands.nuca.gov.eg', port=443): Max retries exceeded with url: /ar/News.asp"
  },
@@ -159,7 +159,7 @@
    "العمرانية الجديدة - تحت رعاية وزارة الإتصالات وتكنولوجيا المعلومات"
   ],
   "count": 29,
-  "checked": "2026-08-04T11:15:12.009829+00:00",
+  "checked": "2026-08-04T11:57:45.641114+00:00",
   "fail_count": 0
  },
  "http://www.newcities.gov.eg/": {
@@ -250,13 +250,13 @@
    "(32 – 85) من القانون رقم 182"
   ],
   "count": 41,
-  "checked": "2026-08-04T11:15:12.009829+00:00",
+  "checked": "2026-08-04T11:57:45.641114+00:00",
   "fail_count": 0
  },
  "https://reservations.realestate.gov.eg/ar": {
   "last_error": "تعذّر الوصول: 522 Server Error: <none> for url: https://reservations.realestate.gov.eg/ar",
-  "checked": "2026-08-04T11:15:12.009829+00:00",
-  "fail_count": 16
+  "checked": "2026-08-04T11:57:45.641114+00:00",
+  "fail_count": 17
  },
  "https://beitakfemisr.com/": {
   "fp": "8edbd1749a5d16bd7635cc664be78ec9fe6bf1fd4da24db8e297dd4e389b5ad3",
@@ -267,12 +267,12 @@
    "امتلك منزلك في مصر بسهولة من الخارج | بيتك في مصر"
   ],
   "count": 1,
-  "checked": "2026-08-04T11:15:12.009829+00:00",
+  "checked": "2026-08-04T11:57:45.641114+00:00",
   "fail_count": 0
  },
  "https://www.mhuc.gov.eg/": {
   "last_error": "تعذّر الوصول: HTTPSConnectionPool(host='www.mhuc.gov.eg', port=443): Max retries exceeded with url: / (Caused by P",
-  "checked": "2026-08-04T11:15:12.009829+00:00",
-  "fail_count": 16
+  "checked": "2026-08-04T11:57:45.641114+00:00",
+  "fail_count": 17
  }
 }

@@ -1,6 +1,6 @@
 {
- "updated": "2026-08-04T11:26:30.346637+00:00",
- "now_digest": "حجز شقق الإيجار 2026 هو ما يستحق الانتباه. شروط التقديم وأماكن طرح 15 ألف وحدة سكنية جديدة قد تتم الإعلان عنها قريبًا. \n\nيتم التحويل البنكي قبل التخصيص، ويرجى التأكد من الرصيد قبل منتصف الليل في يوم 23، حيث يحسب الرصيد في يوم 22.",
+ "updated": "2026-08-04T12:09:03.613003+00:00",
+ "now_digest": "المصري المغترب، هناك بعض التغييرات جديدة تخص عملية التحويل البنكي للنقد. أولاً والأهم، يتم التحويل البنكي قبل التخصيص، مما يعني أن الرصيد سيحسب بعد التحويل، وسيتم إعطاء المبلغ المخصص بعد ذلك.\n\nبالنسبة للرصيد، سيحسب في يوم 22 من الشهر، وسيتم إعتبار الرصيد لو تم إرساله قبل منتصف الليل في يوم 23. يعتبر اليوم الأخير في عملية التحويل هو اليوم الذي يتم فيه التحويل البنكي.",
  "brief": null,
  "forecast": null,
  "market": [
@@ -622,7 +622,7 @@
    "confirmed": 0
   },
   "stats": {
-   "cycles": 12,
+   "cycles": 13,
    "utterances": 138,
    "confirmed": 0,
    "avg_lead_days": null
@@ -747,13 +747,7 @@
   ],
   "questions": []
  },
- "urgent": [
-  {
-   "title": "حجز شقق الإيجار 2026.. شروط التقديم وأماكن طرح 15 ألف وحدة سكنية الجديدة",
-   "link": "https://news.google.com/rss/articles/CBMiwAJBVV95cUxQTlFpSlRucGR2Sm95bTVmV2FYZFRYeEJYX0JwSTdiNVlUTTRJMVNaNjBuQ21MRTNJb2U4N2JOTklHUWJQTW1VNkdoWWJsaXR3Q3JCb1VNbUJxMkY2alh6aE41Si0wMzAzTm1iNzAzUEVaOUVhR0ZaR0RZYXJva3RUN0VJMld5Rlktc245US05NEdBWklXa1o5QTUzbFlScDh6em4wUlRjVTJfZW1sSVdhbGpXazUxenp5U2ZodF9VMHpLaXNieElfN1M4dEh4VENxeUM3T0F4clZNQ1JIVGlxSDVJUkxhUDFTN25IWnM4UzNjZldnamNqTTM1RFJSclNJcm96NWtWYmlCdjRXR0N2el9ZTTFsczRjVkRRQVNORVRqdW5BZEZRRWxLelFfeUdKMmhVei1WQW40b2JpVnpNYw?oc=5",
-   "source": "قناة صدى البلد"
-  }
- ],
+ "urgent": [],
  "top": [],
  "videos": [
   {
@@ -842,8 +836,8 @@
   }
  ],
  "counts": {
-  "total": 66,
-  "new": 3,
-  "beit": 14
+  "total": 65,
+  "new": 0,
+  "beit": 13
  }
 }
