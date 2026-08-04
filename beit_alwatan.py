@@ -31,6 +31,7 @@ from datetime import datetime, timezone, timedelta
 import requests
 import feedparser
 
+
 # ============================================================
 #  الإعدادات — عدّل هنا بس
 # ============================================================
@@ -992,13 +993,16 @@ def diff_and_update(state, facts, items):
         state["timeline"] = state["timeline"][-200:]
 
     # حدّث cities count من items
+    # يتحسب من عناصر الدورة الحالية بس. قبل كده كان بيزيد كل دورة على
+    # نفس الأخبار، فالأرقام بتكبر للأبد ومابتعبّرش عن اهتمام حقيقي.
     city_names = _config.BEIT_ALWATAN.get("cities", [])
-    counts = state.setdefault("cities", {})
+    counts = {}
     for it in items or []:
         blob = (it.get("title") or "") + " " + (it.get("snippet") or "")
         for city in city_names:
             if city in blob:
                 counts[city] = counts.get(city, 0) + 1
+    state["cities"] = counts
 
     # حدّث sources (لينكات فقط — التوافق مع النسخ القديمة اللي كانت dicts)
     existing = state.get("sources") or []
@@ -1156,6 +1160,7 @@ FIELD_LABELS = {
     "المدن_المطروحة":     "المدن المطروحة",
     "قيمة_الجدية":        "قيمة الجدية",
     "شروط_التقديم":       "شروط التقديم",
+    "طريقة_السداد":       "طريقة السداد",
     "آخر_تطور":           "آخر تطور",
     "درجة_الثقة":         "درجة الثقة",
 }
@@ -1180,7 +1185,9 @@ def _parse_days_left(raw_value):
         target = datetime(y, mo, d, tzinfo=timezone.utc)
     except ValueError:
         return None, None
-    diff = (target - datetime.now(timezone.utc)).days
+    # المقارنة بالتاريخ مش باللحظة — target منتصف الليل، فلو الموعد
+    # النهاردة الفرق كان بيطلع سالب ويتعرض «مرّ» وهو لسه قادم.
+    diff = (target.date() - datetime.now(timezone.utc).date()).days
     return target.date().isoformat(), diff
 
 
@@ -1244,7 +1251,7 @@ def dashboard(state):
         "price":      _v("سعر_المتر"),
         "deposit":    _v("قيمة_الجدية"),  # لو null، monitor.py بيملاها من bit.mzayasoft (نطاق مقدم حقيقي)
         "areas":      _v("المساحات_المتاحة"),
-        "payment":    _v("شروط_التقديم"),
+        "payment":    _v("طريقة_السداد") or _v("موعد_السداد"),
         "conditions": _v("شروط_التقديم"),
         "last":       _v("آخر_تطور"),
         "confidence": _v("درجة_الثقة"),

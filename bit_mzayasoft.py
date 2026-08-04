@@ -405,9 +405,11 @@ def detect_new_ads(ads):
     first_run = len(seen) == 0
 
     new_ads = [a for a in ads if a.get("id") and a["id"] not in seen]
-    seen.update(a["id"] for a in ads if a.get("id"))
-
-    state["seen_ad_ids"] = list(seen)[-4000:]
+    # ترتيب مستقر: القديم الأول والجديد في الآخر. `list(set)[-N:]` كان
+    # بيرمي بصمات عشوائي فإعلانات قديمة كانت بترجع تتبعت كأنها جديدة.
+    ordered = [x for x in (state.get("seen_ad_ids") or [])]
+    ordered += [a["id"] for a in ads if a.get("id")]
+    state["seen_ad_ids"] = list(dict.fromkeys(ordered))[-4000:]
     state["updated"] = datetime.now(timezone.utc).isoformat()
     _save_state(state)
 

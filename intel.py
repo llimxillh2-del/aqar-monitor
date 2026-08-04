@@ -518,6 +518,8 @@ def tier(sig):
         return "مؤكدة رسميًا"
     if sig.get("status") == "مكذّبة":
         return "مكذّبة"
+    if sig.get("status") == "منتهية":
+        return "منتهية"
     ind, fh = independence(sig), firsthand_count(sig)
     if ind >= 3 or (ind >= 2 and fh >= 2):
         return "إشارة قوية"

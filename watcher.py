@@ -243,8 +243,12 @@ def health(state=None):
             continue
         rec = state.get(page["url"]) or {}
         fails = int(rec.get("fail_count", 0))
-        if rec.get("count"):
-            status = "يعمل" if fails == 0 else "متقطع"
+        if fails >= 3:
+            status = "متعذّر"          # فشل متكرر = واقع فعلًا مش «متقطع»
+        elif rec.get("count") and fails == 0:
+            status = "يعمل"
+        elif rec.get("count"):
+            status = "متقطع"
         elif rec.get("last_error"):
             status = "متعذّر"
         else:
@@ -267,9 +271,15 @@ def changes_to_items(changes):
     items = []
     for ch in changes:
         preview = " · ".join(ch["added"][:3])[:320]
+        # بصمة المحتوى الجديد في الرابط — من غيرها كل التغييرات على نفس
+        # الصفحة بتاخد نفس الـ link، فأول واحد بس بيتحسب «جديد» والباقي
+        # بيتفلتر للأبد لأنه موجود في seen.json.
+        stamp = hashlib.sha1(
+            "|".join(ch["added"][:8]).encode("utf-8")).hexdigest()[:10]
         items.append({
             "title": f"تغيير في {ch['name']}",
-            "link": ch["url"],
+            "link": f"{ch['url']}#chg-{stamp}",
+            "source_url": ch["url"],
             "source": "🏛️ مصدر رسمي",
             "snippet": preview,
             "published": ch["when"],

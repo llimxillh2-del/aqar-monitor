@@ -17,6 +17,7 @@
 """
 
 import os
+import re
 import sys
 import json
 import time
@@ -67,6 +68,20 @@ def _ensure_dirs():
             os.makedirs(d, exist_ok=True)
 
 
+SEEN_MAX = 6000
+
+
+def _trim_seen(seen, fresh_items):
+    """
+    الأحدث في الآخر. الاقتطاع القديم كان `sorted(seen)[-4000:]` —
+    ترتيب أبجدي، يعني الروابط اللي بتترمي عشوائية والتنبيهات تتكرر.
+    """
+    old = [x for x in (seen if isinstance(seen, list) else sorted(seen))]
+    new = [it["link"] for it in fresh_items if it.get("link")]
+    merged = list(dict.fromkeys(old + new))
+    return merged[-SEEN_MAX:]
+
+
 def load_json(path, default):
     if os.path.exists(path):
         try:
@@ -101,34 +116,72 @@ def write_text(path, text):
 
 _TG_SPLIT_LIMIT = 3600
 
+_OPEN_TAG_RE = re.compile(r"<(?!/)(\w+)[^>]*>")
+_CLOSE_TAG_RE = re.compile(r"</(\w+)>")
+
+
+def _open_tags(text):
+    """الوسوم اللي فتحت في النص ولسه ماقفلتش — بترتيب الفتح."""
+    stack = []
+    for m in re.finditer(r"<(/?)(\w+)[^>]*>", text or ""):
+        closing, name = m.group(1), m.group(2).lower()
+        if name in ("br", "hr", "img"):
+            continue
+        if closing:
+            if stack and stack[-1] == name:
+                stack.pop()
+        else:
+            stack.append(name)
+    return stack
+
+
+def _seal(chunk):
+    """يقفل أي وسم مفتوح في نهاية الجزء عشان تليجرام مايرفضهوش."""
+    stack = _open_tags(chunk)
+    return chunk + "".join(f"</{t}>" for t in reversed(stack))
+
 
 def _split_message(text, limit=_TG_SPLIT_LIMIT):
     """
-    تقسيم آمن: بيقطع عند نهاية سطر، ومابيقطعش وسم HTML في النص.
-    (النسخة القديمة كانت بتقطع كل 3800 حرف بشكل أعمى فبتكسر الوسوم
-     وتليجرام يرفض الرسالة بـ 400.)
+    تقسيم آمن:
+      • بيقطع عند نهاية سطر
+      • بيحافظ على **ترتيب** النص (النسخة القديمة كانت بترمي السطر
+        الطويل في chunks قبل ما تفرّغ current، فالرسالة بتتقلب)
+      • بيقفل أي وسم HTML مفتوح في آخر كل جزء ويفتحه في اللي بعده
+        (قبل كده `<b>` كان بيتقسم على رسالتين وتليجرام يرفض بـ 400)
     """
     text = text or ""
     if len(text) <= limit:
         return [text] if text.strip() else []
 
     chunks, current = [], ""
+
+    def flush():
+        nonlocal current
+        if current.strip():
+            chunks.append(current.rstrip())
+        current = ""
+
     for line in text.split("\n"):
-        while len(line) > limit:                       # سطر واحد طويل جدًا
+        while len(line) > limit:                   # سطر واحد أطول من الحد
+            flush()                                # الترتيب أولاً
             cut = line.rfind(" ", 0, limit)
-            if cut <= 0:                               # مفيش مسافة نقطع عندها
+            if cut <= 0:
                 cut = limit
             chunks.append(line[:cut])
             line = line[cut:].lstrip()
-        if len(current) + len(line) + 1 > limit:
-            if current.strip():
-                chunks.append(current.rstrip())
-            current = line
-        else:
-            current = f"{current}\n{line}" if current else line
-    if current.strip():
-        chunks.append(current.rstrip())
-    return chunks
+        if current and len(current) + len(line) + 1 > limit:
+            flush()
+        current = f"{current}\n{line}" if current else line
+    flush()
+
+    # قفل/إعادة فتح الوسوم بين الأجزاء
+    sealed, carry = [], []
+    for ch in chunks:
+        body = "".join(f"<{t}>" for t in carry) + ch
+        carry = _open_tags(body)
+        sealed.append(_seal(body))
+    return sealed
 
 
 def telegram(text, preview=False, silent=False):
@@ -212,7 +265,8 @@ def fast_check(notify=True, verbose=True):
         print("=" * 62)
 
     _ensure_dirs()
-    seen = set(load_json(config.SEEN_FILE, []))
+    seen = load_json(config.SEEN_FILE, [])
+    seen_set = set(seen)
 
     # 1) المصادر الرسمية — رخيص، بيستخدم watch_state.json الخاص بيه
     official_changes = watch_cycle(verbose=verbose, notify=notify)
@@ -233,30 +287,66 @@ def fast_check(notify=True, verbose=True):
         out.append(it)
     items = out
 
-    new_items = [it for it in items if it["link"] not in seen]
+    new_items = [it for it in items if it["link"] not in seen_set]
     if verbose:
         print(f"    → {len(items)} خبر إجمالي · {len(new_items)} جديد")
 
-    if new_items and notify:
-        lines = [f"⚡ <b>خبر بيت الوطن جديد ({len(new_items)})</b>", _SUB_FAST]
-        for it in new_items[:6]:
-            title = render.esc(str(it.get("title", ""))[:180])
-            link = render.esc(it.get("link", ""))
-            src = render.esc(it.get("source", ""))
-            lines.append(f'• <a href="{link}">{title}</a>')
-            if src:
-                lines.append(f'  ↳ <i>{src}</i>')
-        msg = "\n".join(lines)
-        telegram(msg, preview=False)
+    # 3) إعلانات قطع جديدة على bit.mzayasoft — سوق حقيقي بأسعار حقيقية
+    new_ads = []
+    try:
+        ads = bit_mzayasoft.fetch_land_ads()
+        if ads:
+            new_ads, _ = bit_mzayasoft.detect_new_ads(ads)
+    except Exception as exc:
         if verbose:
-            print(f"    ↗ تنبيه فوري مُرسل ({len(new_items)} خبر)")
+            print(f"    ! mzayasoft: {str(exc)[:60]}")
+
+    if (new_items or new_ads) and notify:
+        lines = []
+        if new_items:
+            lines.append(f"⚡ <b>بيت الوطن — {len(new_items)} خبر جديد</b>")
+            lines.append(_SUB_FAST)
+            for it in new_items[:5]:
+                title = render.esc(str(it.get("title", ""))[:150])
+                link = render.esc(it.get("link", ""))
+                src = render.esc(str(it.get("source", ""))[:30])
+                lines.append(f'• <a href="{link}">{title}</a>')
+                if src:
+                    lines.append(f'  <i>{src}</i>')
+            if len(new_items) > 5:
+                lines.append(f"<i>… و{len(new_items) - 5} خبر آخر</i>")
+
+        if new_ads:
+            if lines:
+                lines.append("")
+            lines.append(f"🏷️ <b>{len(new_ads)} إعلان قطعة جديد</b> "
+                         f"<i>(مصدر مجتمعي)</i>")
+            for a in new_ads[:4]:
+                bits = [a.get("status") or "إعلان"]
+                if a.get("area_m2"):
+                    bits.append(f"{a['area_m2']} م²")
+                if a.get("premium"):
+                    bits.append(f"أوفر {a['premium']:,} ج")
+                lines.append("• " + " · ".join(bits))
+
+        lines.append("")
+        lines.append(f'<a href="{config.SITE_BASE_URL}/beit-alwatan.html">'
+                     f'الملف الكامل ←</a>')
+
+        if telegram("\n".join(lines), preview=False):
+            if verbose:
+                print(f"    ↗ تنبيه فوري ({len(new_items)} خبر · "
+                      f"{len(new_ads)} إعلان)")
+        elif verbose:
+            print("    ✗ فشل إرسال التنبيه الفوري")
 
     # بنسجّل كل حاجة شفناها (مش بس اللي بعتناها) عشان الدورة الكاملة
     # بعد كده متكررش نفس الأخبار
-    seen.update(it["link"] for it in items)
-    save_json(config.SEEN_FILE, list(seen)[-6000:])
+    seen = _trim_seen(seen, items)
+    save_json(config.SEEN_FILE, seen)
 
-    return {"official_changes": len(official_changes), "new_news": len(new_items)}
+    return {"official_changes": len(official_changes),
+            "new_news": len(new_items), "new_ads": len(new_ads)}
 
 
 _SUB_FAST = "─" * 18
@@ -273,7 +363,8 @@ def full_cycle(ai, use_ai=True, notify=True, force=False):
     print("=" * 62)
 
     _ensure_dirs()
-    seen = set(load_json(config.SEEN_FILE, []))
+    seen = load_json(config.SEEN_FILE, [])
+    seen_set = set(seen)
     summaries = load_json(config.SUMMARY_CACHE, {})
 
     # ---------- 1) المصادر الرسمية ----------
@@ -305,7 +396,7 @@ def full_cycle(ai, use_ai=True, notify=True, force=False):
 
     # ---------- 4) الجديد ----------
     all_items = [it for items in sections.values() for it in items]
-    new_items = [it for it in all_items if force or it["link"] not in seen]
+    new_items = [it for it in all_items if force or it["link"] not in seen_set]
     new_links = {it["link"] for it in new_items}
     print(f"\n[*] {len(all_items)} عنصر · {len(new_items)} جديد")
 
@@ -675,19 +766,37 @@ def full_cycle(ai, use_ai=True, notify=True, force=False):
                 site_links=site_links,
             )
 
+            sent = failed = 0
             for i, msg in enumerate(messages, 1):
-                telegram(msg, preview=False)
-                if len(messages) > 1:
-                    print(f"    ↗ رسالة {i}/{len(messages)} مُرسلة")
+                if telegram(msg, preview=False):
+                    sent += 1
+                    if len(messages) > 1:
+                        print(f"    ↗ رسالة {i}/{len(messages)} مُرسلة")
+                else:
+                    failed += 1
+                    print(f"    ✗ رسالة {i}/{len(messages)} فشلت")
 
-            print(f"[*] رسالة تليجرام موحّدة مُرسلة "
-                  f"({len(messages)} جزء · {sum(len(m) for m in messages)} حرف)")
+            # تنبيهات الرادار — كانت بتتحسب في intel_msgs وترمى من غير
+            # ما تتبعت أبدًا. دي أهم حاجة في النظام (كلام ناس مش في الأخبار).
+            for sig_msg in intel_msgs[:config.INTEL_MAX_ALERTS_PER_CYCLE]:
+                if telegram(sig_msg, preview=False, silent=True):
+                    sent += 1
+                else:
+                    failed += 1
+            if intel_msgs:
+                print(f"    ↗ {len(intel_msgs)} تنبيه إشارة")
+
+            total_chars = sum(len(x) for x in messages)
+            if failed:
+                print(f"[!] تليجرام: {sent} نجحت · {failed} فشلت "
+                      f"— راجع التوكن والـ chat id")
+            else:
+                print(f"[✓] تليجرام: {sent} رسالة ({total_chars} حرف)")
         else:
             print("[i] مفيش أي جديد — مفيش رسالة")
 
     # ---------- 13) حفظ المشاهَد ----------
-    seen.update(it["link"] for it in all_items)
-    save_json(config.SEEN_FILE, sorted(seen)[-4000:])
+    save_json(config.SEEN_FILE, _trim_seen(seen, all_items))
 
     took = int(time.time() - started)
     print(f"\n[✓] تمت الدورة في {took // 60}د {took % 60}ث — {engines}")
@@ -704,7 +813,7 @@ def run_daemon(ai, use_ai=True, notify=True):
     interval = max(config.WATCH_INTERVAL_SECONDS, 20)
     full_every = config.INTERVAL_HOURS * 3600
 
-    print(f"[+] وضع الرصد المستمر")
+    print("[+] وضع الرصد المستمر")
     print(f"    المصادر الرسمية: كل {interval} ثانية")
     print(f"    الدورة الكاملة:  كل {config.INTERVAL_HOURS} ساعة")
     print("    Ctrl+C للإيقاف\n")
@@ -788,8 +897,8 @@ def main():
 
     if args.fast_check:
         result = fast_check(verbose=True, notify=notify)
-        print(f"[✓] فحص سريع خلص — {result['official_changes']} تغيير رسمي "
-              f"· {result['new_news']} خبر جديد")
+        print(f"[✓] فحص سريع — {result['official_changes']} تغيير رسمي · "
+              f"{result['new_news']} خبر · {result['new_ads']} إعلان")
         return
 
     if args.daemon:

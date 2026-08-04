@@ -10,6 +10,7 @@
 """
 
 import re
+import html
 import time
 import urllib.parse
 from datetime import datetime, timezone, timedelta
@@ -72,9 +73,14 @@ def _entry_date(entry):
 
 
 def _strip_html(text):
+    """
+    يشيل الوسوم **ويفك رموز HTML**. من غير الفك كان `&nbsp;` بيوصل
+    للصفحة كنص، وبعدين esc() بيهرب الـ& فيشوفه الزائر «&nbsp;&nbsp;».
+    """
     text = re.sub(r"(?is)<(script|style)[^>]*>.*?</\1>", " ", text or "")
     text = re.sub(r"<[^>]+>", " ", text)
-    return re.sub(r"\s+", " ", text).strip()
+    text = html.unescape(text)
+    return re.sub(r"[\s\u00a0\u200f\u200e]+", " ", text).strip()
 
 
 def fetch_bytes(url, timeout=None):
@@ -138,12 +144,28 @@ def _clean_title(title):
     return re.sub(r"\s+-\s+[^-]+$", "", title).strip()
 
 
+def _useful_snippet(snippet, title):
+    """
+    ملخص Google News دايمًا = «العنوان + اسم الموقع» — تكرار خالص.
+    بنرميه لو مش بيضيف معلومة فعلية على العنوان.
+    """
+    snip = (snippet or "").strip()
+    if not snip:
+        return ""
+    core = re.sub(r"\W+", "", snip)
+    head = re.sub(r"\W+", "", title or "")
+    if not core or (head and core.startswith(head[:40])):
+        return ""
+    return snip if len(core) > len(head) + 40 else ""
+
+
 def google_news(query):
     q = urllib.parse.quote(query)
     url = f"https://news.google.com/rss/search?q={q}&hl=ar&gl=EG&ceid=EG:ar"
     items = parse_feed(url, label="Google News")
     for it in items:
         it["title"] = _clean_title(it["title"])
+        it["snippet"] = _useful_snippet(it.get("snippet"), it["title"])
         it["kind"] = "news"
     return items
 
@@ -181,9 +203,13 @@ def fetch_news(extra_queries=None):
             if q not in sections[first]:
                 sections[first].append(q)
 
+    # منع التكرار **بين** الأقسام كمان — قبل كده كان لكل قسم مجموعته
+    # الخاصة، فنفس الخبر كان بيظهر في قسمين.
+    global_links, global_titles = set(), set()
+
     for section, queries in sections.items():
         print(f"[*] أخبار: {section}")
-        seen_links, seen_titles, bucket = set(), set(), []
+        seen_links, seen_titles, bucket = global_links, global_titles, []
         for q in queries:
             print(f"    - {q}")
             for item in google_news(q):
@@ -201,10 +227,13 @@ def fetch_news(extra_queries=None):
         filter_eg = "تحليل السوق" in section
         clean = quality.enrich_items(bucket, filter_egypt=filter_eg,
                                      dedupe=True, dedupe_threshold=0.42)
+        # الأحدث أولاً — القارئ بيتوقع تسلسل زمني. الأولوية والمصدر
+        # بيكسروا التعادل بس. (قبل كده كان الترتيب بالكلمات المفتاحية
+        # فالتواريخ كانت بتقفز قدام وورا على الصفحة.)
         clean.sort(key=lambda x: (
-            -score_item(x),           # أولوية الكلمات المفتاحية
-            x.get("source_tier", 3),  # مصادر أفضل
-            -float(x.get("published_ts") or 0),  # أحدث
+            -float(x.get("published_ts") or 0),
+            -score_item(x),
+            x.get("source_tier", 3),
         ))
         result[section] = clean
         merged = raw_count - len(clean)

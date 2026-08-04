@@ -14,6 +14,7 @@
 import re
 import html
 import hashlib
+import calendar
 from datetime import datetime, timezone, timedelta
 
 import config
@@ -30,8 +31,32 @@ def esc(text):
     return html.escape(str(text or ""))
 
 
+def _last_weekday(year, month, weekday):
+    """آخر يوم من نوع معيّن في الشهر (0=إثنين .. 6=أحد)."""
+    day = calendar.monthrange(year, month)[1]
+    d = datetime(year, month, day, tzinfo=timezone.utc)
+    while d.weekday() != weekday:
+        d -= timedelta(days=1)
+    return d
+
+
+def egypt_offset(utc_dt=None):
+    """
+    فرق توقيت مصر عن UTC. مصر بترجع للتوقيت الصيفي (+3) من آخر جمعة
+    في أبريل لآخر خميس في أكتوبر، و(+2) باقي السنة. الرقم كان متثبّت
+    على 3 فالموقع كان بيقدّم ساعة من نوفمبر لأبريل.
+    """
+    if getattr(config, "TIMEZONE_FORCE_OFFSET", None) is not None:
+        return config.TIMEZONE_FORCE_OFFSET
+    d = utc_dt or datetime.now(timezone.utc)
+    start = _last_weekday(d.year, 4, 4)      # آخر جمعة أبريل
+    end = _last_weekday(d.year, 10, 3)       # آخر خميس أكتوبر
+    return 3 if start <= d < end else 2
+
+
 def cairo_now():
-    return datetime.now(timezone.utc) + timedelta(hours=config.TIMEZONE_OFFSET_HOURS)
+    now = datetime.now(timezone.utc)
+    return now + timedelta(hours=egypt_offset(now))
 
 
 def stamp():
@@ -61,6 +86,20 @@ def num(n):
     return str(n)
 
 
+def _ar_count(n, one, two, few, many):
+    """
+    العدد في العربية 3 حالات: 1 مفرد · 2 مثنى · 3-10 جمع · 11+ مفرد منصوب.
+    الكود القديم كان بيستخدم صيغة واحدة للكل فيطلع «منذ 3 يومًا».
+    """
+    if n == 1:
+        return one
+    if n == 2:
+        return two
+    if 3 <= n <= 10:
+        return f"{n} {few}"
+    return f"{n} {many}"
+
+
 def ago(iso):
     if not iso:
         return ""
@@ -75,12 +114,12 @@ def ago(iso):
     if hours < 1:
         return "منذ دقائق"
     if hours < 24:
-        return f"منذ {int(hours)} ساعة"
+        return "منذ " + _ar_count(int(hours), "ساعة", "ساعتين", "ساعات", "ساعة")
     days = int(hours / 24)
     if days == 1:
         return "أمس"
     if days < 30:
-        return f"منذ {days} يومًا"
+        return "منذ " + _ar_count(days, "يوم", "يومين", "أيام", "يومًا")
     return d.strftime("%Y-%m-%d")
 
 
@@ -1593,7 +1632,13 @@ def build_beit_page(d, engines_note, intel=None, now_digest=None):
         main.append(_block("القراءة الاستشرافية", md_to_html(d["forecast"]), "outlook"))
 
     if d.get("checklist"):
-        main.append(_block("خطوات عملية", md_to_html(d["checklist"]), "steps"))
+        steps = d["checklist"]
+        if isinstance(steps, (list, tuple)):
+            body = "<ol class=\"steps\">" + "".join(
+                f"<li>{esc(str(s))}</li>" for s in steps if str(s).strip()) + "</ol>"
+        else:
+            body = md_to_html(steps)
+        main.append(_block("خطوات عملية", body, "steps"))
 
     # المصادر — مطوية افتراضيًا، مرجع مش قراءة أساسية
     srcs = d.get("sources") or []
@@ -1674,6 +1719,7 @@ def build_beit_page(d, engines_note, intel=None, now_digest=None):
 # الرسالة الوحيدة اللي بتفضل منفصلة: تنبيه رصد لحظي للمصادر الرسمية
 # (`watcher.format_alert`) — لأنها لحظية وبتيجي بره الدورة الكاملة.
 
+TG_LIMIT = 3400          # لازم يفضل أقل من حد التقسيم في monitor.py
 _SEP = "━" * 22
 _SUB = "─" * 18
 
@@ -1938,7 +1984,7 @@ def _intel_block(intel_view, max_signals=4):
     return "\n".join(lines)
 
 
-def _news_block(new_by_section, urgent_links, per_section=4, total_cap=14):
+def _news_block(new_by_section, urgent_links, per_section=3, total_cap=9):
     """أخبار جديدة مصنّفة — من غير تكرار للعاجل اللي فوق."""
     if not new_by_section:
         return None
@@ -2032,7 +2078,7 @@ def build_unified_telegram(*, new_by_section=None, brief=None, forecast=None,
         all_items.extend(items)
     urgent_links = urgent_links or set()
 
-    header = [f"🏛️ <b>مرصد العقارات المصرية</b>",
+    header = ["🏛️ <b>مرصد العقارات المصرية</b>",
               f"<i>📅 {stamp()}</i>"]
 
     # الترتيب: بيت الوطن (أهم شيء) → تغييرات → عاجل → إشارات → أخبار
@@ -2048,7 +2094,7 @@ def build_unified_telegram(*, new_by_section=None, brief=None, forecast=None,
         _intel_block(intel_view),
         _brief_block(brief),
         _news_block(new_by_section, urgent_links),
-        _forecast_block(forecast),
+        # الاستشراف تحليل طويل — مكانه الموقع، مش رسالة تليجرام.
         _stats_footer(counts or {}, engines, site_links),
     ]
     blocks = [b for b in blocks if b]
@@ -2057,7 +2103,7 @@ def build_unified_telegram(*, new_by_section=None, brief=None, forecast=None,
                    "قبل أي التزام مالي.</i>")
 
     # نجمّع في رسالة واحدة، ولو تعدّت الحد نقسّم على الأقسام
-    limit = 3800
+    limit = TG_LIMIT
     header_txt = "\n".join(header)
     parts = [header_txt]
     current = header_txt

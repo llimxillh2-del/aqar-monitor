@@ -77,27 +77,9 @@ def _handle_stop(signum, frame):
 # ============================================================
 
 def _split(text, limit=3600):
-    """تقسيم عند حدود السطور — ما بيكسرش وسوم HTML."""
-    text = text or ""
-    if len(text) <= limit:
-        return [text] if text.strip() else []
-    chunks, current = [], ""
-    for line in text.split("\n"):
-        while len(line) > limit:
-            cut = line.rfind(" ", 0, limit)
-            if cut <= 0:
-                cut = limit
-            chunks.append(line[:cut])
-            line = line[cut:].lstrip()
-        if len(current) + len(line) + 1 > limit:
-            if current.strip():
-                chunks.append(current.rstrip())
-            current = line
-        else:
-            current = f"{current}\n{line}" if current else line
-    if current.strip():
-        chunks.append(current.rstrip())
-    return chunks
+    """تقسيم آمن — بيحافظ على الترتيب وبيقفل وسوم HTML المفتوحة."""
+    from monitor import _split_message
+    return _split_message(text, limit)
 
 
 def _plain(text):
