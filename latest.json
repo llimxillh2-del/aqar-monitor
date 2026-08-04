@@ -1,7 +1,7 @@
 {
- "updated": "2026-08-04T10:33:28.262968+00:00",
- "now_digest": "الرصيد يحسب في يوم 22 يوليو، وينتهي التقديم في منتصف الليل. وسيتم طرح كراسات الشروط في 25 مدينة جديدة لشقق الإيجار التمليكي.",
- "brief": "## الوضع الحالي\nالوضع الحالي في السوق العقاري المصري يُظهر إقبالًا كبيرًا من المصريين بالخارج على المشاركة في مبادرات سكنية واستثمارية مختلفة. وزارة الإسكان تعمل على زيادة فرص السكن والاستثمار للمصريين بالخارج، مع إطلاق مراحل جديدة من مبادرات مثل \"بيتك في مصر\" و\"بيت الوطن\". هناك أيضًا طرح جديد لأراضي سكنية في مدن متعددة، مع إمكانية حجز شقق إيجار تمليكي.\n\n## فرص تستاهل الانتباه\n- طرح أراضي سكنية في 17 مدينة.\n- طرح 635 قطعة أرض مميزة في 7 مدن.\n- إطلاق شقق الإيجار التمليكي في 25 مدينة جديدة.\n- طرح 2898 قطعة أرض سكنية بأسعار تبدأ من 2200 جنيه للمتر.\n- إطلاق منصة لتدريس المناهج المصرية للمصريين بالخارج.\n\n## مخاطر وتحذيرات\n- يجب على المصريين بالخارج التحقق من شروط وأحكام كل مبادرة أو طرح قبل المشاركة.\n- يجب الاطلاع على كراسات الشروط والأسعار قبل التقديم.\n- يجب النظر في جميع الخيارات والفرص المتاحة قبل اتخاذ أي قرار.\n\n## الخلاصة\nالوضع الحالي في السوق العقاري المصري يوفر فرصًا متعددة للمصريين بالخارج للمشاركة في مبادرات سكنية واستثمارية. يجب على الأفراد البحث والتحقق من جميع المعلومات المتاحة قبل اتخاذ أي قرار استثماري.",
+ "updated": "2026-08-04T11:26:30.346637+00:00",
+ "now_digest": "حجز شقق الإيجار 2026 هو ما يستحق الانتباه. شروط التقديم وأماكن طرح 15 ألف وحدة سكنية جديدة قد تتم الإعلان عنها قريبًا. \n\nيتم التحويل البنكي قبل التخصيص، ويرجى التأكد من الرصيد قبل منتصف الليل في يوم 23، حيث يحسب الرصيد في يوم 22.",
+ "brief": null,
  "forecast": null,
  "market": [
   {
@@ -46,10 +46,9 @@
   "dates": [],
   "next": null,
   "cities": {
-   "القاهرة الجديدة": 21,
-   "الشيخ زايد": 9,
-   "بدر": 14,
-   "العبور": 1
+   "بدر": 2,
+   "القاهرة الجديدة": 1,
+   "الشيخ زايد": 1
   },
   "summary": null,
   "people": null,
@@ -617,19 +616,42 @@
  },
  "intel": {
   "counts": {
-   "total": 4,
+   "total": 5,
    "strong": 0,
-   "novel": 4,
+   "novel": 5,
    "confirmed": 0
   },
   "stats": {
-   "cycles": 11,
-   "utterances": 137,
+   "cycles": 12,
+   "utterances": 138,
    "confirmed": 0,
    "avg_lead_days": null
   },
   "digest": null,
   "signals": [
+   {
+    "statement": "يتم التحويل البنكي قبل التخصيص",
+    "type": "إجراء",
+    "tier": "شهادة فردية",
+    "status": "جديدة",
+    "novel": true,
+    "mentions": 1,
+    "independence": 1,
+    "firsthand": 1,
+    "weight": 8.6,
+    "lead_days": null,
+    "first_seen": "2026-08-04T11:20:25.902357+00:00",
+    "total_likes": 1,
+    "sources": [
+     {
+      "channel": "yt:\"🚨 رسمياً.. الفرحة لكل المغتربين! مفاجأة",
+      "author": "@اخبارالاسكان",
+      "url": "https://www.youtube.com/watch?v=f1b8RTUtISM&lc=UgyODyqFohqABG4di8d4AaABAg",
+      "quote": "\"مبروك لكل اللي حولوا ودخلوا المرحلة دي! 🥳 طمنونا، مين فيكم عمل التحويل البنكي ومستني التخصيص؟ واللي عنده أي سؤال يكتبه وهيتم الرد عليه فوراً 👇✨\"",
+      "firsthand": true
+     }
+    ]
+   },
    {
     "statement": "الرصيد يحسب لو ارسل قبل منتصف الليل في يوم ٢٣",
     "type": "موعد",
@@ -727,83 +749,22 @@
  },
  "urgent": [
   {
-   "title": "الإسكان: زيادة أراضي \"بيت الوطن\" إلى 15.5 ألف قطعة والإعداد لطرح جديد لـ\"بيتك في مصر\"",
-   "link": "https://news.google.com/rss/articles/CBMiigVBVV95cUxOUV9yOG1HS0htSGpGWjRUNzBwV3ExekpIYTJPaDRDUEU3WXNjVk91RXNVcU5FRTQtUWNJT3RNYUNTdWFzanVBMkVuancwd3I0Z2VpeU1TWDU0NDA2R2NHc3ZtU1QyQlR4dFZjNVBLWGVBZFozLWk1MVd3RnZWR3d6RC1aeEQtWlV4M0tERVRGV242dUU0bFIxSTJZZk5fVml2bWg0bGluSXRyWWV4RGFvSHE0ZUJBQTVZR0tWN0ZRTXhLaVNSOHR1bkktVVhkUmtJeENLeTF5aHN3ZXdsdUtRZTBMUlRDVnk5LWlLZ3RKS1pqX1RSa0tldDBtbnIxTTVGRGZVeE1BUUJFY3FZSnNHdGJFb1NVQURlbEJLX08tSlc0YzBYSk90SWRfS3pTRy1lUUQ3UFNXQnZjTnNWb2FTa0ZrQnhPS1ExYy1sUTh0bWhqM0VWVVJXSkhxY0o0ZGE1M0JZZklhZHVJeFhmTnp0SXZaSm84N0VKTFJTSlUyWElTOTgzOHpoNTl5TXBINWJzMFZMMGowc1hscGhGMXZGY1lmYmRpTE5pWEEzTkFyeDNhUHZDMEdyb0hhMFJadjc1b29aV1Bid0ZVRjdORWs3d1JkQ2tPTFNCMHhVYTJxSmRfdU5XbjJoUGl2RjB4UExScGRSVDRubm9JSnlSRVpxYUtwaXVoc01TakZjbVhIdVdoQjdCYmVKSkhnMGdYX0tvY2NLWERGREsyTmpDckhFYldKWWdFUjE1ckFNSE91eGY0OGFBODV3bDZJZ2FtcFRoT0JuQzAzRUJfOUNJal9VcDZFM21ybHIyNS1QeE9QR0JPUWdwQmJGem16UFM1d3FBNWZpNTJJVEpIZ9IBigVBVV95cUxOUV9yOG1HS0htSGpGWjRUNzBwV3ExekpIYTJPaDRDUEU3WXNjVk91RXNVcU5FRTQtUWNJT3RNYUNTdWFzanVBMkVuancwd3I0Z2VpeU1TWDU0NDA2R2NHc3ZtU1QyQlR4dFZjNVBLWGVBZFozLWk1MVd3RnZWR3d6RC1aeEQtWlV4M0tERVRGV242dUU0bFIxSTJZZk5fVml2bWg0bGluSXRyWWV4RGFvSHE0ZUJBQTVZR0tWN0ZRTXhLaVNSOHR1bkktVVhkUmtJeENLeTF5aHN3ZXdsdUtRZTBMUlRDVnk5LWlLZ3RKS1pqX1RSa0tldDBtbnIxTTVGRGZVeE1BUUJFY3FZSnNHdGJFb1NVQURlbEJLX08tSlc0YzBYSk90SWRfS3pTRy1lUUQ3UFNXQnZjTnNWb2FTa0ZrQnhPS1ExYy1sUTh0bWhqM0VWVVJXSkhxY0o0ZGE1M0JZZklhZHVJeFhmTnp0SXZaSm84N0VKTFJTSlUyWElTOTgzOHpoNTl5TXBINWJzMFZMMGowc1hscGhGMXZGY1lmYmRpTE5pWEEzTkFyeDNhUHZDMEdyb0hhMFJadjc1b29aV1Bid0ZVRjdORWs3d1JkQ2tPTFNCMHhVYTJxSmRfdU5XbjJoUGl2RjB4UExScGRSVDRubm9JSnlSRVpxYUtwaXVoc01TakZjbVhIdVdoQjdCYmVKSkhnMGdYX0tvY2NLWERGREsyTmpDckhFYldKWWdFUjE1ckFNSE91eGY0OGFBODV3bDZJZ2FtcFRoT0JuQzAzRUJfOUNJal9VcDZFM21ybHIyNS1QeE9QR0JPUWdwQmJGem16UFM1d3FBNWZpNTJJVEpIZw?oc=5",
-   "source": "Masrawy"
-  },
-  {
-   "title": "شقق الإيجار التمليكي.. 5000 وحدة في 25 مدينة جديدة وموعد طرح كراسات الشروط",
-   "link": "https://news.google.com/rss/articles/CBMipANBVV95cUxPS1Z5eENEWTQ0TVFPS1ZNZ0VXbWJQbDdZWU0tVWJvTHhYMjI1MU4yYmxSeWdPelNOcmQ1ZUNrLVRmbmQta2ZNcTIwX3JzbGZ4RmxrWGUzaFhaNEVWTWhvNU4xczhFQUR6c2ZmZDYwakFsYWk2b3N5d1N0TFN2YmhYOVZfOHRxWTBaenF5V01HZ1FyWHprRGYyR0hJSS0taDdxTDJlbTRFdmZSS2s2LWtBS1lCd0tRM25SRXpFemh2TTBDQk52bmdQUGlER010cGU2VEFDaHpzbHNzRlJCWGdRekhKLVVSRl9tVEdPMDlPczZUYTVSdUJtZjloS1dHUHk5a3JESzBuSkRvMllMdVZJOENDaWd4WWxVTEltaEM4OWZPYmhhOFpzWXJPNlJRaDQtMm5aZWUwdlppVFZGd2RmRTJ2b2M4YkVpaHdWWV9Mb2p1VWFqQndSeTZlWkcwUnpBQ2luOTFHRExXTTBlcGYtSndRdUt4TEtLMDlvNTNmY3ZoUkZ1NGkyZ240bnNEQTBHM29jNXhTc1lUZW1XNmNIMWdTQTnSAZ8DQVVfeXFMTm04VHZoOW94UHVhdkd2NzJhMkh2T29nNklqYTg4YkZGTzR2RV82UFFyWjBVU00xcUZpSDhITFFjOWxZSC1rYVBndThIbDZBNmZON3RXLWlndFJDMDZ6YzlHMW1XYWxyVmpFT3hvR3c1OUhsWUVtUFg2ellsVUpZbFJmN0NHTHYwQXRmeEdHQnJTdFJESG93ektQd3BXaE9WVjVpTUtwTXBaV1hmbkdObWpCeUZrZ2ZTYUlxSmR1a1Q0WkdybUZpRFJxcHlkdGR4WWJaTDBoZEdSZFBUTV84eHBQRU13Mk0xYXg1Q2JIeHh3clRhbkhjbUM0U2lsd195MGt0MXZvS2NGdlluRmh2R3NmbFJYMDYxdENFa0VRYkh2bHZRUjdyM3dpS2hpbW02M3huYVJvTnpyNkNKZ29LbUtkRkVLdzRZSVNaWE56WktZUS1NdHE2My1nd1VyekNTVXpybTNiclE3S3ZXRnh0RDRXS0JZZVdfbl9FV3J0ekxPNVJwT1g0cWNyQkYxRlJtTVQ2QjZBUERsLTZTb2p5OA?oc=5",
-   "source": "اليوم السابع"
-  },
-  {
-   "title": "كل ما تريد معرفته عن طرح جديد للأراضي السكنية في 17 مدينة",
-   "link": "https://news.google.com/rss/articles/CBMingNBVV95cUxOUV9BYnFlU0FYS0dkOGQtTEx1U0xxNjBDNzN1WmRCcUYzbGVDclhyMjhPcHdFay0wc0dfZTB5QmtwSWhsSHh3OEx3SXExRTREczVETzBrWE5iY1d3NGFMRTVnY1RDOFRTYkVrOVZsNDBIZXNGWU1rMVJkZHlhX2FpZTB4a1hqN0hwXzFwZUUwUXBKQjBYaVdNbWxqVnVoNHI4RTI4OVpqbGZLaVZFRXpUSzVib19FT0tBYWhQQnFqU2FGVTlXSmdIWVpkV0tiaml0Z0VrQVBWdDBFWGJ4YjdvZFJOc2RLTG96YnVBRDBjSFlzMDFpLWttUHZNcE9MbWFBRldjcW5sUkFBcTJZUF9xdlJyQWtLZkJvU21qbG9GRnVtckJObU9FdDR3Qkc5d1dhR2xCWXA0cmNDVTdud0hqUUtqMlNRT2l4NkFId2dVR2VDbERWRUxEU2RvYTNzd3JQYzFrQXJoaFoxNUFod1Q3a1pOMk0ya0FtaUJFNDEzODNJZEZmSFc3eU9uenpXRnNJSms0Z2FkOE9OOWtJbHfSAZgDQVVfeXFMTk05cEhfZ3JFUlB1QnhtYXRsXzR5TnRyeTZ6WXFaWVlyOWNJeFl4bG9pbDhNNDN3SENkUFVNZ0RtbkQ0VWY3RWpwbVhEQWVPbF9vcG53dW50QllkWkdaVnFacUxUMFR6QVNZNlNIaV9rVTVWSzBrTGhmSDNtRWZSZm52RGl3QmdmTG5va3BCemRfN2RUa3Z1NHdYb1FvTTI4Ykc0YXdTUnJBcXAyRXVENnpNai1uaE9oVVdPb2JNQU5TRHNDWHZ4ZzU4aVZFWi1paktfSU8xUTdEWU5rVGRWbHNVZ3pNYzdDalJNeUN5QkkzN1Nlam9WbmpQVHhoMVd1MXdTZm55QUxWeXA1Y3FmSmtyS1d6clpRZWlkbExQUEdVY3o5czc2WjZjY254eEYzMGs5UE5qcUVOYTBjbTRxRFZHeEhDbWdja0dXam5rUThKMUpJaElSYlk3ZlZycVhlaHBQTElqZzI3UWpGUk1NcmpFMEF2aThrUXRiYWlveU9RQUVPd3FhUkd1VDNwVGZSYkJfSTMyTGlw?oc=5",
-   "source": "اليوم السابع"
-  },
-  {
-   "title": "شقق الإيجار التمليكي.. التفاصيل الكاملة للشروط وطريقة التقديم في 25 مدينة",
-   "link": "https://news.google.com/rss/articles/CBMi4gRBVV95cUxOMGhEa1ZuOGd1aUdBVmtIR1hXaU13X3hVbExlN2tKV28zNm9VNURBa3dzYjcxLW42dXk2VWxPMlhxbE5yRFhPMGZkZmI5QV9ZMVd0WG1lNjhBWVVQaTA5X1hRdHdRd19jbTFhQW1Nb0hTNGNNSll5RGF5MlhnOWtlMmRCNTNJWTNUNEtiR1pVTWJYN0lkbUtwc1g5aWp5ZVlKdWVKZ01NYWhmOXljVGRaWEVkWld1MmRjMUU5dnJzNjJEbXZHZy11bmdZN3QyWkgzLUFwdVEyWGxJajdWY0stLXBJZ25EaFg3N09hVmJIdnRTT1U0YmNSTGJQeG80Z0NDNDFMNnQ5TzBuVnQ3WGplMHBYU0ZHUzJvcFN3VGFudlk5cDN3U1k1M2JIUXJWVW1rNmU3amlpejJMeklRcEptbkcwUGJ4RHFLUVJGd2kzYmlOX1d4ZFc2OC1DZlFhS1ZrdXlmb002R1hzUDdUTEE2ZDA5d1dfRmEtUHc5ZkJQeU56SjFZVW85Mlpqa2tmQk55NjJUUmY5SFlOMktnSDI4bXY1UkY0Z3ZQdzZXQkpjQ2lLRXZweWR5Z00xdVMtQnZtYjJESUx1enE2akFMYnhjVTlncWZwTjNfa2l5bkZhRTc2c0JpQjlWSFA4TWlOVDUxRXNGdnhqZEwxOUZCc0lHNGNXTlAzaU90cXI0cTIwbzJfYkRwaHBHVGVGd1B0eGUyaDNsS2hhbmNIaFRTaTBVS192dXdSYjZsSnROWUpZR1Rzdlh1cXY4Q09SS2JRbU5JQlpxQUJXZEw2Wm1QTHh0VVhR0gHnBEFVX3lxTE9GQ2I2RTZ5aDR0ZmNoOWtfdjduV1o0dUdQallxWnhZZ2RBNlpVZERucWxYQ3VodFNPMW1FN0s3QjI0QzlReW4tU0FCWTF2alJkVmhwbDRHcWR4QjNGaHpLOHdDWndaY1htb0ZudHBEYUs1aDZMX2ZXb1B6Z0p2UngxOXNVa0JSYWx5WWZOcFdaREV5QUM4encyYi1FbjZ5WnUteFppS19hN1pVLTliUHZaS2hBU3puRGE3cEUyOVJkdEVfakxKbk5yTGlkTFhFMnl4TUp3Z0p2ckh1Rmp1VjdsdDdQTE9ybzRfdGtXVUY2NmhERW50R19VMEdRY0lMTldQMTgyLVZKSDcxaGZqaUZnVi1XTmlIVWw3bXA3cG8zalZtajl3eXhYLXJ0LTZCY09rQ1dqOG80bGpVanpmbXMxWV9QYkZBNC10TThIOXd0b0diR3M5Q3pEZDQtR3pZVENNbWwxRjF0S0pkamFFaF9LRFhfQk5FbnFuWlFvakozakNxWkp1XzU2UmtBWUM3WDc3V1o4YUotRTBhcjdISHlUZzRva2lvWUN4WUxBX204MmdYM2dld1VRT3BkQUhJOFg1ZGVMaXNhc3hVT3VHZXc4dzNKX0RSWG1aelN1V3BjakNpWFJlZ2lSQ2hTdndhNkg5SVBJYTRVOHA3Y1hkUHFWcy1FUTBiYXlBRmJUOTQ3MUlNUk94Mko3UzVUSWVXOUl6U05leUpJTENTOV9yY3RwSE1hQjk1UEtFemR6OFZ6S245ZGdDTWpUelozNHNOSHdFamVBQ1l4VjhZM3QtRU1ER1BqMGlnbw?oc=5",
-   "source": "Masrawy"
-  },
-  {
-   "title": "ننشر كراسة شروط حجز أراضي الإسكان بـ 17 مدينة.. والتقديم يبدأ 27 يوليو",
-   "link": "https://news.google.com/rss/articles/CBMisARBVV95cUxOTEoyQ0FDQnVycndXSk5BSFVJWjE3Z2hmSWlnVHdmWUd2cGJ0ZXQ0SXpUaFV4bjNaVmhoZHgzTVVsVk5Za20tcUI0VDJQUzJJSlJOWVlBbTAwOVRlQVpMQTVJdlEwYWFPZ3JxWm0wdlN1dUtfTEZjaUpUX3BjUUdnY0E5Zzc1RkJkZzA1S1h4TzhQTlJfRkhCaWlaRG9IbGptV21mN09NSDBmR0c4ZWhURFByNXhKUVN0ajBiYVZNUWZEdWI2aldqVEtLQ0U1RVhSN3NkMGhIQXo2UUNXNURQRHEyT2J4RUdNdVNJY1h4SHVnTXVOLW5JbHowZl9rbmJybjR1dmhkcXJrMDQyWExNSlpRUVFXSFJsekNSdlRZbS1qX3JRazFMRW1CQktKV3BFSWlZSjlWWHZMb1hGTGM0dzRQUEZ6UXZ5Zm5Fazd3bVl5N1JMbzFvVTYyQ056QzI1R2R0aDA5UEw3eUFPXzBaXzVHMDVKTmd6S3FDUGRwZDl0djVNWWtSVkNDZnlsRGRFWE5wN3NlZXF1UU9PY3VmX1JoOW9fVkQ2dGpSV0UwS0tTZjg5TXhNTFdDT21YMzZmVm1YcldiVEtoSGhjbmVXVy1RQlE0Ni1kT2tTQ3I0MHhrX2pzODhMVzlzNy1qN0hVSTExRU1jZUIzODkwRVhXdURHRFowelJseW1zblFNLWpxbTN3bHdicG9ocWdfWXpyWDd3N0NOcnY2QnpPRE5fd9IBtgRBVV95cUxPQnlnUVg0eHZGTVI0SWNSdDdCZy00TVZPblRVdlpRemxrdDlrc003azc0d1I1eFFqTHF2M0lXSXZmOTNzZW1pTV9IUUg3SDVGckNXSHFENEdQampYVTBOVXQ3am9pbmxQcWNhOFl3dnRMQ2RJS2s1NnVRcnZLamx4b3Q5SVlrOTdGQlhYMXpoa1BnRnN2SFVoLVp5RUs1UExQVHJyX1N4ektuYlZmYVRhcjgzaXRtdDBWLXd5MktOd29GUHRVR2dPbWR2a1NJOXVpREFCOGpPQjRyZ2VTYXRnblBvd2ZXdjZGVEl5QmhtYlpnWVNHdE95VlZtejlnRjl1YVJtLVoyYnUwM2VOZ3RTUlNLYVRHLTBOLXlxREtEdFZnN3V2T3BtQjhRVS1pRzhXVTdOQW9UMWw4UFhacll1UG5HSTJSYXd6R180MXVaYWNzTE0yRXpBeVR0c3FGUGdIQXl2aWZ4RDI4YWRyV2VCeXZNbGFKMUY4dTJHV1dNZjRucHFWaUs3c2hMbnpITERTeVB4N2VSOXJ0ZTdSYzliQTg4SlZVX3pvOU9obEVqSEczZDlfcjRJOUhsVHdoNV9MUUVORENKWjZhaEJnT04zWnB6Tjc1RmUxMXptX1lNSVUzc1RESXg4R1dfV3RiS1Utc2RsN1M2cmlHYnBrMXhHRXEtRzB2YjkxMEIxbDNpeHRMLUttZmZpeXZfLVdYLV9fNG9YRkJoclVqQ1BLUHVoYTM2SUJndw?oc=5",
-   "source": "Masrawy"
-  },
-  {
-   "title": "​من بيتك وفي 17 مدينة.. الطريقة والمواعيد الكاملة لحجز أراضي الإسكان الجديدة",
-   "link": "https://news.google.com/rss/articles/CBMiREFVX3lxTE4yUWNhd1JhNFY5RS1uUmR0WkdmbUVkU2FYZzhJZ0ktWUd2SXA2YU54Y0JwMng3MHZJNzNMUmc5bGx5R2R3?oc=5",
-   "source": "بانكير"
+   "title": "حجز شقق الإيجار 2026.. شروط التقديم وأماكن طرح 15 ألف وحدة سكنية الجديدة",
+   "link": "https://news.google.com/rss/articles/CBMiwAJBVV95cUxQTlFpSlRucGR2Sm95bTVmV2FYZFRYeEJYX0JwSTdiNVlUTTRJMVNaNjBuQ21MRTNJb2U4N2JOTklHUWJQTW1VNkdoWWJsaXR3Q3JCb1VNbUJxMkY2alh6aE41Si0wMzAzTm1iNzAzUEVaOUVhR0ZaR0RZYXJva3RUN0VJMld5Rlktc245US05NEdBWklXa1o5QTUzbFlScDh6em4wUlRjVTJfZW1sSVdhbGpXazUxenp5U2ZodF9VMHpLaXNieElfN1M4dEh4VENxeUM3T0F4clZNQ1JIVGlxSDVJUkxhUDFTN25IWnM4UzNjZldnamNqTTM1RFJSclNJcm96NWtWYmlCdjRXR0N2el9ZTTFsczRjVkRRQVNORVRqdW5BZEZRRWxLelFfeUdKMmhVei1WQW40b2JpVnpNYw?oc=5",
+   "source": "قناة صدى البلد"
   }
  ],
- "top": [
-  {
-   "title": "الإسكان: زيادة أراضي \"بيت الوطن\" إلى 15.5 ألف قطعة والإعداد لطرح جديد لـ\"بيتك في مصر\"",
-   "link": "https://news.google.com/rss/articles/CBMiigVBVV95cUxOUV9yOG1HS0htSGpGWjRUNzBwV3ExekpIYTJPaDRDUEU3WXNjVk91RXNVcU5FRTQtUWNJT3RNYUNTdWFzanVBMkVuancwd3I0Z2VpeU1TWDU0NDA2R2NHc3ZtU1QyQlR4dFZjNVBLWGVBZFozLWk1MVd3RnZWR3d6RC1aeEQtWlV4M0tERVRGV242dUU0bFIxSTJZZk5fVml2bWg0bGluSXRyWWV4RGFvSHE0ZUJBQTVZR0tWN0ZRTXhLaVNSOHR1bkktVVhkUmtJeENLeTF5aHN3ZXdsdUtRZTBMUlRDVnk5LWlLZ3RKS1pqX1RSa0tldDBtbnIxTTVGRGZVeE1BUUJFY3FZSnNHdGJFb1NVQURlbEJLX08tSlc0YzBYSk90SWRfS3pTRy1lUUQ3UFNXQnZjTnNWb2FTa0ZrQnhPS1ExYy1sUTh0bWhqM0VWVVJXSkhxY0o0ZGE1M0JZZklhZHVJeFhmTnp0SXZaSm84N0VKTFJTSlUyWElTOTgzOHpoNTl5TXBINWJzMFZMMGowc1hscGhGMXZGY1lmYmRpTE5pWEEzTkFyeDNhUHZDMEdyb0hhMFJadjc1b29aV1Bid0ZVRjdORWs3d1JkQ2tPTFNCMHhVYTJxSmRfdU5XbjJoUGl2RjB4UExScGRSVDRubm9JSnlSRVpxYUtwaXVoc01TakZjbVhIdVdoQjdCYmVKSkhnMGdYX0tvY2NLWERGREsyTmpDckhFYldKWWdFUjE1ckFNSE91eGY0OGFBODV3bDZJZ2FtcFRoT0JuQzAzRUJfOUNJal9VcDZFM21ybHIyNS1QeE9QR0JPUWdwQmJGem16UFM1d3FBNWZpNTJJVEpIZ9IBigVBVV95cUxOUV9yOG1HS0htSGpGWjRUNzBwV3ExekpIYTJPaDRDUEU3WXNjVk91RXNVcU5FRTQtUWNJT3RNYUNTdWFzanVBMkVuancwd3I0Z2VpeU1TWDU0NDA2R2NHc3ZtU1QyQlR4dFZjNVBLWGVBZFozLWk1MVd3RnZWR3d6RC1aeEQtWlV4M0tERVRGV242dUU0bFIxSTJZZk5fVml2bWg0bGluSXRyWWV4RGFvSHE0ZUJBQTVZR0tWN0ZRTXhLaVNSOHR1bkktVVhkUmtJeENLeTF5aHN3ZXdsdUtRZTBMUlRDVnk5LWlLZ3RKS1pqX1RSa0tldDBtbnIxTTVGRGZVeE1BUUJFY3FZSnNHdGJFb1NVQURlbEJLX08tSlc0YzBYSk90SWRfS3pTRy1lUUQ3UFNXQnZjTnNWb2FTa0ZrQnhPS1ExYy1sUTh0bWhqM0VWVVJXSkhxY0o0ZGE1M0JZZklhZHVJeFhmTnp0SXZaSm84N0VKTFJTSlUyWElTOTgzOHpoNTl5TXBINWJzMFZMMGowc1hscGhGMXZGY1lmYmRpTE5pWEEzTkFyeDNhUHZDMEdyb0hhMFJadjc1b29aV1Bid0ZVRjdORWs3d1JkQ2tPTFNCMHhVYTJxSmRfdU5XbjJoUGl2RjB4UExScGRSVDRubm9JSnlSRVpxYUtwaXVoc01TakZjbVhIdVdoQjdCYmVKSkhnMGdYX0tvY2NLWERGREsyTmpDckhFYldKWWdFUjE1ckFNSE91eGY0OGFBODV3bDZJZ2FtcFRoT0JuQzAzRUJfOUNJal9VcDZFM21ybHIyNS1QeE9QR0JPUWdwQmJGem16UFM1d3FBNWZpNTJJVEpIZw?oc=5",
-   "source": "Masrawy"
-  },
-  {
-   "title": "وزير الخارجية: طرح مراحل جديدة من مبادرة «بيتك في مصر» لدعم المصريين بالخارج",
-   "link": "https://news.google.com/rss/articles/CBMiXEFVX3lxTFB2YU82X2RRUmVKaXJsdXZFaERnQU1xeFpzMDFFZ0Zub2RreWFuSUJWNGExLWVGWldjeFliOHVuSmhnNTNBUG5yaURSYW5tY2kyTnkxYzU1WExyQmhv?oc=5",
-   "source": "الوطن"
-  },
-  {
-   "title": "وزير الخارجية: إقبال كبير من المصريين بالخارج للمشاركة بمبادرات «مزرعتك وحسابك وبيتك في مصر",
-   "link": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE1TUXVlTzkyZHp1Mi1NU1Nqem8welU4a0ZHekJYdmp4TkhiallrSDN4X09TWU14dllrOHM2ZmsxZ1Y2c3ltZ1RlZnZnNzQ1SmJyaTIwUFdR?oc=5",
-   "source": "بوابة الأهرام"
-  },
-  {
-   "title": "وزارة الإسكان: إتاحة فرص سكنية واستثمارية للمصريين بالخارج داخل المدن الجديدة",
-   "link": "https://news.google.com/rss/articles/CBMi-wRBVV95cUxQTE9lTGxOTkNfaXZlLWlwdEJRRlZPUlJwMWVMeGhSVnBWM29sS3c4UTNpSTZJVzJxbjlTOFB0U2VubWk2ZVAxOW4yNmNmVDNGQzRiZllVb2Y5Wkl0T3JWb0ktMjU1Sk54WEdickxiWFFaZU1rMXhYQkxhMENIaE9SZ0hqY0xtRFZNcWhlQzBUYnFfcnRXaW4wc3RvMzBac2RoaktsNlQxY0FDQWx0WDRDeXhxcG8wUnBtSVdJS0JTcE5IVGFkcDBMNC12UUd4d2tnRThkWkpISmFHdEYwOExpNXUyUTlXWGNoQ2RiVGRUbUFzLUNjVk1pQ051RjFHdFBGN1pBOEFjTmZOT1BCekRaMHBMd1NJMlJxRGFIUWNXOVc0eUljT3BROU9jN3luRW0xdkU2TElJSjlCTHFRSWNLYlRxX2lpN0Q3OWlHQ1ZNb3E3eW0zanFheFJqRVlrSjd6Mk1XdWNXYTVrX0U3SmpuZEtidlFXTzhpeUpMUXdvZGRjLUZudV9sRnM5WWxPTW12Ym1mOURzUUV2NGZUU01LYlNTdlhDVHpTS0Y1bldONTIxcE85QlZYN1NKZk1zMGh4a3dxWEtWbjdfamJwLXNZLTE2bzVqZV9scmFxXzdKR3NNSzZOY3E5V2JaZTZVWG5UMVBvLVRkV2pYZ2FCaUhBUWI4TGJRODEyM3RvaGpyMEx6SF9CcmVpWmlnUXdkbGwzTTdyT0pHMkxjSi1MY2hkQldfX3Fod1pDRkFuZy1mZGY5MHNILWNFTnd4OEFUR0sxeEF5ckNkZXF5azF4OEd1Tmx1NlRhdTlYbVdmNmFVREhZRFpNUkNXY3BORQ?oc=5",
-   "source": "الهيئة الوطنية للإعلام"
-  },
-  {
-   "title": "صندوق الإسكان الاجتماعي يستعد لطرح 15 ألف وحدة بنظام الإيجار الشهري",
-   "link": "https://news.google.com/rss/articles/CBMi1wJBVV95cUxNTWtkdFg2b3ZmVk5GQmRBdUZ1NXRNZjdfSTJVeVlZTkdycFczd1RnLUxTelN1WkEzT25YZURHbE1RdnZ0VGdiNkhFZDdEeFJoYkNVMXQ3akpXNkpkV1NObGR2LWNuNndTa2wyTWYycXJ4R1J5ajhfUy1BVzdsY0N0WUE0MHNZYUY4LXdJMUI2d2FJLWJ4NVZ6V0dCRVRIajU0cGJnTE9nNTFvQmZLMUh5ZDRNOVJmbGljR2JFNWhEbEJCblFnV0llRWZydzRGMlA1Q1JQek50TGV6Y2tLZnBLZXZzb3l2clBMWG1oOGVTRzY2MWdiNmxUTEhiRks2REZzdzJ5TTFkbkZYNjh3Z3Qyd0lmNk1Nc1o3YV9sZTZUQ2ZRajdSOUVlSzB4dFplRWNzMFVYMTI4VHBrUzFVdXNxQWZnTmN4dnBRVjhJSUwwbUdOdXZUeUJ3?oc=5",
-   "source": "جريدة حابي"
-  },
-  {
-   "title": "«الإسكان الاجتماعي» يعلن ضوابط وشروط طرح وحدات الإيجار الجديدة",
-   "link": "https://news.google.com/rss/articles/CBMi8gNBVV95cUxNY0NIcFl4NnpzSFpOM25ac0JNYlpMYUpiT3F5ZGJZSVVGeFVjcllrYlQ5RXhyS3ppTXVHLU5HUU00VFRRMzJSdEJESVNuUEE5anhXcWF2cG1kc09yc2tNT2ZYTVc5ZXhDcnZOTUJvUHlTNnowSWFLaTdMd0J4cVktOU1kMXdjVXpxZVhJUGk3SWc3YTVEXzVJZFFmVjI5WGRxOEFVV1hDbWZHR0RwUl9kUUppWXRTVTdwWFpYTnVDREZ5YTg0RTE3eXhHcnNLR3hwRkVYcHVDX3JUZ0tpc1FhdDBZbzFHeUpNOTZzeUJaWkNNN0Q5cVhSelQtVEdUTzQ5dVRkRzZhc3ZVS1FIZDlaQ2liWkt5VG5wdEVXczB0aVlJQ2dTZnR4cEpDeFllWFcycXlLcFBvZ05yU0JGSUFXMEtkYUpnRGNNejl5T29qdkswUTMwaG1za0lXSGJ4OTVNa2haeEFLRm5rT1BGU1Y3Rzh2SktoWTU3bXlEbWdObXlaR284cGdiVC1vTVFuZ0pjOHRZeFhHWVg5WDBwb2h4RlA4VXdPb1V1UjE5ZW43eVNrY2tuVUVqal9HNlVRbk9FV0xROTZycGg3bWRaZUN3LTFfVVUxUkozRnpZbjdDNzk3VHhRTzk1cC1tTzdqRjVldlE?oc=5",
-   "source": "جريدة إسكان مصر"
-  },
-  {
-   "title": "وزارة الإسكان: إتاحة فرص سكنية واستثمارية للمصريين بالخارج داخل المدن الجديدة",
-   "link": "https://news.google.com/rss/articles/CBMi-wRBVV95cUxQTE9lTGxOTkNfaXZlLWlwdEJRRlZPUlJwMWVMeGhSVnBWM29sS3c4UTNpSTZJVzJxbjlTOFB0U2VubWk2ZVAxOW4yNmNmVDNGQzRiZllVb2Y5Wkl0T3JWb0ktMjU1Sk54WEdickxiWFFaZU1rMXhYQkxhMENIaE9SZ0hqY0xtRFZNcWhlQzBUYnFfcnRXaW4wc3RvMzBac2RoaktsNlQxY0FDQWx0WDRDeXhxcG8wUnBtSVdJS0JTcE5IVGFkcDBMNC12UUd4d2tnRThkWkpISmFHdEYwOExpNXUyUTlXWGNoQ2RiVGRUbUFzLUNjVk1pQ051RjFHdFBGN1pBOEFjTmZOT1BCekRaMHBMd1NJMlJxRGFIUWNXOVc0eUljT3BROU9jN3luRW0xdkU2TElJSjlCTHFRSWNLYlRxX2lpN0Q3OWlHQ1ZNb3E3eW0zanFheFJqRVlrSjd6Mk1XdWNXYTVrX0U3SmpuZEtidlFXTzhpeUpMUXdvZGRjLUZudV9sRnM5WWxPTW12Ym1mOURzUUV2NGZUU01LYlNTdlhDVHpTS0Y1bldONTIxcE85QlZYN1NKZk1zMGh4a3dxWEtWbjdfamJwLXNZLTE2bzVqZV9scmFxXzdKR3NNSzZOY3E5V2JaZTZVWG5UMVBvLVRkV2pYZ2FCaUhBUWI4TGJRODEyM3RvaGpyMEx6SF9CcmVpWmlnUXdkbGwzTTdyT0pHMkxjSi1MY2hkQldfX3Fod1pDRkFuZy1mZGY5MHNILWNFTnd4OEFUR0sxeEF5ckNkZXF5azF4OEd1Tmx1NlRhdTlYbVdmNmFVREhZRFpNUkNXY3BORQ?oc=5",
-   "source": "الهيئة الوطنية للإعلام"
-  }
- ],
+ "top": [],
  "videos": [
   {
-   "title": "&quot;🚨 رسمياً.. الفرحة لكل المغتربين! مفاجأة ضخمة في أراضي بيت الوطن&quot; #بيت_الوطن #المصريين_بالخارج #وزار",
+   "title": "\"🚨 رسمياً.. الفرحة لكل المغتربين! مفاجأة ضخمة في أراضي بيت الوطن\" #بيت_الوطن #المصريين_بالخارج #وزار",
    "link": "https://www.youtube.com/watch?v=f1b8RTUtISM",
    "channel": "الاسكان لحظه بلحظه  ",
    "published": "2026-08-02T20:05:05+00:00",
    "summary": ""
   },
   {
-   "title": "حصري من أمريكا.. م. مجدي إسحاق ينقل شكوي المصريين بالخارج بشأن &quot;بيت الوطن&quot; ويعلن عن مطالبهم",
+   "title": "حصري من أمريكا.. م. مجدي إسحاق ينقل شكوي المصريين بالخارج بشأن \"بيت الوطن\" ويعلن عن مطالبهم",
    "link": "https://www.youtube.com/watch?v=DUsz19JWyfQ",
    "channel": "AlHadath Alyoum - الحدث اليوم",
    "published": "2026-08-01T22:48:03+00:00",
@@ -881,8 +842,8 @@
   }
  ],
  "counts": {
-  "total": 68,
-  "new": 6,
+  "total": 66,
+  "new": 3,
   "beit": 14
  }
 }
