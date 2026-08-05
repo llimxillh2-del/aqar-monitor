@@ -364,6 +364,56 @@ def fast_check(notify=True, verbose=True):
         elif verbose:
             print("    ✗ فشل إرسال التنبيه الفوري")
 
+    # ---------- تحديث الموقع بدون AI ----------
+    # الصفحة كانت بتتولد في الدورة الكاملة بس (كل 4 ساعات)، يعني
+    # الخبر العاجل يوصل تليجرام ويفضل الموقع قديم. هنا بنعيد بناء
+    # الصفحة بالأخبار الجديدة **مع الاحتفاظ** بتحليل الـAI المخزّن
+    # من آخر دورة كاملة — رخيص ومن غير أي استدعاء AI.
+    try:
+        prev = load_json(config.LATEST_JSON, {})
+        beit_state = beit_alwatan.load()
+        beit_view = beit_alwatan.dashboard(beit_state)
+        beit_view["mzaya_source_url"] = config.BIT_MZAYASOFT_URL
+
+        try:
+            intel_view = intel.board(intel.load())
+        except Exception:
+            intel_view = None
+
+        sections = {}
+        for it in items:
+            key = "فيديوهات وتحليلات" if it.get("kind") == "video" \
+                else "بيت الوطن ومبادرات المغتربين"
+            sections.setdefault(key, []).append(it)
+        official_items = watcher.changes_to_items(official_changes)
+        if official_items:
+            sections = {OFFICIAL_SECTION: official_items, **sections}
+
+        new_links = {it["link"] for it in new_items}
+        urgent_links = {it["link"] for it in new_items
+                        if quality.is_urgent_by_content(it.get("title", ""))}
+
+        write_text(config.OUTPUT_HTML, render.build_index(
+            sections, prev.get("brief"), new_links, set(), urgent_links,
+            "محدّث بالفحص السريع (بدون AI)",
+            forecast=prev.get("forecast"),
+            market_rows=market_state.summary_rows(market_state.load()),
+            health_rows=watcher.health(), beit=beit_view,
+            official_changes=official_changes, intel=intel_view,
+            now_digest=prev.get("now_digest")))
+
+        prev["updated"] = datetime.now(timezone.utc).isoformat()
+        prev["urgent"] = [{"title": i["title"], "link": i["link"],
+                           "source": i.get("source", "")}
+                          for i in new_items
+                          if i["link"] in urgent_links][:15]
+        save_json(config.LATEST_JSON, prev)
+        if verbose:
+            print(f"    ✓ {config.OUTPUT_HTML} اتحدّث")
+    except Exception as exc:
+        if verbose:
+            print(f"    ! تعذّر تحديث الصفحة: {str(exc)[:80]}")
+
     # بنسجّل كل حاجة شفناها عشان الدورة الكاملة متكررش نفس الأخبار
     save_json(config.SEEN_FILE, _trim_seen(seen, items))
 

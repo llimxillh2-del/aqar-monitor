@@ -101,21 +101,23 @@ jobs:
           done
           exit 1
 
-      # ننشر الصفحات بس — مش الريبو كله (قبل كده كان بيرفع .pyc والحالة)
+      # ننشر الصفحات بس — مش الريبو كله. بننشر في الدورة الكاملة
+      # **والفحص السريع** كمان عشان الموقع يتحدّث مع تليجرام في نفس اللحظة.
       - name: تجهيز مجلد النشر
-        if: steps.mode.outputs.flag == '--once'
+        if: steps.mode.outputs.flag != '--watch'
         run: |
           rm -rf _site && mkdir -p _site
-          cp index.html beit-alwatan.html latest.json _site/
+          cp index.html latest.json _site/
+          [ -f beit-alwatan.html ] && cp beit-alwatan.html _site/ || true
           touch _site/.nojekyll
 
       - name: رفع الموقع
-        if: steps.mode.outputs.flag == '--once'
+        if: steps.mode.outputs.flag != '--watch'
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
 
       - name: نشر الموقع
-        if: steps.mode.outputs.flag == '--once'
+        if: steps.mode.outputs.flag != '--watch'
         id: deployment
         uses: actions/deploy-pages@v4
