@@ -28,6 +28,7 @@ from datetime import datetime, timezone
 
 import config
 import sources
+import quality
 import watcher
 import market_state
 import beit_alwatan
@@ -271,27 +272,44 @@ def fast_check(notify=True, verbose=True):
     # 1) المصادر الرسمية — رخيص، بيستخدم watch_state.json الخاص بيه
     official_changes = watch_cycle(verbose=verbose, notify=notify)
 
-    # 2) أخبار بيت الوطن بس (أهم قسم) — من غير باقي الأقسام العامة
+    # 2) الأخبار — بيت الوطن + الطروحات الجديدة (مش كل الأقسام عشان
+    #    يفضل خفيف وينفع يتكرر كل ربع ساعة)
+    queries = list(config.BEIT_ALWATAN["queries"])
+    for q in config.NEWS_SECTIONS.get("طروحات ومشروعات جديدة", []):
+        if q not in queries:
+            queries.append(q)
+
     if verbose:
-        print("[*] فحص أخبار بيت الوطن")
+        print(f"[*] أخبار سريعة ({len(queries)} عبارة)")
     items = []
-    for q in config.BEIT_ALWATAN["queries"]:
+    for q in queries:
         items.extend(sources.google_news(q))
         time.sleep(0.5)
 
-    dedup, out = set(), []
-    for it in items:
-        if it["link"] in dedup:
-            continue
-        dedup.add(it["link"])
-        out.append(it)
-    items = out
+    # 3) يوتيوب — RSS مجاني بدون مفتاح ولا حصة
+    if verbose:
+        print(f"[*] يوتيوب ({len(config.YOUTUBE_CHANNELS)} قناة)")
+    for entry in config.YOUTUBE_CHANNELS:
+        name, ch_id = entry if isinstance(entry, (tuple, list)) \
+            else ("YouTube", entry)
+        try:
+            items.extend(sources.youtube_channel_feed(ch_id, name))
+        except Exception as exc:
+            if verbose:
+                print(f"    ! {name}: {str(exc)[:50]}")
+        time.sleep(0.4)
+
+    # تنظيف: فك روابط Google News · فلتر المصادر الضعيفة · دمج المكرر
+    items = quality.enrich_items(items, filter_egypt=False, dedupe=True,
+                                 dedupe_threshold=0.45)
+    quality.save_url_cache()
 
     new_items = [it for it in items if it["link"] not in seen_set]
+    new_items.sort(key=lambda x: -float(x.get("published_ts") or 0))
     if verbose:
-        print(f"    → {len(items)} خبر إجمالي · {len(new_items)} جديد")
+        print(f"    → {len(items)} عنصر · {len(new_items)} جديد")
 
-    # 3) إعلانات قطع جديدة على bit.mzayasoft — سوق حقيقي بأسعار حقيقية
+    # 4) إعلانات قطع جديدة على bit.mzayasoft — سوق حقيقي بأسعار حقيقية
     new_ads = []
     try:
         ads = bit_mzayasoft.fetch_land_ads()
@@ -301,49 +319,53 @@ def fast_check(notify=True, verbose=True):
         if verbose:
             print(f"    ! mzayasoft: {str(exc)[:60]}")
 
+    # ---------- الرسالة ----------
     if (new_items or new_ads) and notify:
-        lines = []
-        if new_items:
-            lines.append(f"⚡ <b>بيت الوطن — {len(new_items)} خبر جديد</b>")
-            lines.append(_SUB_FAST)
-            for it in new_items[:5]:
-                title = render.esc(str(it.get("title", ""))[:150])
-                link = render.esc(it.get("link", ""))
-                src = render.esc(str(it.get("source", ""))[:30])
-                lines.append(f'• <a href="{link}">{title}</a>')
-                if src:
-                    lines.append(f'  <i>{src}</i>')
-            if len(new_items) > 5:
-                lines.append(f"<i>… و{len(new_items) - 5} خبر آخر</i>")
+        urgent = [it for it in new_items
+                  if quality.is_urgent_by_content(it.get("title", ""))]
+        normal = [it for it in new_items if it not in urgent]
+        news = [it for it in normal if it.get("kind") != "video"]
+        vids = [it for it in normal if it.get("kind") == "video"]
+
+        dt = render.cairo_now()
+        L = ["⚡ <b>تحديث فوري</b>",
+             f"<i>{dt.day} {render.AR_MONTHS_OUT[dt.month - 1]} · {dt:%H:%M}</i>"]
+
+        for icon, name, rows, cap in (("🔴", "عاجل", urgent, 4),
+                                      ("📰", "أخبار", news, 5),
+                                      ("🎥", "فيديو", vids, 3)):
+            blk = render._group(icon, name, rows, cap)
+            if blk:
+                L += ["", blk]
+
+        if official_changes:
+            L += ["", "🏛️ <b>تغيير في مصدر رسمي</b>"]
+            for ch in official_changes[:3]:
+                L.append(f'• <a href="{render.esc(ch["url"])}">'
+                         f'{render.esc(ch["name"])}</a>')
 
         if new_ads:
-            if lines:
-                lines.append("")
-            lines.append(f"🏷️ <b>{len(new_ads)} إعلان قطعة جديد</b> "
-                         f"<i>(مصدر مجتمعي)</i>")
-            for a in new_ads[:4]:
-                bits = [a.get("status") or "إعلان"]
-                if a.get("area_m2"):
-                    bits.append(f"{a['area_m2']} م²")
-                if a.get("premium"):
-                    bits.append(f"أوفر {a['premium']:,} ج")
-                lines.append("• " + " · ".join(bits))
+            L += ["", f"🏷️ <b>إعلانات قطع جديدة ({len(new_ads)})</b>"]
+            for ad in new_ads[:4]:
+                bits = [ad.get("status") or "إعلان"]
+                if ad.get("area_m2"):
+                    bits.append(f"{ad['area_m2']} م²")
+                if ad.get("premium"):
+                    bits.append(f"أوفر {ad['premium']:,} ج")
+                L.append("• " + render.esc(" · ".join(bits)))
 
-        lines.append("")
-        lines.append(f'<a href="{config.SITE_BASE_URL}/beit-alwatan.html">'
-                     f'الملف الكامل ←</a>')
+        L += ["", f'📄 <a href="{config.SITE_BASE_URL}/index.html">'
+                  f'التقرير الكامل</a>']
 
-        if telegram("\n".join(lines), preview=False):
+        if telegram("\n".join(L), preview=False):
             if verbose:
-                print(f"    ↗ تنبيه فوري ({len(new_items)} خبر · "
+                print(f"    ↗ تنبيه فوري ({len(new_items)} عنصر · "
                       f"{len(new_ads)} إعلان)")
         elif verbose:
             print("    ✗ فشل إرسال التنبيه الفوري")
 
-    # بنسجّل كل حاجة شفناها (مش بس اللي بعتناها) عشان الدورة الكاملة
-    # بعد كده متكررش نفس الأخبار
-    seen = _trim_seen(seen, items)
-    save_json(config.SEEN_FILE, seen)
+    # بنسجّل كل حاجة شفناها عشان الدورة الكاملة متكررش نفس الأخبار
+    save_json(config.SEEN_FILE, _trim_seen(seen, items))
 
     return {"official_changes": len(official_changes),
             "new_news": len(new_items), "new_ads": len(new_ads)}
@@ -764,6 +786,7 @@ def full_cycle(ai, use_ai=True, notify=True, force=False):
                 counts=counts_footer,
                 engines=engines_line,
                 site_links=site_links,
+                now_digest=now_digest,
             )
 
             sent = failed = 0

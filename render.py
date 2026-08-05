@@ -2063,75 +2063,145 @@ def _stats_footer(counts, engines, links=None):
     return "\n".join(lines)
 
 
+# ============================================================
+#  رسالة تليجرام — سطر واحد لكل خبر
+# ============================================================
+#  العنوان نفسه هو الرابط (تليجرام بيخفي الـURL) — فمفيش روابط
+#  طويلة بتاكل المساحة. المصدر جنب العنوان على نفس السطر.
+
+_TITLE_MAX = 88
+
+
+def _short(text, n=_TITLE_MAX):
+    t = re.sub(r"\s+", " ", str(text or "")).strip()
+    return t if len(t) <= n else t[:n - 1].rstrip() + "…"
+
+
+def _src_of(item):
+    """اسم المصدر مختصر — من غير وقت ولا زوايد."""
+    src = re.sub(r"\s+", " ", str(item.get("source") or "")).strip()
+    src = re.sub(r"^(قناة|جريدة|بوابة|موقع)\s+", "", src)
+    return src[:22]
+
+
+def _line(item):
+    """• عنوان مربوط — مصدر"""
+    title = esc(_short(item.get("title", "")))
+    link = esc(item.get("link", ""))
+    src = _src_of(item)
+    tail = f" — <i>{esc(src)}</i>" if src else ""
+    return f'• <a href="{link}">{title}</a>{tail}'
+
+
+def _group(icon, title, rows, cap):
+    if not rows:
+        return ""
+    out = [f"{icon} <b>{esc(title)}</b>"]
+    out += [_line(it) for it in rows[:cap]]
+    if len(rows) > cap:
+        out.append(f"<i>+{len(rows) - cap} غيرها على الموقع</i>")
+    return "\n".join(out)
+
+
+def _beit_line(beit, changes):
+    """بيت الوطن في سطر أو اتنين — مش بطاقة كاملة."""
+    if not beit:
+        return ""
+    bits = []
+    if beit.get("stage"):
+        bits.append(str(beit["stage"]))
+    bits.append(str(beit.get("booking") or "الحجز لم يُعلن"))
+    nxt = beit.get("next")
+    if isinstance(nxt, dict) and nxt.get("days_left") is not None:
+        dl = nxt["days_left"]
+        when = "النهاردة" if dl == 0 else (
+            "بكرة" if dl == 1 else
+            f"بعد {_ar_count(dl, 'يوم', 'يومين', 'أيام', 'يومًا')}")
+        bits.append(f"{nxt.get('label', 'موعد')} {when}")
+    out = ["🏘️ <b>بيت الوطن</b> — " + esc(" · ".join(bits))]
+    for ch in (changes or [])[:3]:
+        field = str(ch.get("field", "")).replace("_", " ")
+        out.append(f"🔸 {esc(field)}: <b>{esc(_short(ch.get('to', ''), 55))}</b>")
+    return "\n".join(out)
+
+
+def _radar_lines(intel_view, cap=3):
+    if not intel_view:
+        return ""
+    sigs = intel_view.get("signals") or []
+    novel = intel_view.get("novel")
+    if novel is None:
+        novel = [x for x in sigs if x.get("novel")]
+    novel = [x for x in novel if x.get("status") != "مؤكدة رسميًا"][:cap]
+    if not novel:
+        return ""
+    out = ["🔍 <b>كلام ناس — مش في الأخبار</b>"]
+    for sg in novel:
+        n = sg.get("independence", 1)
+        out.append(f"• {esc(_short(sg.get('statement', ''), 78))} "
+                   f"— <i>{n} مصدر</i>")
+    out.append("<i>غير مؤكد رسميًا</i>")
+    return "\n".join(out)
+
+
 def build_unified_telegram(*, new_by_section=None, brief=None, forecast=None,
                            urgent_links=None, beit=None, beit_changes=None,
                            market_changes=None, intel_view=None, counts=None,
-                           engines="", site_links=None):
+                           engines="", site_links=None, now_digest=None):
     """
-    الرسالة الموحّدة الاحترافية — ترتيب هرمي بالأهمية.
-
-    ترجّع list من نصوص (كل نص رسالة تليجرام واحدة). عادةً عنصر واحد؛
-    لو الرسالة طويلة جدًا يتم تقسيمها عند حدود الأقسام (مش في نص القسم).
+    نشرة مضغوطة: سطر واحد لكل خبر، العنوان هو الرابط.
+    ترجّع list من نصوص، كل واحد رسالة تليجرام.
     """
-    all_items = []
-    for items in (new_by_section or {}).values():
-        all_items.extend(items)
+    items = []
+    for lst in (new_by_section or {}).values():
+        items.extend(lst)
     urgent_links = urgent_links or set()
 
-    header = ["🏛️ <b>مرصد العقارات المصرية</b>",
-              f"<i>📅 {stamp()}</i>"]
+    urgent = [i for i in items if i.get("link") in urgent_links
+              and i.get("kind") != "video"]
+    news = [i for i in items if i.get("link") not in urgent_links
+            and i.get("kind") != "video"]
+    vids = [i for i in items if i.get("kind") == "video"]
+    for lst in (news, vids):
+        lst.sort(key=lambda x: -float(x.get("published_ts") or 0))
 
-    # الترتيب: بيت الوطن (أهم شيء) → تغييرات → عاجل → إشارات → أخبار
-    # → استشراف → إحصائيات
-    # ملحوظة: بيت الوطن بيتشال من "تغييرات السوق" عشان ما يتكررش —
-    # ليه قسمين مخصصين فوق (_beit_block و _beit_changes_block) بالفعل.
-    blocks = [
-        _beit_block(beit),
-        _beit_changes_block(beit_changes),
-        _plots_block(beit),
-        _market_changes_block(market_changes, exclude_topics=("بيت الوطن",)),
-        _urgent_block(all_items, urgent_links),
-        _intel_block(intel_view),
-        _brief_block(brief),
-        _news_block(new_by_section, urgent_links),
-        # الاستشراف تحليل طويل — مكانه الموقع، مش رسالة تليجرام.
-        _stats_footer(counts or {}, engines, site_links),
-    ]
-    blocks = [b for b in blocks if b]
+    d = cairo_now()
+    head = (f"🏛️ <b>مرصد العقارات المصرية</b>\n"
+            f"<i>{d.day} {AR_MONTHS_OUT[d.month - 1]} · {d:%H:%M}</i>")
 
-    footer_note = ("⚠️ <i>للاسترشاد فقط — راجع كراسة الشروط والمصدر الرسمي "
-                   "قبل أي التزام مالي.</i>")
+    blocks = [b for b in (
+        _group("🔴", "عاجل", urgent, 4),
+        _beit_line(beit, beit_changes),
+        _group("📰", "أخبار", news, 6),
+        _group("🎥", "فيديو", vids, 3),
+        _radar_lines(intel_view),
+    ) if b]
 
-    # نجمّع في رسالة واحدة، ولو تعدّت الحد نقسّم على الأقسام
-    limit = TG_LIMIT
-    header_txt = "\n".join(header)
-    parts = [header_txt]
-    current = header_txt
+    tail = []
+    c = counts or {}
+    stat = " · ".join(x for x in (
+        f"{c['new']} خبر" if c.get("new") else "",
+        f"{c['videos']} فيديو" if c.get("videos") else "",
+        f"{c['signals']} إشارة" if c.get("signals") else "") if x)
+    for label, url in (site_links or []):
+        tail.append(f'📄 <a href="{esc(url)}">{esc(label)}</a>')
+    if stat:
+        tail.append(f"<i>{esc(stat)}</i>")
+    if tail:
+        blocks.append("\n".join(tail))
 
-    def push_block(b):
-        nonlocal current
-        candidate = current + "\n\n" + _SEP + "\n\n" + b
-        if len(candidate) <= limit:
-            current = candidate
-            parts[-1] = current
-            return
-        # القسم مش هيدخل — ابدأ رسالة جديدة (بدون هيدر ضخم، بس تنويه بسيط)
-        cont_header = f"🏛️ <b>مرصد العقارات — تكملة {len(parts) + 1}</b>"
-        if len(cont_header) + len(b) + 6 > limit:
-            # القسم لوحده أطول من الحد — نقصّه بأمان
-            b = b[:limit - len(cont_header) - 10] + "…"
-        current = cont_header + "\n\n" + b
-        parts.append(current)
-
+    parts, current = [head], head
     for b in blocks:
-        push_block(b)
-
-    # التنويه القانوني على آخر رسالة
-    if len(parts[-1]) + len(footer_note) + 4 <= limit:
-        parts[-1] += "\n\n" + footer_note
-    else:
-        parts.append(footer_note)
-
+        cand = current + "\n\n" + b
+        if len(cand) <= TG_LIMIT:
+            current = cand
+            parts[-1] = current
+            continue
+        cont = "🏛️ <b>تكملة</b>"
+        if len(cont) + len(b) + 4 > TG_LIMIT:
+            b = b[:TG_LIMIT - len(cont) - 8] + "…"
+        current = cont + "\n\n" + b
+        parts.append(current)
     return parts
 
 

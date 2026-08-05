@@ -99,6 +99,31 @@ b = watcher.changes_to_items([{"name": "n", "url": "https://u", "added": ["سط�
 check("كل تغيير له رابط فريد", a[0]["link"] != b[0]["link"], a[0]["link"][-14:])
 
 print(line)
+print("10) شكل نشرة تليجرام")
+iv = {"signals": [
+    {"statement": "أقل مقدم حجز 8000 دولار", "tier": "إشارة متقاطعة",
+     "status": "جديدة", "novel": True, "mentions": 3, "independence": 2}]}
+bt = {"stage": "المرحلة 11", "booking": None,
+      "next": {"label": "القرعة", "days_left": 6}}
+sec = {"أخبار": [
+    {"title": "خبر عاجل", "link": "https://a/1", "source": "الأهرام",
+     "published": now.isoformat(), "published_ts": now.timestamp(), "kind": "news"},
+    {"title": "فيديو تحليلي", "link": "https://y/1", "source": "قناة",
+     "published": now.isoformat(), "published_ts": now.timestamp(), "kind": "video"}]}
+msg = "\n".join(render.build_unified_telegram(
+    new_by_section=sec, urgent_links={"https://a/1"}, beit=bt, intel_view=iv,
+    beit_changes=[{"field": "سعر_المتر", "to": "20 ألف"}],
+    counts={"new": 5}, site_links=[("التقرير", "https://s")]))
+check("قسم العاجل ظاهر", "🔴" in msg and "خبر عاجل" in msg)
+check("سطر بيت الوطن ظاهر", "🏘️" in msg and "المرحلة 11" in msg)
+check("العد التنازلي ظاهر", "بعد 6 أيام" in msg)
+check("سطر واحد لكل خبر", msg.count("خبر عاجل") == 1 and " — " in msg)
+check("العنوان هو الرابط", '<a href="https://a/1">خبر عاجل</a>' in msg)
+check("الفيديو في قسمه", "🎥" in msg)
+check("رادار كلام الناس ظاهر", "🔍" in msg and "8000 دولار" in msg)
+check("تنويه الرادار موجود", "غير مؤكد رسميًا" in msg)
+
+print(line)
 print("النتيجة: " + str(len(PASS)) + " نجح · " + str(len(FAIL)) + " فشل")
 if FAIL:
     print("الفاشل: " + " | ".join(FAIL))

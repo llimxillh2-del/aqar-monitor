@@ -1,0 +1,121 @@
+name: مرصد العقارات المصرية
+
+on:
+  schedule:
+    # الدورة الكاملة (أخبار + يوتيوب + AI + رادار) — كل 4 ساعات
+    - cron: '5 */4 * * *'
+    # فحص سريع بدون AI — أخبار + يوتيوب + رسمي + إعلانات القطع
+    # كل ربع ساعة. (GitHub بيأخّر أحيانًا — ده أقل تأخير عملي متاح.)
+    - cron: '10,25,40,55 * * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'وضع التشغيل'
+        type: choice
+        default: 'once'
+        options: [once, fast-check, watch]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: aqar-monitor
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    # لازمة لـ deploy-pages — من غيرها النشر بيترفض لو الـ environment
+    # عليه قواعد حماية.
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: تنصيب المكتبات
+        run: pip install -r requirements.txt
+
+      # فحص سريع للأسرار — بيطبع الأطوال بس، مش القيم
+      - name: فحص الإعدادات
+        env:
+          TOK: ${{ secrets.TELEGRAM_TOKEN }}
+          CID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GRQ: ${{ secrets.GROQ_API_KEY }}
+          YT:  ${{ secrets.YOUTUBE_API_KEY }}
+        run: |
+          echo "TELEGRAM_TOKEN   : ${#TOK} حرف  (المتوقع 46)"
+          echo "TELEGRAM_CHAT_ID : ${#CID} حرف"
+          echo "GROQ_API_KEY     : ${#GRQ} حرف"
+          echo "YOUTUBE_API_KEY  : ${#YT} حرف"
+          case "$TOK" in
+            *"<"*|*">"*) echo "::error::التوكن فيه أقواس < > — شيلها من الـ secret" ;;
+            *" "*)       echo "::error::التوكن فيه مسافة" ;;
+          esac
+
+      - name: تحديد الوضع
+        id: mode
+        run: |
+          if [ "${{ github.event.schedule }}" = "10,25,40,55 * * * *" ]; then
+            echo "flag=--fast-check" >> $GITHUB_OUTPUT
+            echo "name=فحص سريع" >> $GITHUB_OUTPUT
+          else
+            echo "flag=--${{ github.event.inputs.mode || 'once' }}" >> $GITHUB_OUTPUT
+            echo "name=دورة كاملة" >> $GITHUB_OUTPUT
+          fi
+
+      - name: ${{ steps.mode.outputs.name }}
+        run: python monitor.py ${{ steps.mode.outputs.flag }}
+        env:
+          TELEGRAM_TOKEN:     ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_ALLOWED:   ${{ secrets.TELEGRAM_ALLOWED }}
+          GEMINI_API_KEY:     ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY:       ${{ secrets.GROQ_API_KEY }}
+          CEREBRAS_API_KEY:   ${{ secrets.CEREBRAS_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          YOUTUBE_API_KEY:    ${{ secrets.YOUTUBE_API_KEY }}
+          SITE_BASE_URL:      https://llimxillh2-del.github.io/aqar-monitor
+
+      - name: حفظ الحالة
+        run: |
+          git config user.name  "aqar-monitor-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add -A state/ index.html beit-alwatan.html latest.json
+          git diff --staged --quiet && exit 0
+          git commit -m "تحديث تلقائي — $(date -u +'%Y-%m-%d %H:%M UTC')"
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin ${{ github.ref_name }} && \
+            git push && exit 0
+            sleep 5
+          done
+          exit 1
+
+      # ننشر الصفحات بس — مش الريبو كله (قبل كده كان بيرفع .pyc والحالة)
+      - name: تجهيز مجلد النشر
+        if: steps.mode.outputs.flag == '--once'
+        run: |
+          rm -rf _site && mkdir -p _site
+          cp index.html beit-alwatan.html latest.json _site/
+          touch _site/.nojekyll
+
+      - name: رفع الموقع
+        if: steps.mode.outputs.flag == '--once'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: نشر الموقع
+        if: steps.mode.outputs.flag == '--once'
+        id: deployment
+        uses: actions/deploy-pages@v4
