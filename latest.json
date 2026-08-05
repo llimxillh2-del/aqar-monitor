@@ -1,6 +1,6 @@
 {
- "updated": "2026-08-05T06:32:32.028266+00:00",
- "now_digest": "المصريين المقيمين بالخارج ينتظرون مؤتمرهم السنوي، والذي سيفتتح في السنة الحالية. وسيكون هذا المؤتمر فرصة لوزير الخارجية لاستعراض المبادرات والخدمات الجديدة التي سيتم تقديمها للمصريين المقيمين بالخارج.",
+ "updated": "2026-08-05T06:54:35.044012+00:00",
+ "now_digest": null,
  "brief": null,
  "forecast": null,
  "market": [
@@ -46,6 +46,7 @@
   "dates": [],
   "next": null,
   "cities": {
+   "6 أكتوبر": 1,
    "بدر": 1
   },
   "summary": null,
@@ -556,6 +557,16 @@
   },
   "mzaya_new_ads": []
  },
+ "beitak_femasr": {
+  "stage": null,
+  "booking": null,
+  "price": null,
+  "deposit": null,
+  "dates": [],
+  "last": null,
+  "summary": null,
+  "timeline": []
+ },
  "intel": {
   "counts": {
    "total": 0,
@@ -564,7 +575,7 @@
    "confirmed": 0
   },
   "stats": {
-   "cycles": 9,
+   "cycles": 10,
    "utterances": 159,
    "confirmed": 0,
    "avg_lead_days": null
@@ -575,16 +586,21 @@
  },
  "urgent": [
   {
-   "title": "افتتاح مؤتمر المصريين بالخارج 2026.. وزير الخارجية يستعرض مبادرات وخدمات جديدة",
-   "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE9GNG5sZmRkdmhwV3lHQ2liTWZuNTRvUUFPaFBRY0Z1NWp4MjhSTHk5WmxzTEhRTm5FNXBuMWJrbTk5RzdOUENSOEtDOVZ6NzMzb0xKSy1OS21LMkxHNmk40gFjQVVfeXFMUGV5dWpnSHplUXRZS1BXai1OcEt1VGs4a0U3U0ZkNkVVM184NzRKYVg1akY0WF81UHY3WWVLM1BSM2RVS2xLdDQ5UzJwSUprN1VnVkVfYzkwLVJaYkRjU09BSUdr?oc=5",
-   "source": "المصري اليوم"
+   "title": "نائب رئيس هيئة المجتمعات العمرانية يشدد علي سرعة تقنين أوضاع المستثمرين",
+   "link": "https://news.google.com/rss/articles/CBMi_gNBVV95cUxPdXQzMGlhVzR4dTE1TVpQWlcwVmRCUDhTQ2RTa0Q3VFo3eUJZeXMtdzV2X1pjMm9pdUxZQTlHNmt1RlFLbF9NRi0wWlZTZzFacVpmcERXVFJKNnJVN2F2VDNsc2owYnkyLV9SZmNwaTQ5X3hKLWJqMVkwSXg2cjd1eVh5ZEpab2x3Qmtud1FwaVhBd0QtWGpOYnlXS1h2QU5nT1hmRy1jWU9tLWltTUZqMmRHMFFsVml4WjJRY1UxVThCZ0ZZSWE5dUw5N29SbnBGZnJJQlpybFNuS1VHSTQzTjlQb1p6a1c5emlGZmZldndwbVRTQ2hlck1KUHh4bDMzSlRPT3FKMm1qU0c2UTdjZUhKNWtiTnJlc0tqbHlUSGFMd0JSOXhxSUVSUWwwcmV4dk5DQ0VYMUdSbUEtY0VEV3VJNk1pWk0zbXA4Yjd1d3VIOUFWYm1MUDBHVzhwRmM1RUxvTTNVVGlEZDN0OThJSjRlUUlqYWNjT0w0cEU0QjZzRmxlZTZTSFZZRkIySU5fOHpDWXRrdnhOMHIxNVNiVFdoQnh0OFBPa0Eyd1ZyYzJVNmdpUzctYnhiVjlNcHVwdXhHSm92RHhCNzgwZ2dZNG1KXy1sOFBtamo1bVZJMEdKS0hOc1lsVnd3czl2ZHRlbDNKZzNfd3UwajRha2fSAfgDQVVfeXFMTUk1VERQS25GOGZIWHdveFNSUnpQLVZ3RzBzMDZ0SXNqMlJzQXg1SWdvcW16d0FvOU1FUXhndkl6QkpmOGwtSTJ0S0FIUzlJTDRTTzdVSHY4czRPTDNydGZKNWRDTGE1blp2RDV6V21WTGI1eXNxQkYtM1Z5YzRmREwzMDdPXzZnVlczOE1iQ3RTcU9Cck5xazdMZmE4NFdRZGlvNEZOQ0EwcmRGaWFZTTVlcXdQb1FGMHpXYVBzWlR1cWphN296cExUQ0h3UERmaTFDX2RPTmxoUXJQcHNtQTc5dGxXQlFUSjVZTTFHV0psclZzSkpkZEREWll2T3hLb2lPR3otbzc2ZFF3dXE4czA5U0ZJLVJkcGhpVG1ZY3FYTGZOYUI5aG9rT2Q3dlpHQTAzQkxfLUV0Tm9ibGJxbVR5Sm0wSWlTN0xHbWtqNjVKbTZ4cXlHem9yb1VfWFJMT0VyZFhYdDJhM084Y0QyTXBZc1BIQkZiaGFLNHFVWW93RWwySDI4U3F6S0RYc01BRVBscjNhN3ZQTXhBNmN6dnVYM25DaVlZdzNReUxNUFF0b2ZvUG9seWRRZHItTmxYYTVzQ2pRNnA1LXd1SldwQS1xanp0Wjd0TkNvWkg1WWFNUWVUUVlCQ2JTaWlxbTJkMGRiWHRsclhy?oc=5",
+   "source": "اليوم السابع"
   }
  ],
  "top": [
   {
-   "title": "🚨 صدمة بيت الوطن المرحلة 11: 63 ألف تحويل و10 آلاف قطعة أرض جديدة! (كواليس حاسمة)",
-   "link": "https://www.youtube.com/watch?v=-FxM1rljjkw",
-   "source": "الاسكان لحظه بلحظه  "
+   "title": "10 مليارات دولار استثمارات صينية في مصر",
+   "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1qdnpuWkt3QW9CSC12Q1hhQzdZWWpiNG5ablMxVWNneWMySUg4Q1d5TVVOOU12YTBnSGFrTUdpV0hoNHdSMmlKUlVVc1JJQVptdDB1eFl2NljSAVhBVV95cUxNanZ6blpLd0FvQkgtdkNYYUM3WVlqYjRuWm5TMVVjZ3ljMklIOENXeU1VTjlNdmEwZ0hha01HaVdIaDR3UjJpSlJVVXNSSUFabXQwdXhZdjZY?oc=5",
+   "source": "الراي"
+  },
+  {
+   "title": "وزارة الإسكان تبدأ تنفيذ المرافق بمنطقة بيت الوطن الحي التاسع بمدينة 6 أكتوبر",
+   "link": "https://news.google.com/rss/articles/CBMi9gJBVV95cUxQRDlVNTd6VDdPYlBwUmU0NUFrVUlhQlZTeFJ6OXN2aDRYcDVFWUJhQU1wTGVVWGF5amFLbmVDcmlWRllBV1EzQ1d5R2pTaG13SWlabzhLQzh6RFVHUm5MNG9pOW1VSzEzeTlHUnh6MEtFN3l6akRDbW5EVjNvSDJUNWF2X2s0bVlzekJoekdScEM2c1BfZDkwbDRneVFzMm9lZ2VtYkk3SzNJYXNBRWViZVZPa0x5dEtwUHFGR2MtNzNSWUF0aFNJMklSX3I1UXZwSElTMnl0WGFkdjNpY3FpX0pYa2Q0WmhXMkFRb0FCRk5qdlE2VzdPd3FHZW1lT3dUVEs1V0xfZDFLTDVYZVUxelJNdXVhQmt1M1E5a3prZ1FYUDktQWNqR2hrY2QwZm10Q1FYT2I2SHVselhtTFEwaGVXQXA0VERpV3VIbGtTak9SZ0lveWpOQXl1bEU5NWV0aF96Y3d6bl9wejQycllOUkFicGRWZw?oc=5",
+   "source": "جريدة المال"
   }
  ],
  "videos": [
@@ -674,8 +690,8 @@
   }
  ],
  "counts": {
-  "total": 80,
-  "new": 3,
-  "beit": 15
+  "total": 82,
+  "new": 5,
+  "beit": 16
  }
 }
