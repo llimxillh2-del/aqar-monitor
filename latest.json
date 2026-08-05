@@ -1,6 +1,6 @@
 {
- "updated": "2026-08-05T06:02:38.961140+00:00",
- "now_digest": "المصري المغترب، إحنا نزودك على كل التغييرات اللي حصلت في السوق العقاري المصري. أهم حاجة اللي حصلت هي إعلان الإسكان عن إضافة 11 ألف قطعة أرض جديدة للمرحلة 11 من مشروع \"بيت الوطن\".",
+ "updated": "2026-08-05T06:32:32.028266+00:00",
+ "now_digest": "المصريين المقيمين بالخارج ينتظرون مؤتمرهم السنوي، والذي سيفتتح في السنة الحالية. وسيكون هذا المؤتمر فرصة لوزير الخارجية لاستعراض المبادرات والخدمات الجديدة التي سيتم تقديمها للمصريين المقيمين بالخارج.",
  "brief": null,
  "forecast": null,
  "market": [
@@ -564,8 +564,8 @@
    "confirmed": 0
   },
   "stats": {
-   "cycles": 8,
-   "utterances": 153,
+   "cycles": 9,
+   "utterances": 159,
    "confirmed": 0,
    "avg_lead_days": null
   },
@@ -573,27 +573,18 @@
   "signals": [],
   "questions": []
  },
- "urgent": [],
+ "urgent": [
+  {
+   "title": "افتتاح مؤتمر المصريين بالخارج 2026.. وزير الخارجية يستعرض مبادرات وخدمات جديدة",
+   "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE9GNG5sZmRkdmhwV3lHQ2liTWZuNTRvUUFPaFBRY0Z1NWp4MjhSTHk5WmxzTEhRTm5FNXBuMWJrbTk5RzdOUENSOEtDOVZ6NzMzb0xKSy1OS21LMkxHNmk40gFjQVVfeXFMUGV5dWpnSHplUXRZS1BXai1OcEt1VGs4a0U3U0ZkNkVVM184NzRKYVg1akY0WF81UHY3WWVLM1BSM2RVS2xLdDQ5UzJwSUprN1VnVkVfYzkwLVJaYkRjU09BSUdr?oc=5",
+   "source": "المصري اليوم"
+  }
+ ],
  "top": [
   {
-   "title": "حصري من أمريكا.. م. مجدي إسحاق ينقل شكوي المصريين بالخارج بشأن \"بيت الوطن\" ويعلن عن مطالبهم",
-   "link": "https://www.youtube.com/watch?v=DUsz19JWyfQ",
-   "source": "AlHadath Alyoum - الحدث اليوم"
-  },
-  {
-   "title": "لو عاوز طرح مسكن7 خطوة لو عملتها بالشكل ده يبقي انت كسبت",
-   "link": "https://www.youtube.com/watch?v=IAnENyA8aiY",
-   "source": "كلام في المفيد — هاني الخميسي"
-  },
-  {
-   "title": "سر الحائط الخرساني.. وليه بيحدد جودة التنفيذ؟",
-   "link": "https://www.youtube.com/watch?v=t5ReaD0nX5w",
-   "source": "كلام في المفيد — هاني الخميسي"
-  },
-  {
-   "title": "🚨 اتحادات الملاك مبتنفذش وعودها؟ الدليل قدامك!",
-   "link": "https://www.youtube.com/watch?v=oENbuj0cXxw",
-   "source": "كلام في المفيد — هاني الخميسي"
+   "title": "🚨 صدمة بيت الوطن المرحلة 11: 63 ألف تحويل و10 آلاف قطعة أرض جديدة! (كواليس حاسمة)",
+   "link": "https://www.youtube.com/watch?v=-FxM1rljjkw",
+   "source": "الاسكان لحظه بلحظه  "
   }
  ],
  "videos": [
@@ -623,6 +614,13 @@
    "link": "https://www.youtube.com/watch?v=jzT3wyzGUAo",
    "channel": "الاسكان مع عمر مخلوف",
    "published": "2026-08-02T19:28:58+00:00",
+   "summary": ""
+  },
+  {
+   "title": "🚨 صدمة بيت الوطن المرحلة 11: 63 ألف تحويل و10 آلاف قطعة أرض جديدة! (كواليس حاسمة)",
+   "link": "https://www.youtube.com/watch?v=-FxM1rljjkw",
+   "channel": "الاسكان لحظه بلحظه  ",
+   "published": "2026-07-20T20:54:34+00:00",
    "summary": ""
   },
   {
@@ -673,18 +671,11 @@
    "channel": "الإسكان مع عمرو زكي",
    "published": "2026-07-24T16:03:07+00:00",
    "summary": ""
-  },
-  {
-   "title": "طرح أميز وارخص قطع اراضي ، بمقدم ١٠٠ الف ، بالبطاقه بس ، مساحه تصل ١٠٠٠ متر",
-   "link": "https://www.youtube.com/watch?v=j9oid6bCg7o",
-   "channel": "الإسكان مع عمرو زكي",
-   "published": "2026-07-25T13:59:39+00:00",
-   "summary": ""
   }
  ],
  "counts": {
-  "total": 79,
-  "new": 28,
-  "beit": 14
+  "total": 80,
+  "new": 3,
+  "beit": 15
  }
 }
