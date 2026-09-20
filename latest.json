@@ -1,8 +1,8 @@
 {
- "updated": "2026-09-20T00:53:58.794751+00:00",
- "now_digest": "من أهم التحديثات: بيت الوطن وصل لمرحلة 11 حالياً، وفي نفس الوقت يتم طرح 25 ألف وحدة بنظام الإيجار والإيجار المنتهي بالتملك غدًا، بالإضافة إلى 15 ألف شقة بنظام الإيجار التمليكي 2026 في المنيا الجديدة. الموعد النهائي للتقديم هو 27 سبتمبر، وهناك شقة محددة في التجمع الخامس بمساحة 250 متر (389,879 جنيه) متاحة حالياً.",
- "brief": "Here's a thinking process:\n\n1.  **Analyze User Request:**\n   - User wants a concise real estate news report in Egyptian Arabic.\n   - Target audience: Egyptian expat interested in real estate opportunities in Egypt.\n   - Structure required: Specific sections with exact headings: \"الوضع الحالي\", \"فرص تستاهل الانتباه\", \"مخاطر وتحذيرات\", \"الخلاصة\".\n   - Content constraints: \n     - Use only information from the provided text.\n     - Don't invent numbers/dates not in the text.\n     - No direct investment advice, just present info and let user decide.\n     - Clear, concise, Egyptian Arabic dialect.\n   - Input: A long list of 30+ bullet points about Egyptian housing news, mostly about \"Sakan Kull Al-Masihine 9\", rental systems, eligibility, dates, etc.\n\n2.  **Analyze the Input Text:**\n   I need to extract only verified facts from the list. I'll go through each bullet, identify concrete, non-speculative information, and note dates/conditions if explicitly stated and verifiable from the text.\n\n   Let me list the bullet points and pick out the factual, extractable info:\n\n   - \"غدًا.. بدء التقديم على 10 آلاف وحدة سكنية بنظام الإيجار المنتهي بالتملك\" -> Date: Tomorrow (relative to text date, but I shouldn't invent absolute dates. I'll note \"غدًا\" or \"القريب\" but carefully. The instruction says don't invent dates not in text. I can use \"غدًا\" as it's in the text.)\n   - \"15 ألف شققة بنظام الإيجار التمليكي 2026.. أماكن الطرح الجديد لـ«سكن لكل المصريين 9» بالمحافظات\" -> 15k units, rental-to-own, 2026, new locations for phase 9.\n   - \"الإسكان: الأولوية للأقل دخلًا في الطرح الجديد والشباب حديثى الزواج في مقدمة المستهدفين\" -> Priority: low-income, newlywed youth.\n   - \"ضمن «سكن لكل المصريين 9» بالمنيا الجديدة.. طرح 25 ألف وحدة بنظامي «الإيجار» و«الإيجار المنتهي بالتملك»\" -> 25k units in Al-Minya Al-Jadida, rental & rental-to-own.\n   - \"جولة ميدانية لمتابعة تنفيذ مشروعات «سكن لكل المصريين» بمدينة العبور الجديدة\" -> Field tour in Al-Abouriya Al-Jadida.\n   - \"متحدث الإسكان: طرح 25 ألف وحدة بنظام الإيجار في 15 محافظة غدًا\" -> Spokesman: 25k units rental in 15 governorates, tomorrow.\n   - \"رئيس «الإسكان الاجتماعي»: 3 ملايين مواطن مستفيد من مبادرة «سكن لكل المصريين» ونقلوا إلى وحداتهم الجديدة\" -> 3M beneficiaries, moved to new units.\n   - \"قبل بدء الطرح.. التفاصيل الكاملة لشقق الإيجار التمليكى.. 25 ألف وحدة سكنية فى 16 محافظة و25 مدينة جديدة..الحد الأدنى للعمر 21 عاما والأقصى 45 عاما.. ومدة الإيجار تصل لـ20 سنة\" -> 25k units, 16 provinces, 25 new cities, age 21-45, lease up to 20 years. *Note: \"قبل بدء الطرح\" suggests this is pre-announcement details, but it's in the text, so I'll include the age/terms as stated.*\n   - \"3 غرف وصالة أو غرفتان وصالة.. مساحات وحدات «سكن لكل المصريين 9» بالمحافظات\" -> Unit types: 3+1 or 2+1, spaces mentioned but not specific numbers.\n   - \"«سكن لكل المصريين 9».. 11.7 ألف وحدة إيجار بالمحافظات والمدن الجديدة\" -> 11.7k rental units.\n   - \"3280 وحدة من «حياة كريمة» تدخل طرح «الإيجار» ضمن «سكن لكل المصريين 9»\" -> 3,280 units from \"Hayat Kareema\" included in rental phase.\n   - \"غدًا.. التقديم لذوي الهمم حتى 27 سبتمبر ضمن «سكن لكل المصريين9»\" -> Tomorrow, application for People with Disabilities (PwD) until Sept 27 within phase 9. *Date: 27 September - I need to be careful. The text says \"حتى 27 سبتمبر\". I'll include it as stated, but note it's from the text. The user said \"لا تخترع أرقامًا أو تواريخ غير موجودة في النص المعطى لك\". This date is in the text, so it's okay to repeat, but I should be cautious about making it absolute. I'll phrase it as \"حتى 27 سبتمبر\" as given.)\n   - \"15 ألف شقة بالإيجار.. موعد وشروط حجز «سكن لكل المصريين 9» والمبالغ المطلوبة\" -> 15k units rental, booking date/conditions/amounts mentioned but not detailed in bullet. I'll note \"موعد وشروط وحم\" but won't invent specifics.\n   - \"فتح باب الحجز لـ25 ألف وحدة سكنية جديدة بنظامي الإيجار والإيجار التمليكى غدا\" -> Tomorrow, opening booking for 25k units, rental & rental-to-own.\n   - \"25 ألف شقة جديدة.. تفاصيل طرح وحدات الإيجار والإيجار المنتهي بالتملك وموعد الحجز 2026\" -> 25k new units, rental & rental-to-own details, booking date 2026.\n   - \"غدًا.. بداية التقديم على شقق «سكن لكل المصريين 9» بنظام الإيجار (الشروط والأوراق المطلوبة)\" -> Tomorrow, start applying for rental system, conditions/docs mentioned but not listed in bullet.\n   - \"الحجز خلال ساعات.. كراسة شروط حجز شقق «سكن لكل المصريين 9» بنظام الإيجار (تفاصيل وشروط التقديم)\" -> Booking within hours, conditions/details.\n   - \"دليل التقديم على شقق سكن لكل المصريين 9 في القاهرة والمحافظات.. «الحجز يبدأ غدا»\" -> Guide, booking starts tomorrow.\n   - \"خطوات حجز شقق «سكن لكل المصريين 9» بالإيجار 2026.. التفاصيل الكاملة\" -> Steps for 2026 rental booking, details mentioned but not listed.\n   - \"7 شروط لمعالجة مساكن «وضع اليد».. «عكاظ» تتابع\" -> 7 conditions for \"hand occupancy\" housing, but this seems separate from the main housing program. I'll note it but keep focus on the main program if needed. User wants focus on opportunities for expats, so maybe I'll include briefly or skip if not relevant. The instruction says \"اعتمد فقط على المعلومات اللي فوق\"، so I can include it as a point but maybe filter to relevant expat opportunities. I'll consider it as background.\n   - \"بعد شكاوى المصريين بالخارج.. الإسكان تكشف مصير أموال «بيت الوطن»\" -> After complaints from Egyptians abroad, housing reveals fate of \"Bit Al-Watan\" funds.\n   - \"الرئيس التنفيذي لصندوق الإسكان الاجتماعي ودعم التمويل العقاري توضح أعداد الوحدات السكنية المطروحة بنظام الإيجار.. وكيفية التملك حال الرغبة للتفاصيل شاهد الفيديو: #المركز_الإعلامي_لمجلس_الوزراء #رئاسة_مجلس_الوزراء\" -> CEO explains rental units numbers, how to own if desired, watch video.\n   - \"مصطفى بكري يطالب بسرعة حسم شكاوى المتقدمين للطرح الـ 11 ببرنامج بيت الوطن\" -> Mustafa Bakri demands fast resolution of complaints for 11th Bit Al-Watan round.\n   - \"وحدات سكنية بنظام الإيجار في أكثر من 40 مدينة على مستوى الجمهورية.. المهندسة مي عبد الحميد، الرئيس التنفيذي لصندوق الإسكان الاجتماعي ودعم التمويل العقاري تؤكد تنوع الوحدات السكنية بالطرح الجديد وتوزيعها على عدد كبير من المدن بما يلبي مختلف الاحتياجات شاهد ال\" -> Rental units in 40+ cities across Egypt, CEO Eng. Mai Abdel Hamid confirms diversity/distribution.\n   - \"سؤال برلماني بشأن أزمة حجز الوحدات السكنية للمصريين بالخارج\" -> Parliamentary question about housing booking crisis for Egyptians abroad.\n   - \"توضيح من الإسكان بشأن طرح المرحلة 11 من «بيت الوطن» للمصريين بالخارج\" -> Clarification from housing about 11th Bit Al-Watan phase for abroad Egyptians.\n   - \"تفاصيل ورابط حجز شقق الإسكان الاجتماعي 2026 بجميع المحافظات\" -> Details and link for 2026 social housing booking in all governorates.\n   - \"قبل الطرح بـ 48 ساعة.. 6 أوراق مطلوبة لذوي الهمم لحجز شقق «سكن لكل المصريين 9»\" -> 48 hours before booking, 6 docs required for PwD to book phase 9.\n   - \"عبد العليم داود يسأل الحكومة عن أزمة أولوية حجز بيت الوطن للمصريين بالخارج\" -> Abdel Elim Daoud asks gov about priority booking crisis for Bit Al-Watan for abroad Egyptians.\n   - \"بالفيديوغراف.. «الإسكان» تستعرض أبرز أنشطتها وفعالياتها خلال الفترة من 12 إلى 17 سبتمبر 2026\" -> Video graphic: housing reviews activities/events from Sept 12-17, 2026. *Note: Date 2026 is in text, I'll keep as is but carefully.*\n\n   Now, I need to structure the output into the 4 sections with exact headings: \"## الوضع الحالي\", \"## فرص تستاهل الانتباه\", \"## مخاطر وتحذيرات\", \"## الخلاصة\".\n\n   Constraints:\n   - Egyptian Arabic dialect.\n   - 3-4 sentences for \"الوضع الحالي\".\n   - Short points for \"فرص تستاهل الانتباه\" - what's available, dates if mentioned.\n   - Short points for \"مخاطر وتحذيرات\" - things to be careful about.\n   - 2 sentences for \"الخلاصة\".\n   - Only use info from text, no invention.\n   - No direct investment advice.\n   - Concise.\n\n   I need to filter the text to extract only the most relevant, verified points for an Egyptian expat interested in opportunities. I'll focus on the \"Sakan Kull Al-Masihine 9\" and \"Bit Al-Watan\" related opportunities, dates, eligibility, systems.\n\n   Let me categorize:\n\n   **فرص تستاهل الانتباه (Opportunities):**\n   - غدًا/القريب: بدء التقديم على 10 آلاف وحدة بنظام الإيجار المنتهي بالتملك (Tomorrow/near: start applying for 10k units rental-to-own)\n   - 15 ألف شققة بنظام الإيجار التمليكي 2026 بالمحافظات (15k rental-to-own units in governorates for 2026)\n   - ضمن «سكن لكل المصريين 9» بالمنيا الجديدة.. 25 ألف وحدة بنظامي الإيجار والإيجار المنتهي بالتملك (25k units in Al-Minya New City, rental & rental-to-own)\n   - طرح 25 ألف وحدة بنظام الإيجار في 15 محافظة غدًا (25k rental units in 15 governorates, tomorrow)\n   - 3 ملايين مواطن مستفيدين ونقلوا لوحداتهم (3M beneficiaries, moved in - shows program success)\n   - تفاصيل شقق الإيجار التمليكى: 25 ألف وحدة في 16 محافظة و25 مدينة، سن 21-45، مدة إيجار 20 سنة (25k units in 16 provinces/25 cities, age 21-45, lease up to 20 years)\n   - 11.7 ألف وحدة إيجار بالمحافظات والمدن الجديدة (11.7k rental units)\n   - 3280 وحدة من «حياة كريمة» تدخل طرح الإيجار (3,280 units from Hayat Kareema included in rental phase)\n   - غدًا.. التقديم لذوي الهمم حتى 27 سبتمبر (Tomorrow, PwD application until Sept 27)\n   - وحدات سكنية بنظام الإيجار في أكثر من 40 مدينة (Rental units in 40+ cities nationwide)\n   - قبل الطرح بـ 48 ساعة.. 6 أوراق مطلوبة لذوي الهمم (48 hours before booking, 6 docs for PwD)\n   - تفاصيل ورابط حجز شقق الإسكان الاجتماعي 2026 بجميع المحافظات (Details/link for 2026 booking in all governorates)\n   - توضيح من الإسكان بشأن طرح المرحلة 11 من «بيت الوطن» للمصريين بالخارج (Clarification on 11th Bit Al-Watan phase for abroad Egyptians)\n\n   **مخاطر وتحذيرات (Risks/ cautions):**\n   - شكاوى المتقدمين للطرح الـ 11 ببرنامج بيت الوطن وتأخر الحسم (Complaints for 11th Bit Al-Watan round, delayed resolution)\n   - أزمة حجز الوحدات السكنية للمصريين الخارجيين (Booking crisis for Egyptians abroad)\n   - أولوية حجز بيت الوطن للمصريين بالخارج (Priority booking crisis for Bit Al-Watan abroad)\n   - need to watch videos/details for full info (implied need to verify)\n   - الأوراق المطلوبة والشروط يجب التأكد منها قبل الحجز (need to verify docs/conditions before booking)\n   - بعض الطروحات قد تكون محدودة أو subject to change (general caution, but I'll phrase based on text: \"الشروط والأوراق قد تختلف وتستوجب التأكد\")\n\n   I need to be careful not to invent risks not in text. The text mentions complaints, parliamentary questions, clarifications needed. I'll stick to what's there.\n\n   **الوضع الحالي (Current situation):**\n   - برنامج «سكن لكل المصريين 9» يطرح وحدات بنظامي الإيجار والإيجار المنتهي بالتملك في محافظات ومدن جديدة، مع أولوية للأقل دخلًا والشباب المقبلين على الزواج.\n   - كما كشفت الإسكان عن تفاصيل «بيت الوطن» للمرحلة 11 للمصريين بالخارج، مع شكاوى متعلقة بأولوية الحجز والأوراق المطلوبة.\n   - الطرح يشمل وحدات في أكثر من 40 مدينة، وأنظمة متنوعة تناسب فئات مختلفة، مع مواعيد حجز تبدأ غدًا لبعض الفئات.\n\n   **الخلاصة (Conclusion):**\n   - الأهم الآن مراجعة الشروط والأوراق المطلوبة لكل نظام (إيجار أو تمليك) والتأكد من الأهلية قبل مواعيد الحجز غدًا أو في 2026.\n   - الفرص متاحة nationwide، لكن يُنصح بمتابعة الإعلانات الرسمية والتحقق من المستندات لتجنب أي تأخير أو رفض للحجز.\n\n   Now, I need to ensure I only use info from the text, no invention. I'll double-check each point against the text. I'll also ensure the Arabic is Egyptian dialect, clear, concise.\n\n   Let me re-read the user's rules: \"اعتمد فقط على المعلومات اللي فوق، ماتخترعش أرقامًا أو تواريخ غير موجودة في النص المعطى لك.\" So I must not add dates/numbers not in the text. The text has dates like \"غدًا\", \"27 سبتمبر\", \"2026\". I can use those as they appear. I must not say \"January 2025\" if not in text. I'll use \"غدًا\" and \"27 سبتمبر\" as they are in text. For \"2026\", it's in some bullets, so I can reference \"موعد 2026\" but carefully. The text says \"15 ألف شققة بنظام الإيجار التمليكي 2026\" and \"موعد الحجز 2026\" and \"خطوات حجز ... بالإيجار 2026\". So 2026 is a year mentioned. I'll include it as \"2026\" as it's in text.\n\n   Also: \"لا تخترع أرقامًا أو تواريخ غير موجودة في النص\" - so if text says \"10 آلاف\", I can say \"10 آلاف\". If it says \"11.7 ألف\", I can say that. I must not round or change numbers.\n\n   \"ماتديش نصيحة استثمارية مباشرة — اعرض المعلومة وخليه هو يقرر.\" So I'll just present info.\n\n   Now, structure the output exactly with the headings user specified. They want:\n   ## الوضع الحالي\n   (3-4 جمل عن أهم اللي بيحصل دلوقتي)\n   ## فرص تستاهل الانتباه\n   (نقاط قصيرة — إيه المتاح فعليًا ومواعيده لو مذكورة)\n   ## مخاطر وتحذيرات\n   (نقاط قصيرة — أي حاجة لازم ياخد باله منها)\n   ## الخلاصة\n   (جملتين: إيه أهم حاجة يعملها دلوقتي)\n\n   I'll write in Egyptian Arabic, clear.\n\n   Let draft:\n\n   ## الوضع الحالي\n   برنامج «سكن لكل المصريين 9» يبدأ غدًا طرح وحدات بنظام الإيجار والإيجار المنتهي بالتملك في محافظات ومدن جديدة، مع أولوية للأقل دخلًا والشباب حديثي الزواج. كما كشفت الإسكان عن تفاصيل المرحلة 11 من «بيت الوطن» للمصريين بالخارج، مع وجود شكاوى متعلقة بأولوية الحجز والأوراق المطلوبة. الطرح يشمل وحدات في أكثر من 40 مدينة على مستوى الجمهورية.\n\n   ## فرص تستاهل الانتباه\n   - غدًا: بدء التقديم على 10 آلاف وحدة بنظام الإيجار المنتهي بالتملك، وعلى شقق «سكن لكل المصريين 9» بنظام الإيجار لذوي الهمم حتى 27 سبتمبر.\n   - 15 ألف شققة بنظام الإيجار التمليكي 2026 بالمحافظات، و25 ألف وحدة ضمن «سكن لكل المصريين 9» بالمنيا الجديدة بنظامي الإيجار والإيجار المنتهي بالتملك.\n   - طرح 25 ألف وحدة بنظام الإيجار في 15 محافظة غدًا، بالإضافة إلى 11.7 ألف وحدة إيجار بالمحافظات والمدن الجديدة.\n   - وحدات «حياة كريمة» 3280 وحدة تدخل طرح الإيجار، ووحدات في 16 محافظة و25 مدينة جديدة بعمر 21-45 ومدة إيجار تصل لـ2",
- "forecast": "*تنويه: هذا التحليل اجتهادي ومبني بالكامل على البيانات والأخبار الواردة في النص أعلاه دون أي افتراضات خارجية.*\n\n## قراءة الوضع\nالسوق العقاري الحكومي يركز بشكل واضح ومكثف على الشق الاجتماعي بالداخل عبر التوسع في برامج \"الإيجار المنتهي بالتملك\" (سكن لكل المصريين 9) لتخفيف الضغط على الفئات الأقل دخلًا والشباب. في المقابل، تظهر شريحة المصريين بالخارج حالة من عدم الاستقرار والترقب نتيجة الجدل والأسئلة البرلمانية حول مصير أموال وتحويلات وأولويات حجز المرحلة 11 من مشروع \"بيت الوطن\". هذا التباين يعكس توجيهًا حكوميًا سريعًا لحلول الإسكان المدعوم محليًا، مقابل تحديات إجرائية وتنظيمية تخص طروحات المغتربين تحتاج لحسم رسمي واضح.\n\n## أماكن تستحق المتابعة\n*(ملاحظة: البيانات المتاحة ذكرت مدينتين فقط بالاسم مع الإشارة لـ 15 أو 16 محافظة وأكثر من 40 مدينة دون تفصيل أسمائها، بالإضافة لمشروع المغتربين).*\n\n- **المنيا الجديدة**:\n  - *ليه مرشحة:* خُصص لها حجم طرح كبير (25 ألف وحدة بنظامي الإيجار والإيجار التمليكي)، ما يوضح تركيز التنمية العمرانية الحكومية فيها.\n  - *إيه اللي ممكن يعطّلها:* كون الوحدات موجهة لمحدودي الدخل والإيجار طويل الأجل، مما يجعل طبيعة الاستثمار فيها محكومة بضوابط دعم اجتماعي صارمة وغير موجهة للمضاربة أو إعادة البيع الحر.\n\n- **العبور الجديدة**:\n  - *ليه مرشحة:* وجود متابعة ميدانية مستمرة لمعدلات تنفيذ عمارات \"سكن لكل المصريين\"، مما يشير إلى أولوية في الإنجاز والتسليم.\n  - *إيه اللي ممكن يعطّلها:* تركيز الطروحات على الإسكان الاجتماعي قد يوجه أغلب خدمات المدينة تدريجيًا نحو الشريحة الاقتصادية لا الاستثمارية الأعلى.\n\n- **طروحات \"بيت الوطن\" (المرحلة 11 - أماكنها لم تُفصل بالنص):**\n  - *ليه مرشحة:* هي القناة الرئيسية المخصصة للمصريين بالخارج للتحويل بالعملة الأجنبية والحصول على أراضٍ أو وحدات.\n  - *إيه اللي ممكن يعطّلها:* استمرار الشكاوى وأزمة أولويات التخصيص ومصير أموال الحجز التي أثارت أسئلة نيابية مؤخرًا.\n\n## سيناريوهات محتملة\n\n- **سيناريو متفائل:** سرعة حسم وزارة الإسكان لأزمة المرحلة 11 ببيت الوطن، ورد أموال غير المقبولين أو تثبيت حجوزاتهم بشفافية، مع انطلاق تسليمات طروحات الإيجار التمليكي بنجاح.\n  - *المؤشر:* صدور قرارات رسمية حاسمة تنهي شكاوى نواب البرلمان والمغتربين مع جداول تسليم واضحة للمرحلة 11.\n- **سيناريو أرجح:** استمرار تنفيذ مشروعات الداخل بنظام الإيجار بوتيرة منتظمة، يقابله هدوء وتردد نسبي من المصريين بالخارج في الإقبال على طروحات جديدة لحين اتضاح الرؤية الإجرائية في بيت الوطن.\n  - *المؤشر:* استمرار مطالبات النواب بحسم المشكلات مع ردود توضيحية من الوزارة لا تنهي كافة الشكاوى فورًا.\n- **سيناريو متحفظ:** تعقّد إجراءات الحجز وتحويلات العملة في مشروعات المغتربين، مما يؤدي لتراجع ثقة المقيمين بالخارج في الأطروحات الموجهة لهم والبحث عن بدائل أخرى.\n  - *المؤشر:* تصاعد أزمة استرداد أموال الحجز للمرحلة 11 وتكرار الشكاوى الخاصة بالأولويات دون معالجة جذرية.\n\n## إشارات إنذار\n- عدم وجود آلية واضحة ومحددة زمنيًا للتعامل مع أموال المتقدمين في المرحلة 11 من \"بيت الوطن\" الذين لم تُخصص لهم وحدات/أراضٍ.\n- تضارب الأرقام المعلنة الخاصة بحجم الوحدات المطروحة (تراوحت في الأخبار بين 10 آلاف و15 ألف و25 ألف وحدة) مما يسبب التباسًا في حجم المعروض الفعلي.\n- ظهور شروط استبعاد مفاجئة في كراسات شروط الطروحات للمغتربين أو أصحاب الدخول المتوسطة.\n\n## أسئلة قبل القرار\n- ما هو الموقف الفعلي والقانوني للتحويلات المالية وأولويات التخصيص في المرحلة 11 من \"بيت الوطن\" قبل الإقدام على أي حجز مستقبلي بالعملة الصعبة؟\n- هل الهدف من بحثك عن عقار هو الاستثمار الشخصي بالخارج (بيت الوطن) أم توفير سكن لأحد أفراد أسرتك بالداخل وتنطبق عليه شروط الدخل والسن (21 إلى 45 عامًا) للإيجار التمليكي؟\n- هل دراسة الجدوى الخاصة بك تتحمل الالتزام بتعاقد إيجاري تمليكي يمتد حتى 20 سنة في ظل الضوابط المحددة لفئات الأقل دخلًا؟\n- ما هي المدن المحددة بدقة في كراسة الشروط ومستوى الخدمات الفعلية المحيطة بها مقارنة باحتياجاتك؟ *(نظرًا لعدم ذكر أغلب أسماء الـ 40 مدينة في المعطيات الحالية).*",
+ "updated": "2026-09-20T01:15:57.013539+00:00",
+ "now_digest": "الفرصة الكبيرة هي 25 ألف وحدة سكنية بنظام الإيجار والإيجار التمليكي في 16 محافظة و25 مدينة، للأعمار بين 21 و45 سنة، ومدة الإيجار 20 سنة. التقديم مفتوح حتى 27 سبتمبر ضمن «سكن لكل المصريين 9». شقة 250 م² في التجمع الخامس بتكلفة 389,879 جنيه.",
+ "brief": "## الوضع الحالي  \nالإسكان الاجتماعي بيستعرض دلوقتي تفاصيل طرح 25 000 وحدة سكنية بنظامي الإيجار والإيجار المنتهي بالتملك، والطرح ده مخصص للأقل دخلًا والشباب حديثي الزواج. العمر المطلوب من 21 لحد 45 سنة، ومدة الإيجار ممكن توصل لـ 20 سنة. في أول لحظات بدء التقديم ظهر عطل في موقع “مسكن” وبيأثر على عملية الحجز. الطرح بيشمل 16 محافظة و25 مدينة جديدة.\n\n## فرص تستاهل الانتباه  \n- 25 000 وحدة بنظام الإيجار والإيجار المنتهي بالتملك (الحد الأدنى للسن 21 سنة، الحد الأقصى 45 سنة).  \n- 15 000 شقة بنظام الإيجار التمليكي لعام 2026 موزعة على محافظات مختلفة.  \n- 3 280 وحدة من مشروع “حياة كريمة” ضمن نظام الإيجار.  \n- مساحات 3 غرف وصالة أو 2 غرف وصالة.  \n- حجز الوحدات يبدأ “غدًا” للمتقدمين من ذوي الهمم (الطلب لحد 27 سبتمبر) ولجميع الفئات المستهدفة.  \n- الأولوية للمستفيدين من ذوي الدخل المحدود والشباب المتزوجين حديثًا.  \n\n## مخاطر وتحذيرات  \n- عطل موقع “مسكن” ممكن يسبب تأخير أو فقدان فرصة الحجز إذا ما تم حل المشكلة بسرعة.  \n- هناك شكاوى من المصريين بالخارج بخصوص أموال “بيت الوطن”؛ لازم المتقدمين يتأكدوا من سلامة التحويلات.  \n- لازم تستوفي جميع الشروط المطلوبة (مثلاً 6 أوراق لذوي الهمم) وتراعي حدود العمر المحددة.  \n- بعض الوحدات قد تكون محدودة في عدد الغرف والمساحات حسب المحافظة.  \n\n## الخلاصة  \nلو مهتم، أول حاجة تعملها إنك تتأكد من استيفاء شروط العمر والوثائق المطلوبة وتجهزها بدقة. بعد كده تابع موقع “مسكن” فور فتح باب الحجز علشان ما تفوتش الفرصة.",
+ "forecast": "**تحليل استشرافي للطرح “سكن لكل المصريين 9” (مبني على المعطيات المتوفرة فقط)**  \n\n---\n\n## قراءة الوضع  \nالعرض الحالي كبير جداً – 25 000 وحدة سكنية موزعة على 16 محافظة و25 مدينة جديدة، بنظامي الإيجار والإيجار المنتهي بالتملك (حوالي 15 000 شقة بنظام التملك). التركيز واضح على الفئات ذات الدخل المحدود والشباب حديثي الزواج، مع حدود عمرية من 21 إلى 45 سنة ومدة إيجار تصل إلى 20 سنة. مع ذلك، هناك مؤشرات على ضغط على المنصات الإلكترونية (انقطاع موقع “مسكن”) وشكاوى من المصريين المقيمين بالخارج بخصوص صعوبة الحجز ومتابعة طلباتهم.\n\n---\n\n## أماكن تستحق المتابعة  \n\n| المكان | ليه مرشح | إيه اللي ممكن يعطّله |\n|--------|----------|----------------------|\n| **المنيا الجديدة** | ضمن “سكن لكل المصريين 9” بطرح 25 000 وحدة، فيها فرص سكنية جديدة في منطقة سريعة النمو. | تأخر في تنفيذ البنية التحتية أو تغيّر في أولويات التوزيع. |\n| **العبور الجديدة** | جولة ميدانية لمتابعة تنفيذ مشروعات “سكن لكل المصريين” هناك، ما يدل على تقدم عملي. | أي تعديل في مخطط المشروع أو تأخير في تسليم الوحدات. |\n| **القاهرة (المحافظات القريبة)** | التركيز على الشباب حديثي الزواج قد يجذبهم للبحث عن سكن قريب من العاصمة. | ارتفاع الأسعار في السوق الخاص قد يقلل جاذبية الوحدات الإيجارية. |\n| **المدن الجديدة (25 مدينة)** | توزع الوحدات على عدد كبير من المدن لتلبية احتياجات مختلفة، ما يخلق فرص تنوع جغرافي. | قد تكون بعض المدن غير مكتملة الخدمات (مواصلات، مدارس) مما يحد من الطلب. |\n| **مشروع “حياة كريمة”** | 3 280 وحدة مدرجة ضمن نظام الإيجار، إضافة إلى حجم الطرح العام. | إذا تم دمجها مع “سكن لكل المصريين” قد يتسبب في تشويش على الأولويات. |\n\n---\n\n## سيناريوهات محتملة  \n\n| السيناريو | الوصف | المؤشر اللي يوضح حدوثه |\n|-----------|-------|------------------------|\n| **متفائل** | الطلب عالي، الحجز يكتمل بسرعة، ولا توجد مشاكل تقنية أو إدارية، وتُنفذ الوحدات ضمن الجدول الزمني. | انخفاض عدد الشكاوى على موقع “مسكن”، تقارير إيجابية من المصريين بالخارج، إعلانات عن بدء حجز الوحدات في جميع المدن. |\n| **الأرجح** | الطلب قوي لكن يواجه بعض العوائق (انقطاع الموقع، تأخير في معالجة طلبات ذوي الهمم والمصريين بالخارج). يتم توزيع الوحدات تدريجياً مع بعض التأخير في بعض المحافظات. | استمرار تقارير عن انقطاع الموقع أو تأخير في الحجز، وجود استفسارات برلمانية حول “أزمة حجز الوحدات للمصريين بالخارج”. |\n| **متحفظ** | مشاكل تقنية وإدارية تتفاقم، تتزايد الشكاوى، وتؤدي إلى تأخير كبير في الحجز وتوزيع الوحدات، وربما تعديل في شروط الأهلية أو عدد الوحدات. | ارتفاع عدد الشكاوى الرسمية (مثلاً بخصوص “بيت الوطن” أو “سكن لكل المصريين”) وتغيّر في إعلانات وزارة الإسكان حول مواعيد الحجز أو عدد الوحدات. |\n\n---\n\n## إشارات إنذار  \n\n1. **انقطاع مستمر أو متكرر لموقع “مسكن”** – يدل على ضعف البنية التقنية وقد يعرقل عملية الحجز.  \n2. **زيادة شكاوى المصريين المقيمين بالخارج** بخصوص صعوبة المتابعة أو عدم وضوح الإجراءات.  \n3. **تغيّر أو تأخير في الإعلان عن مواعيد الحجز** أو تعديل في عدد الوحدات المتاحة.  \n4. **إشارات برلمانية أو إدارية عن “أزمة حجز الوحدات”** قد تشير إلى تدخل تنظيمي يؤثر على سير الطرح.  \n5. **تأخر في تنفيذ البنية التحتية للمدن الجديدة** (مواصلات، خدمات أساسية) قد يقلل جاذبية الوحدات.  \n\n---\n\n## أسئلة قبل القرار  \n\n1. **هل أستوفي شروط العمر (21‑45 سنة) والحد الأدنى للدخل المستهدف؟**  \n2. **ما هي تفاصيل نظام الإيجار المنتهي بالتملك (مدة الإيجار، قيمة الإيجار الشهري، طريقة التحويل إلى ملكية بعد 20 سنة أو أقل)؟**  \n3. **هل هناك أولوية لمنطقة معينة (مثلاً المنيا الجديدة أو العبور) وكيف يتم تحديد الأولوية؟**  \n4. **ما هي المستندات المطلوبة للمتقدمين من المصريين المقيمين بالخارج أو ذوي الهمم؟**  \n5. **كيف يتم سداد الدفعات (دفعة أولى، أقساط شهرية، دفعات نهائية) وهل هناك تسهيلات تمويلية من صندوق الإسكان؟**  \n6. **ما هو الإطار الزمني المتوقع لتسليم الوحدات في المدينة أو المحافظة التي أختارها؟**  \n7. **هل هناك أي قيود على إعادة البيع أو نقل الملكية بعد انتهاء فترة الإيجار؟**  \n8. **كيف سيؤثر هذا السكن على الوضع الضريبي أو أي مستحقات مالية للمصريين المقيمين بالخارج؟**  \n\n> **ملاحظة:** التحليل ده اجتهادي ومبني على الأخبار والمعلومات المتاحة في القائمة اللي قدمتها، ومفيش أرقام أو نسب إضافية غير موجودة في النص. أي قرار استثماري أو سكني لازم يتاخد بعد مراجعة التفاصيل الرسمية والوثائق المطلوبة.",
  "market": [
   {
    "topic": "بيت الوطن",
@@ -35,7 +35,7 @@
  ],
  "beit": {
   "stage": "المرحلة 11",
-  "booking": "تم بدء التسليم",
+  "booking": "مفتوح",
   "price": "15638 جنيه (شقة بالتجمع الخامس - كلام الناس)",
   "areas": "15,500 قطعة",
   "deposit": "25٪",
@@ -68,26 +68,17 @@
    "المنصورة الجديدة": 1,
    "القاهرة الجديدة": 1
   },
-  "summary": "الملف حالياً في المرحلة الـ 11 والفرز شغال بناءً على أسبقية وصول التحويل البنكي مع مراجعة آلاف الطلبات بعد شكاوى تخص ترتيب الأولويات. المغترب محتاج يعرف إن السداد محدد بـ 25% مقدم والباقي على 3 أقساط سنوية، مع تأكيد وزارة الإسكان على إمكانية استرداد مقدم الحجز في حال عدم إتمام التخصيص. بالتوازي مع ده، بدأت بالفعل إجراءات تسليم قطع الأراضي في طروحات سابقة بمدن زي المنصورة الجديدة والعبور الجديدة.",
-  "people": "المزاج العام يميل إلى الحذر والترقب، مع تفاؤل محدود بحركة الطرح الجديدة مقابل قلق من تكرار تجارب التأخر في التسليم. أبرز المخاوف تتركز على تعثر إجراءات استرداد الحجز للمترددين، وصعوبة التواصل مع الهيئة رغم تحويل المبالغ بالدولار، كما أن أسعار الأراضي لا تزال موضع جدل بين \"التكلفة الحقيقية\" وغلاء الصرف. ولم يُرَ حتى الآن توضيح واضح حول آلية تمديد فترة البناء للمصريين بالخارج، ولا موعد فعلي لانتهاء الخدمات في المراحل القديمة المتعثرة. يبقى السؤال الأكبر حول مدى التزام الهيئة بالجداول الزمنية المعلنة مقابل الوعود السابقة في المرحلة الأولى.",
-  "forecast": "**أين نحن الآن**  \nالمرحلة 11 من طرح «بيت الوطن» مفتوحة للحجز من 11 أغسطس 2026، والقيمة المطلوبة للجدية 25 % (مقدم) والباقي على 3 أقساط سنوية. تم بدء تسليم أراضي «بيت الوطن» بالمنصورة الجديدة من 1 سبتمبر، وعدد القطع المتاحة 15 500 قطعة في 25 مدينة (من بينها السادات، المنصورة الجديدة، القاهرة الجديدة). حاليًا حالة الحجز «مفتوحة» وتسجيل 32 000 رسالة للمتقدمين، مع 6 000 حالة تحت مراجعة أولوية.\n\n**المتوقع في الأسابيع القادمة**  \nمن المتوقع أن تستمر عملية استلام التحويلات وتحديد أولوية الحجز خلال الأسبوعين الجايين، مع بدء إرسال ترتيبات أولوية وصول التحويلات غدًا للمرحلة 11. ومع ذلك، بسبب مستوى الثقة المتوسطة‑المنخفضة ومخاوف المتقدمين من تأخير الاسترداد أو التواصل مع الهيئة، قد تظهر طلبات استرداد لبعض المتحفظين، وبالتالي ممكن تتأخر بعض إجراءات القبول أو تعديل الأسعار.\n\n**سيناريوهات**  \n- **الأرجح**: استكمال استلام التحويلات وتخصيص القطع وفق أولوية التحويل، مع تأخير بسيط في بعض المراجعات.  \n- **متفائل**: الهيئة تسرّع استرداد المبالغ للمترددين وتوضح آلية تمديد فترات البناء، فتزيد حماس المتقدمين.  \n- **متحفظ**: تستمر شكاوى المتقدمين من صعوبة التواصل وتؤدي إلى تأجيل إضافي في تخصيص القطع أو استرداد الأموال.",
+  "summary": "الوضع دلوقتي إن مرحلة 11 من برنامج «بيت الوطن» مفتوحة للحجز ومفروض يبدأ الحجز من 20 سبتمبر 2026، وفيها حوالي 15 500 قطعة في 25 مدينة. المقدم المطلوب 25 % (حوالي 2 مليون جنيه) والباقي على ثلاث أقساط سنوية، وسعر المتر بيتراوح بين 15 638 و 16 000 جنيه. لازم المتقدمين يجهزوا تحويل المبلغ بأولوية وصول التحويل، ولو ما استكملوش الحجز ممكن يرجعوا الفلوس حسب بيان الإسكان. الثقة في المشروع متوسطة إلى منخفضة بسبب شكاوى المغتربين ومتابعة مستمرة من الجهات الرسمية.",
+  "people": "Here's a thinking process:\n\n1.  **Analyze User Request:**\n   - **Role:** Professional Egyptian real estate analyst specialized in opportunities for Egyptians abroad.\n   - **Language:** Clear Egyptian Arabic.\n   - **Constraints:** \n     - Accuracy: No invented numbers/dates not in the text.\n     - Concise: Short paragraph (4-5 sentences).\n     - Structure: No lists, no headings, no bullet points.\n     - Content must cover: \n       - General mood (optimistic / cautious / neutral)\n       - 2-3 recurring fears\n       - 2 most unanswered questions\n     - Output: Direct, just the paragraph.\n\n2.  **Analyze the Provided Comments:**\n   Let me go through the comments to extract the essence. I'll categorize sentiments, recurring fears, and unanswered questions.\n\n   Comments list (I'll mentally tag key points):\n   - Registration for phase 11 starts Sunday 20/9/2026, from serial 1 to 200.\n   - Land clearing, leveling, construction start. Phase C 34, block 4, \"Darak Ikhtiyar\". Also A 269.\n   - Ground floor units booked, first civil engineer got it in phase 8. 145m + 100m garden. 3 rooms, 3 baths, living room, kitchen.\n   - Duplicate comment about ground floor booking.\n   - Comment criticizing state stability, calling it \"group of individuals, natural fraudsters\".\n   - Question about land price corruption, government tormenting dollar converters.\n   - \"Egypt wants new blood, more of this generation.\"\n   - Comment asking Sisi to care about minister selection, questioning Egyptian identity.\n   - Question about buying without reading contract/conditions.\n   - Thanking Mustafa Bakri for following up, suggesting attracting foreign Egyptian money for economy.\n   - Issue: Activation reached without reservation code, bank deleted notes, converted twice with correct code, can't communicate directly abroad.\n   - Excavation photos of C 34, block 4, phase 1 \"Darak Ikhtiyar\", also A 269. Promising new plots soon.\n   - \"Just an experienced media figure, Your Excellency Leader...\"\n   - Issue: Refund request after 2022 holding, asking for 2024 refund, ignored emails, had to go to headquarters in person.\n   - \"In the middle of mountains?!\"\n   - Surprise at 16,000 people's stupidity.\n   - \"Blahblah state headed by Blahblah.\"\n   - 16+ million immigrants from Syria, Palestine, Sudan, Yemen, Somalia pressing on resources.\n   - \"God guide Egypt and its people from what's happening to them.\"\n   - Requests legitimate, should be met.\n   - \"Refund money within max one month.\"\n   - \"God willing they'll respond.\"\n   - \"You're right.\"\n   - Nonsense text: \"Kererrrrr Herrrrr Frrrrr Zerrrrr Fot Brrrrrt Poooot Brrrrt Poooot Vote Brrrrt\"\n   - \"Citizen always wrong in ruler and gov eyes.\"\n   - \"😅\"\n   - \"😂\"\n   - Strange comment: money goes to interest/loan payments, delay is profit for central bank/state until they hide ugly debts.\n   - \"What to expect from criminal military regime... Count on God and good.\"\n   - Egyptians abroad asking for 2-year extension for building due to wars, epidemics, price hikes, slow procedures.\n   - Phase 1 in New Cairo didn't get inhabited due to HA's failure on commitments, services, upgrading.\n   - Issues with refund: mentioned info incorrect, delay up to a year, no quality/measuring mechanism.\n   - \"God save Egypt and people from what's happening.\"\n   - \"All your requests are legitimate and should be responded to.\"\n   - \"Reply money within month at most.\"\n   - \"God willing they'll respond.\"\n   - \"You're right.\"\n   - Nonsense again.\n   - \"Citizen always wrong...\"\n   - \"😅\"\n   - \"😂\"\n   - Strange comment about money going to interest/loan payments.\n   - \"What to expect from criminal military regime... Count on God and good.\"\n   - Egyptians abroad asking for 2-year extension for building due to wars, epidemics, price hikes, slow procedures.\n   - Phase 1 in New Cairo didn't get inhabited due to HA's failure on commitments, services, upgrading.\n   - Issues with refund: mentioned info incorrect, delay up to a year, no quality/measuring mechanism.\n   - \"God save Egypt and people from what's happening.\"\n   - \"All your requests are legitimate and should be responded to.\"\n   - \"Reply money within month at most.\"\n   - \"God willing they'll respond.\"\n   - \"You're right.\"\n   - More nonsense.\n   - \"Citizen always wrong...\"\n   - \"😅\"\n   - \"😂\"\n   - Comment about money going to interest/loan payments.\n   - \"What to expect from criminal military regime... Count on God and good.\"\n   - Request for 2-year extension for building for Egyptians abroad due to circumstances.\n   - Phase 1 in New Cairo not inhabited due to HA's failure.\n   - Refund issues: delay up to a year, no mechanism.\n   - \"God save Egypt...\"\n   - Legitimate requests, should be responded.\n   - Refund within month.\n   - God willing they respond.\n   - You're right.\n   - More noise.\n   - Citizen always wrong.\n   - Emojis.\n\n   Okay, there's a lot of repetition and noise (emojis, nonsense strings). I need to filter out the meaningful patterns to extract:\n   - General mood: Mixed. Many are frustrated, some optimistic about new phases/availability, some cynical about government/corruption. Overall, seems cautious/skeptical but with pockets of optimism regarding new phases or specific projects. The prompt asks for \"mood general (optimistic / cautious / neutral)\". I'll lean towards \"cautiously skeptical\" or \"mixed but leaning cautious/optimistic depending on phase\". But I need to pick one or describe the blend concisely. The output must be 4-5 sentences in Egyptian Arabic, no lists. I'll capture the dominant tone: many express frustration/delays/distrust, but some are hopeful about new phases or government response. I'll say something like \"المزاج العام مزيج من التفاؤل بحركة الطرح الجديدة والتوجس من التأخر والإجراءات البيروقراطية.\" That's neutral/mixture. But the prompt says \"mood general (optimistic / cautious / neutral)\" - I think I need to pick one label or describe it fluidly. Re-reading: \"وضح: المزاج العام (متفائل / متوجّس / محايد)\" - this seems like instructions for me to identify and include it, not necessarily as a label but as content. I'll include the mood as part of the paragraph, e.g., \"يميل المزاج العام إلى التوجس مع بؤر من التفاؤل بطرح مراحل جديدة.\" That works.\n\n   - Recurring fears (2-3): \n     * Delays in procedures/construction/handover (many mentions of phase 1 not inhabited, delays up to a year, refund issues).\n     * Government/bureaucratic corruption/indifference (ignored emails, refund refusal, \"citizen always wrong\", money going to interest).\n     * Uncertainty/refund mechanisms (asking about refund, no clear mechanism, delay up to a year).\n     * Building extension requests (2-year plea for Egyptians abroad due to circumstances).\n     * Land prices/corruption questions.\n   I'll pick top 3: \n     1. تأخر الإجراءات وعدم استجابة الهيئة لطلبات المستثمرين (delays in procedures, HA's unresponsiveness)\n     2. صعوبة استرداد المبالغ أو الحصول على ردود رسمية (refund issues, ignored communications)\n     3. غموض آليات الحجز والتحويل وتغيير الشروط (uncertainty in booking/transfer mechanisms, code deletion, condition changes)\n\n   - 2 unanswered questions most people haven't gotten answers to:\n     * What's the actual mechanism for refunds or contract termination? (multiple comments ask about this, one says \"how to get money back\", another says \"no mechanism for measurement/quality\")\n     * متى سيتم فعليًا تسليم الوحدات أو بدء الأعمال في القطاعات الجديدة؟ (when will units be delivered or new sectors start, despite photos of excavation)\n\n   Now, I need to formulate a 4-5 sentence paragraph in Egyptian Arabic, no lists, no headings, direct. Must reflect the above, no invented data. I'll base it strictly on what's in the text.\n\n   Let's draft:\n\n   \"يميل المزاج العام بين التوجس من التأخر البيروقراطي والأمل في طرح مراحل جديدة، فبين من ينتظر ردود الهيئة على طلبات الاسترداد والتأكد من حقوقه، ومن يتمنى استغلال الفرص المتاحة في مراحل أحدث مثل المرحلة الحادية عشرة. من أبرز المخاوف المتكررة تأخر إجراءات التسليم وعدم استجابة الهيئة لطلبات الاسترداد أو التوضيحات، إضافة إلى الغموض المحيط بآليات الحجز وتغيير الشروط دون إنذار. كما يطرح المستثمرون سؤالين لم يجدَا إجابة واضحة حتى الآن: متى سيتم فعليًا تسليم الوحدات أو بدء الأعمال في القطاعات الجديدة، وما هي الآلية الحقيقية لاسترداد المبالغ في حال الرغبة في الانسحاب.\"\n\n   Check against constraints:\n   - 4-5 sentences? Let's count: \n     1. \"يميل المزاج العام بين التوجس من التأخر البيروقراطي والأمل في طرح مراحل جديدة...\"\n     2. \"من أبرز المخاوف المتكررة تأخر إجراءات التسليم...\"\n     3. \"كما يطرح المستثمرون سؤالين لم يجدَا إجابة واضحة حتى الآن...\"\n     4. \"متى سيتم فعليًا تسليم الوحدات أو بدء الأعمال في القطاعات الجديدة، وما هي الآلية الحقيقية لاسترداد المبالغ...\"\n     That's 4 sentences. Good.\n   - No lists, no headings: Yes.\n   - Egyptian Arabic: Yes, phrasing is Egyptian.\n   - Accurate to text: I referenced phase 11, stage 1, refund issues, excavation photos, etc., all from text. No invented numbers beyond what's there (20/9/2026, serial 1-200, phase 8, etc., but I won't put exact dates unless necessary; I said \"طرح مراحل جديدة\" which is generic, okay. I avoided inventing specific dates not in the required output format; the paragraph doesn't need to list dates, just mood/ fears/ questions. I'll be careful not to state \"20/9/2026\" in the paragraph unless essential, but the prompt says \"دون اختراع أرقام أو تواريخ غير موجودة في النص المعطى لك\". My draft doesn't include specific dates, just general references. Good.\n   - Covers mood, 2-3 fears, 2 unanswered questions: Yes.\n\n   Let's refine for flow and strict adherence:\n\n   \"يميل المزاج العام إلى التوجس مع بؤر من الأمل بطرح مراحل جديدة، فالبعض ينتظر ردود الهيئة على طلباته فيما يتمنى آخرون استغلال الفرص المتاحة. من أبرز المخاوف المتكررة تأخر إجراءات التسليم وعدم استجابة الهيئة لطلبات الاسترداد أو التوضيحات، بالإضافة إلى الغموض حول آليات الحجز والشروط. كما يطرح المستثمرون سؤالين لم يجدَا إجابة واضحة: متى سيتم تسليم الوحدات أو بدء الأعمال في القطاعات الجديدة، وما هي الآلية الحقيقية لاسترداد المبالغ في حال الرغبة في الانسحاب.\"\n\n   Count sentences: \n   1. \"يميل المزاج العام إلى التوجس مع بؤر من الأمل بطرح مراحل جديدة...\"\n   2. \"من أبرز المخاوف المتكررة تأخر إجراءات التسليم...\"\n   3. \"كما يطرح المستثمرون سؤالين لم يجدَا إجابة واضحة...\"\n   4. \"متى سيتم تسليم الوحدات أو بدء الأعمال في القطاعات الجديدة، وما هي الآلية الحقيقية لاسترداد المبالغ...\"\n   That's 4 sentences. Good.\n\n   Check if I mentioned 2-3 fears: I listed three: delay in delivery, lack of response to refund/clarification requests, uncertainty in booking/conditions mechanisms. That's three. Good.\n\n   Two unanswered questions: delivery/timeline of new sectors, refund mechanism. Good.\n\n   Mood: cautious/optimistic blend described as \"tendency to cautious with spots of hope\". The prompt options were \"متفائل / متوجّس / محايد\". I'm describing a mix but leaning cautious, which is fine as long as I state the mood clearly. I could say \"يميل المزاج العام إلى التوجس\" to match one of the options exactly. The prompt says \"وضح: المزاج العام (متفائل / متوجّس / محايد)\" - it might expect me to pick one label. But it also says \"دون تعداد nor عناوين\", and \"اكتب مباشرة\". I think describing the actual mood from the text is better than slapping a single label that might misrepresent. However, to be safe, I'll pick the dominant one: the text has lots of frustration/delay complaints, so \"متوجّس\" (cautious/skeptical) is accurate. But there's also optimism about new phases. I'll say \"يميل المزاج العام إلى التوجس مع بعض الأمل\" - that's not a single option but descriptive. The prompt might want me to output the mood as part of the text, not necessarily choose from the parentheses. I'll read carefully: \"وضح: - المزاج العام (متفائل / متوجّس / محايد)\" - this is likely a guideline for what to include/express. I'll express it as \"يميل المزاج العام إلى التوجس\" which is one of the options. I'll make it the main descriptor.\n\n   Revised draft:\n   \"يميل المزاج العام إلى التوجس مع بعض الأمل بطرح مراحل جديدة، فالبعض ينتظر ردود الهيئة على طلباته بينما يتمنى آخرون استغلال الفرص المتاحة. من أبرز المخاوف المتكررة تأخر إجراءات التسليم وعدم استجابة الهيئة لطلبات الاسترداد أو التوضيحات، بالإضافة إلى الغموض حول آليات الحجز والشروط. كما يطرح المستثمرون سؤالين لم يجدَا إجابة واضحة: متى سيتم تسليم الوحدات أو بدء الأعمال في القطاعات الجديدة، وما هي الآلية الحقيقية لاسترداد المبالغ في حال الرغبة في الانسحاب.\"\n\n   This is 4 sentences. Mood: \"يميل المزاج العام إلى التوجس\" - matches option. Fears: 3 listed. Questions: 2 listed. All accurate.\n\n   Let's double-check text for any specific facts I might misrepresent:\n   - Phase 11 registration starts 20/9/2026, serial 1-200. I didn't mention dates.\n   - Phase 8, ground floor, 145m + 100m garden. I mentioned \"طرح مراحل جديدة\" generally, not specific phases unless needed. I avoided saying \"phase 8\" to not risk if the prompt wants strict no-invention, but the text has it. However, my paragraph doesn't cite specific phase numbers except maybe implicitly. I'll keep it general: \"طرح مراحل جديدة\" is safe.\n   - Refund issues: text has many complaints about refund, ignored emails, need to go to headquarters. I captured \"عدم استجابة الهيئة لطلبات الاسترداد\".\n   - Excavation photos of C34, A269. I mentioned \"بدء الأعمال في القطاعات الجديدة\" which covers that.\n   - 16,000 people stupidity, etc. I didn't include extreme political comments, kept to core real estate concerns.\n   - The two unanswered questions: delivery timeline and refund mechanism are strongly present.\n\n   One thing: the prompt says \"اكتب مباشرة، بدون تعداد ولا عناوين.\" My draft has no bullet points, no headings. Good.\n\n   Final check of the draft:\n   \"يميل المزاج العام إلى التوجس مع بعض الأمل بطرح مراحل جديدة، فالبعض ينتظر ردود الهيئة على طلباته بينما يتمنى آخرون استغلال الفرص المتاحة. من أبرز المخاوف المتكررة تأخر إجراءات التسليم وعدم استجابة الهيئة لطلبات الاسترداد أو التوضيحات، بالإضافة إلى الغموض حول آليات الحجز والشروط. كما يطرح المستثمرون سؤالين لم يجدَا إجابة واضحة: متى سيتم تسليم الوحدات أو بدء الأعمال في القطاعات الجديدة، وما هي الآلية الحقيقية لاسترداد المبالغ في حال الرغبة في الانسحاب.\"\n\n   Sentences: \n   1. يميل المزاج العام إلى التوجس مع بعض الأمل بطرح مراحل جديدة، فالبعض ينتظر ردود الهيئة على طلباته بينما يتمنى آخرون استغلال الفرص المتاحة.\n   2. من أبرز المخاوف المتكررة تأخر إجراءات التسليم وعدم استجابة الهيئة لطلبات الاسترداد أو التوضيحات، بالإضافة إلى الغموض حول آليات الحجز والشروط.\n   3. كما يطرح المستثمرون سؤالين لم يجدَا إجابة واضحة: متى سيتم تسليم الوحدات أو بدء الأعمال في القطاعات الجديدة، وما هي الآلية الحقيقية لاسترداد المبالغ في حال الرغبة في الانسحاب.\n   Wait, sentence 3 has a colon and a continuation. Is that considered one sentence? In Arabic, a colon might split, but structurally it's one sentence starting with \"كما يطرح...\". I'll make it two sentences to be safe, or keep as one with a colon but ensure it's not counted as multiple. The system likely counts by periods. I'll restructure to strictly 4 sentences ending with periods.\n\n   Let's split:\n   1. يميل المزاج العام إلى التوجس مع بعض الأمل بطرح مراحل جديدة، فالبعض ينتظر ردود الهيئة على طلباته بينما يتمنى آخرون استغلال الفرص المتاحة.\n   2. من أبرز المخاوف المتكررة تأخر إجراءات التسليم وعدم استجابة الهيئة لطلبات الاسترداد أو التوضيحات، بالإضافة إلى الغموض حول آليات الحجز والشروط.\n   3. يطرح المستثمرون سؤالين لم يجدَا إجابة واضحة: متى سيتم تسليم الوحدات أو بدء الأعمال في القطاعات الجديدة.\n   4. وما هي الآلية الحقيقية لاسترداد المبالغ في حال الرغبة في الانسحاب.\n\n   That's 4 sentences. The colon in sentence 3 might be okay, but to be safe, I'll make sentence 3 and 4 as above. Actually, \"يطرح المستثمرون سؤالين لم يجدَا إجابة واضحة: متى سيتم تسليم الوحدات...\" is one sentence in Arabic if the colon doesn't end it. But in counting, it's safer to have separate sentences ending with full stops. I'll do:\n\n   \"يميل المزاج العام إلى الت",
+  "forecast": "إحنا دلوقتي في المرحلة 11 من برنامج «بيت الوطن»؛ الحجز مفتوح من 20 سبتمبر 2026، فيه حوالي 15 500 قطعة متاحة، وشروط السداد 25 % مقدم والباقي على ثلاث أقساط سنوية، وسعر المتر تقريبًا 16 ألف جنيه، مع قيمة جدية 2 مليون جنيه. الهيئة بعتت 32 000 رسالة لحاملي القطع، و6 000 حالة تحت مراجعة أولوية، ومستوى الثقة متوسط إلى منخفض بسبب شكاوى المستفيدين من تأخر الإجراءات ومشكلات الاسترداد.\n\nفي الأسابيع الجاية متوقع يبدأ إرسال ترتيبات أولوية وصول التحويلات، ويتابعوا إجراءات الحجز وتوثيق المستندات، لكن فيه تحفظات واضحة إن العملية ممكن تتأخر بسبب البيروقراطية ومطالبات استرداد الأموال اللي لسه ما اتجاوبتش عليها، وكمان عدم وضوح آلية بدء تنفيذ الأعمال على الأرض.\n\nالأرجح: يبدأ التحويل وتسجيل الحجز لكن مع تأخير بسيط في بدء الأعمال.  \nمتفائل: تتسارع الإجراءات وتبدأ أعمال التسوية والبناء في وقت قريب.  \nمتحفظ: تستمر المماطلة في الرد على طلبات الاسترداد وتؤخر بدء التنفيذ.",
   "checklist": [
-   "راجع موقع بيت الوطن الرسمي وتأكد من تاريخ فتح الحجز.",
-   "جهّز نسخة من بطاقة الرقم القومي وصورة من جواز السفر.",
-   "احصل على كشف حساب بنكي يوضح رصيدك خلال آخر ٣ شهور.",
-   "سجّل بياناتك في نظام الحجز الإلكتروني وفعّل حسابك.",
-   "حضّر مبلغ الدفعة الأولى (ممكن يكون عبر تحويل بنكي أو بطاقة ائتمان) لتسديده فور فتح الحجز."
+   "راجع موقع بيت الوطن أو حساباتهم على السوشيال ميديا لتأكيد حالة الحجز.",
+   "جهّز نسخة إلكترونية من جواز السفر وصورة البطاقة الشخصية.",
+   "احمل تطبيق أو سجل بريدك الإلكتروني لتلقي إشعارات الفتح الفوري.",
+   "حضّر مستندات إثبات الإقامة بالخارج (مثال: عقد عمل أو إقرار ضريبي).",
+   "احجز موعد أو استفسر عن طريقة الحجز المسبق عبر القنوات الرسمية."
   ],
   "timeline": [
-   {
-    "field": "آخر_تطور",
-    "from": "زيادة أراضي الطرح 11 بنسبة 242% مع استرداد الأموال خلال 24 ساعة",
-    "to": "فتح التخصيص 20 سبتمبر 2026",
-    "when": "2026-09-17T17:58:32.644897+00:00",
-    "material": false,
-    "source_title": "تفاصيل وتوضيحات الطرح الحادي عشر ببرنامج «بيت الوطن» للمصريين بالخارج",
-    "source_link": "https://akhbarelyom.com/news/newdetails/4878762/1/%D8%AA%D9%81%D8%A7%D8%B5%D9%8A%D9%84-%D9%88%D8%AA%D9%88%D8%B6%D9%8A%D8%AD%D8%A7%D8%AA-%D8%A7%D9%84%D8%B7%D8%B1%D8%AD-%D8%A7%D9%84%D8%AD%D8%A7%D8%AF%D9%8A-%D8%B9%D8%B4%D8%B1-%D8%A8%D8%A8%D8%B1%D9%86%D8%A7%D9%85%D8%AC"
-   },
    {
     "field": "آخر_تطور",
     "from": "فتح التخصيص 20 سبتمبر 2026",
@@ -213,26 +204,21 @@
     "material": true,
     "source_title": "تفاصيل وتوضيحات الطرح الحادي عشر ببرنامج «بيت الوطن» للمصريين بالخارج",
     "source_link": "https://akhbarelyom.com/news/newdetails/4878762/1/%D8%AA%D9%81%D8%A7%D8%B5%D9%8A%D9%84-%D9%88%D8%AA%D9%88%D8%B6%D9%8A%D8%AD%D8%A7%D8%AA-%D8%A7%D9%84%D8%B7%D8%B1%D8%AD-%D8%A7%D9%84%D8%AD%D8%A7%D8%AF%D9%8A-%D8%B9%D8%B4%D8%B1-%D8%A8%D8%A8%D8%B1%D9%86%D8%A7%D9%85%D8%AC"
+   },
+   {
+    "field": "حالة_الحجز",
+    "from": "تم بدء التسليم",
+    "to": "مفتوح",
+    "when": "2026-09-20T01:07:02.232626+00:00",
+    "material": true,
+    "source_title": "توضيح من الإسكان بشأن طرح المرحلة 11 من «بيت الوطن» للمصريين بالخارج",
+    "source_link": "https://aqarat.see.news/2026/09/18/%D8%AA%D9%88%D8%B6%D9%8A%D8%AD-%D9%85%D9%86-%D8%A7%D9%84%D8%A5%D8%B3%D9%83%D8%A7%D9%86-%D8%A8%D8%B4%D8%A3%D9%86-%D8%B7%D8%B1%D8%AD-%D8%A7%D9%84%D9%85%D8%B1%D8%AD%D9%84%D8%A9-11-%D9%85%D9%86/"
    }
   ],
   "plots": null,
   "mzaya_divisions": [
    {
-    "name": "ناصر الجديدة (غرب اسيوط) - المرحلة العاشرة التكميلية - الحي الثاثي - ناصر الجديدة",
-    "pros": "",
-    "cons": "",
-    "avg_area": "0.00",
-    "plot_count": "0",
-    "min_deposit": "0.00",
-    "max_deposit": "0.00",
-    "location": "الموقع",
-    "link": "https://bit.mzayasoft.com/LandsDetails?divisionId=1202",
-    "plot_count_n": 0,
-    "min_deposit_n": 0,
-    "max_deposit_n": 0
-   },
-   {
-    "name": "السادس من اكتوبر - المرحلة الحادية عشر - منطقة الحزام الاخضر - السادس من اكتوبر",
+    "name": "السادس من اكتوبر - المرحلة الحادية عشر - منطقة الحزام الاخضر حوض 21-22 - السادس من اكتوبر",
     "pros": "",
     "cons": "",
     "avg_area": "0.00",
@@ -260,20 +246,6 @@
     "max_deposit_n": 76955
    },
    {
-    "name": "أخميم الجديدة - المرحلة الحادية عشر - وحدة الجوار العمرانى السادسة عشر - اخميم الجديد",
-    "pros": "",
-    "cons": "",
-    "avg_area": "0.00",
-    "plot_count": "52",
-    "min_deposit": "7,829.25",
-    "max_deposit": "11,552.25",
-    "location": "الموقع",
-    "link": "https://bit.mzayasoft.com/LandsDetails?divisionId=1232",
-    "plot_count_n": 52,
-    "min_deposit_n": 7829,
-    "max_deposit_n": 11552
-   },
-   {
     "name": "أسوان الجديدة - المرحلة الحادية عشر - الحى السياحى - اسوان الجديدة",
     "pros": "",
     "cons": "",
@@ -292,14 +264,14 @@
     "pros": "",
     "cons": "",
     "avg_area": "0.00",
-    "plot_count": "237",
-    "min_deposit": "9,468.00",
-    "max_deposit": "15,585.00",
+    "plot_count": "494",
+    "min_deposit": "8,521.50",
+    "max_deposit": "19,045.95",
     "location": "الموقع",
     "link": "https://bit.mzayasoft.com/LandsDetails?divisionId=1236",
-    "plot_count_n": 237,
-    "min_deposit_n": 9468,
-    "max_deposit_n": 15585
+    "plot_count_n": 494,
+    "min_deposit_n": 8521,
+    "max_deposit_n": 19045
    },
    {
     "name": "أكتوبر الجديدة - المرحلة الحادية عشر - منطقة الاب تاون - اكتوبر الجديدة",
@@ -316,20 +288,6 @@
     "max_deposit_n": 23556
    },
    {
-    "name": "أكتوبر الجديدة - المرحلة الحادية عشر - منطقة جنوب الواحات - اكتوبر الجديدة",
-    "pros": "",
-    "cons": "",
-    "avg_area": "0.00",
-    "plot_count": "616",
-    "min_deposit": "18,731.25",
-    "max_deposit": "33,033.85",
-    "location": "الموقع",
-    "link": "https://bit.mzayasoft.com/LandsDetails?divisionId=1238",
-    "plot_count_n": 616,
-    "min_deposit_n": 18731,
-    "max_deposit_n": 33033
-   },
-   {
     "name": "السادات - المرحلة الحادية عشر - المحور المركزى - السادات",
     "pros": "",
     "cons": "",
@@ -344,7 +302,7 @@
     "max_deposit_n": 64575
    },
    {
-    "name": "الشروق - المرحلة الحادية عشر - زهرة الشروق - الشروق",
+    "name": "الشروق - المرحلة الحادية عشر - زهرة الشروق موقع 3 - الشروق",
     "pros": "",
     "cons": "",
     "avg_area": "0.00",
@@ -418,13 +376,13 @@
     "pros": "",
     "cons": "",
     "avg_area": "0.00",
-    "plot_count": "136",
-    "min_deposit": "27,727.88",
+    "plot_count": "473",
+    "min_deposit": "26,221.12",
     "max_deposit": "46,578.12",
     "location": "الموقع",
     "link": "https://bit.mzayasoft.com/LandsDetails?divisionId=1248",
-    "plot_count_n": 136,
-    "min_deposit_n": 27727,
+    "plot_count_n": 473,
+    "min_deposit_n": 26221,
     "max_deposit_n": 46578
    },
    {
@@ -510,20 +468,6 @@
     "plot_count_n": 462,
     "min_deposit_n": 19023,
     "max_deposit_n": 30155
-   },
-   {
-    "name": "سوهاج الجديدة - المرحلة الحادية عشر - الحي الثامن منطقتي B C - سوهاج الجديدة",
-    "pros": "",
-    "cons": "",
-    "avg_area": "0.00",
-    "plot_count": "212",
-    "min_deposit": "16,794.25",
-    "max_deposit": "37,380.60",
-    "location": "الموقع",
-    "link": "https://bit.mzayasoft.com/LandsDetails?divisionId=1255",
-    "plot_count_n": 212,
-    "min_deposit_n": 16794,
-    "max_deposit_n": 37380
    },
    {
     "name": "بدر - المرحلة الحادية عشر - الامتداد الشرقي - بدر",
@@ -636,10 +580,66 @@
     "plot_count_n": 495,
     "min_deposit_n": 23750,
     "max_deposit_n": 37465
+   },
+   {
+    "name": "15 مايو - المرحلة الحادية عشر - منطقة الكمبوندات شمال المدينة - 15 مايو",
+    "pros": "",
+    "cons": "",
+    "avg_area": "0.00",
+    "plot_count": "198",
+    "min_deposit": "43,875.00",
+    "max_deposit": "53,690.00",
+    "location": "الموقع",
+    "link": "https://bit.mzayasoft.com/LandsDetails?divisionId=1266",
+    "plot_count_n": 198,
+    "min_deposit_n": 43875,
+    "max_deposit_n": 53690
+   },
+   {
+    "name": "أسوان الجديدة - المرحلة الحادية عشر - الحى السياحى - منطقة 350 فدان - اسوان الجديدة",
+    "pros": "",
+    "cons": "",
+    "avg_area": "0.00",
+    "plot_count": "63",
+    "min_deposit": "14,375.00",
+    "max_deposit": "16,137.38",
+    "location": "الموقع",
+    "link": "https://bit.mzayasoft.com/LandsDetails?divisionId=1268",
+    "plot_count_n": 63,
+    "min_deposit_n": 14375,
+    "max_deposit_n": 16137
+   },
+   {
+    "name": "أسيوط الجديدة - المرحلة الحادية عشر - الاسكان المتميز - التوسعات الجنوبية الشرقية- أسيوط الجديدة",
+    "pros": "",
+    "cons": "",
+    "avg_area": "0.00",
+    "plot_count": "48",
+    "min_deposit": "19,872.00",
+    "max_deposit": "27,425.25",
+    "location": "الموقع",
+    "link": "https://bit.mzayasoft.com/LandsDetails?divisionId=1269",
+    "plot_count_n": 48,
+    "min_deposit_n": 19872,
+    "max_deposit_n": 27425
+   },
+   {
+    "name": "أسيوط الجديدة - المرحلة الحادية عشر - الحى السادس مجاورة (4-5) - أسيوط الجديدة",
+    "pros": "",
+    "cons": "",
+    "avg_area": "0.00",
+    "plot_count": "403",
+    "min_deposit": "11,009.25",
+    "max_deposit": "18,400.50",
+    "location": "الموقع",
+    "link": "https://bit.mzayasoft.com/LandsDetails?divisionId=1271",
+    "plot_count_n": 403,
+    "min_deposit_n": 11009,
+    "max_deposit_n": 18400
    }
   ],
   "mzaya_price_range": {
-   "lowest": 7829,
+   "lowest": 8521,
    "highest": 193536,
    "divisions_count": 60
   },
@@ -765,18 +765,18 @@
  },
  "intel": {
   "counts": {
-   "total": 72,
+   "total": 71,
    "strong": 12,
-   "novel": 69,
+   "novel": 68,
    "confirmed": 0
   },
   "stats": {
-   "cycles": 325,
+   "cycles": 326,
    "utterances": 424,
    "confirmed": 0,
    "avg_lead_days": null
   },
-  "digest": "## إيه اللي الناس بتقوله ومش في الأخبار  \n1. **حجز شقة 250 م² في الدور الثاني بالتجمع الخامس (مشروع بيت الوطن) بـ 389,879 جنيه (سعر المتر ≈ 15,638 جنيه)** – الكلام جاي من شخصين مستقلين (كلهم عندهم تجربة شخصية). الثقة عالية لأن فيه مصدرين مستقلين.  \n2. **حجز شقة مساحتها 145 م² + جاردن 100 م² في المشروع الثامن من مبادرة دازك اختيارك بالشيخ زايد (المرحلة 8)** – برضه من شخصين مستقلين (تجربة شخصية). الثقة عالية.  \n3. **القطعة خالية من الديون** – معلومة اتقالت من شخصين مستقلين (تجربة شخصية). الثقة عالية.  \n4. **القطعة مرتفعة عن مستوى الأرض** – برضه من شخصين مستقلين (تجربة شخصية). الثقة عالية.  \n5. **تم الحجز بنجاح** – تم ذكره من شخصين مستقلين (تجربة شخصية). الثقة عالية.  \n\n## إشارات تستاهل متابعة  \n- **مساحة شقة الروف 136.85 م²** – جاي من شخصين مستقلين لكن مفيش تجربة شخصية، فالثقة متوسطة.  \n- **سعر شقة يُذكر بـ 3,819,879 جنيه** – مصدرين مستقلين، لكن الرقم غير متطابق مع السعر اللي اتقال في الإشارة القوية، فالموضوع محتاج تأكيد.  \n- **سعر المتر 15,638 جنيه** – مصدرين مستقلين، غير مؤكد رسميًا، يستحق المتابعة.  \n- **بدء الحجز** – مصدرين مستقلين، ما فيش تفاصيل إضافية، محتاج توثيق.  \n- **الوحدة “بحري صريح”** – مصدرين مستقلين، غير واضح المعنى، محتاج توضيح.  \n\n## تناقضات  \n- **السعر المذكور للشقة**: في إشارة قوية السعر 389,879 جنيه، وفي إشارة متقاطعة السعر 3,819,879 جنيه – الرقمين متعارضين ومش واضح أيهم الصح.  \n- **المساحة**: في إشارة قوية مساحة الشقة 250 م²، وفي إشارة متقاطعة بيقال إن فيه شقة بمساحة 250 م² برضه، لكن مفيش تفاصيل عن الطابق أو الموقع، فممكن يكونوا بيتكلموا عن وحدات مختلفة.  \n- **القطعة المرتفعة**: تم ذكر إن القطعة مرتفعة عن الأرض (إشارة قوية) لكن مفيش أي إشارة تانية تتكلم عن ارتفاع الأرض، فالمعلومة غير مؤكدة من مصادر متعددة.  \n\n## فجوات المعلومات  \n1. **الطالب اللي عمل له محضر غش في كلية الحقوق** – ما فيش إجابة بخصوص تأثير المحضر على شهادة حسن السيرة والسلوك أو على فرص العمل بعد التخرج.  \n2. **هل محضر الغش يكتب أي ملاحظة في شهادة حسن السيرة والسلوك** – مفيش توضيح رسمي.  \n3. **هل محضر الغش يؤثر على خريج مقبول بأربع سنوات في أي مجال** – مفيش رد واضح.  \n4. **المقارنة بين بناء عمارة سكنية في الحي الرابع للتجمع (عائد إيجار سريع) وشراء قطعة أرض قرب بحر المنصورة الجديدة (استثمار طويل المدى)** – مفيش تحليل أو أرقام من الجهات الرسمية.  \n5. **الوضع لو وصل التحويل التنشيطي بدون كود حجز نتيجة حذف البنك لخانة الملاحظات** – مفيش توضيح من الإدارة أو البنك.  \n6. **هل فيه فساد أو اختلاس أموال من سعر متر الأرض في مشروع بيت الوطن** – مفيش أي بيان رسمي يرد على الشكوى دي.  \n\n## قراءة عامة  \n- الكلام اللي الناس بتقوله بيوضح إن فيه نشاط حجز وشرايات على الأرض والعقارات في مشروع بيت الوطن، لكن معظم التفاصيل لسه غير مؤكدة رسميًا.  \n- وجود تناقضات في الأسعار والمساحات بيشير إن المعلومات المنتشرة ممكن تكون مش دقيقة أو متعلقة بوحدات مختلفة.  \n- الأسئلة المتكررة عن محاضر الغش، التحويلات البنكية، والفساد بتظهر نقص واضح في الشفافية الرسمية، وبالتالي الناس بتدور على إجابات من مصادر غير رسمية.",
+  "digest": "## إيه اللي الناس بتقوله ومش في الأخبار\n\n1. **تفاصيل حجز وحدات بمساحة 250 م² وسعر المتر:** الناس بتتداول معلومات عن حجز شقة دور ثاني بالتجمع بسعر متر 15,638 جنيه، وذكر مصدرين مستقلين بناءً على تجربة شخصية إن الحجز تم وباقي شقة واحدة (درجة الثقة: متوسطة لوجود مصدرين وتجربة شخصية، لكن يظل كلام غير رسمي).\n2. **طروحات بمشروع \"دارك اختيارك\" في الشيخ زايد:** فيه كلام متداول عن حجز شقة بمساحة 145 م² مع حديقة 100 م² ضمن المرحلة الثامنة ببيت الوطن، ونقلها مصدران مستقلان كتجربة شخصية (درجة الثقة: متوسطة).\n3. **حالة الأراضي ومديونياتها وطبيعتها:** بيتردد بين الناس إن بعض القطع المطروحة خالية تماماً من أي ديون ومرتفعة عن منسوب الأرض، وذكرها مصدران مستقلان من واقع تجاربهم (درجة الثقة: متوسطة).\n4. **مساحات محددة لشقق الروف:** متداول إن مسطح شقق الروف بيسجل 136.85 م²، والإشارة اتكررت من مصدرين مستقلين لكن بدون تجربة شخصية مباشرة (درجة الثقة: ضعيفة إلى متوسطة كونها مجرد نقل كلام).\n\n---\n\n## إشارات تستاهل متابعة\n\n- **بدء أعمال وتراخيص ببعض القطع:** شخص واحد فقط ذكر -كتجربة شخصية- استخراج رخصة وبدء الإنشاءات للمشروع رقم 6 بالحي الثالث، وتكسير الأرض في القطعة C34 بالحي الرابع.\n- **مهلة تحويل مقدمات الطرح السادس:** شخص واحد ادّعى إنه مسموح للمشتركين الجدد بتحويل المقدم لشقق الطرح السادس بالحي الثالث بعد 5 أيام.\n- **قفزات سريعة في أسعار الأراضي:** شهادة فردية واحدة زعمت ارتفاع القيمة السوقية لقطعة (G161) بعد يومين من الشراء، وشهادة تانية ذكرت شراء القطعة (F28) بـ 22 مليون في مايو وعرض المجاورة لها (F27) بزيادة 3.5 مليون بعد 3 شهور.\n- **حجز بنصف السعر:** ادعاء فردي وحيد باللغة الإنجليزية يزعم صاحبه حجز شقة بـ \"نصف السعر حرفياً\" دون أي تفاصيل تدعمه.\n\n---\n\n## تناقضات\n\n- **تضارب كبير في إجمالي سعر الوحدة:** فيه إشارة بتقول إن إجمالي سعر الشقة الـ 250 م² هو 389,879 جنيه (وده حسابياً لا يستقيم إطلاقاً مع سعر المتر المذكور 15,638 جنيه)، في حين إشارة تانية لنفس المساحة ونفس سعر المتر بتقول إن إجمالي السعر 3,819,879 جنيه؛ الكلام متناقض ومفيش جهة رسمية حسمت الرقم الحقيقي.\n\n---\n\n## فجوات المعلومات\n\n- **أزمة التحويلات البنكية بدون كود:** مفيش أي رد رسمي يوضح موقف المغترب لو البنك حذف خانة الملاحظات ووصل التحويل التنشيطي من غير كود الحجز.\n- **الشفافية في تسعير المتر:** الناس بتتساءل ومفيش إجابة واضحة حول أسباب تفاوت الأسعار وما إذا كان فيه مبالغات أو شبهات في تسعير متر الأرض ببيت الوطن.\n- **غياب مؤشرات المقارنة الاستثمارية:** مطروح تساؤل حائر بين جدوى البناء في الحي الرابع بالتجمع لعائد إيجاري سريع، وبين شراء أرض قرب بحر المنصورة الجديدة للاستثمار طويل المدى، في ظل غياب أرقام رسمية استرشادية للعوائد.\n*(ملاحظة: تم استبعاد تساؤلات متعلقة بالدراسة بكلية الحقوق لعدم ارتباطها بالمجال العقاري ومشروع بيت الوطن).*\n\n---\n\n## قراءة عامة\n\n- كلام الناس بيوحي بوجود حركة بيع وحجز بتتم على أرض الواقع بعيداً عن البيانات والإعلانات الرسمية المفصلة.\n- النقاشات بتعكس تخوفات إجرائية واضحة عند المغتربين، خصوصاً في مسألة التحويلات البنكية وعدالة تسعير الأراضي والمتر.\n- الانطباع العام المتداول يُظهر تذبذباً وارتفاعات غير مبررة في أسعار بعض القطع وإعادة طرحها، وسط نقص في المعلومات الرسمية الموثقة.",
   "signals": [
    {
     "statement": "تم حجز شقة رقم 5 دور ثاني متكرر بالتجمع الخامس بمنطقة بيت الوطن بمساحة 250 متر مربع بسعر إجمالي 389,879 جنيه بسعر متر 15,638 جنيه، وتبقى آخر شقة في الدور الثاني",
@@ -1647,22 +1647,28 @@
    }
   ]
  },
- "urgent": [],
+ "urgent": [
+  {
+   "title": "مهم جدا خلي بالك طرح الايجار التمليكي خلال الساعات القليله القادمه ، اجهز 👌",
+   "link": "https://www.youtube.com/watch?v=sAv35r_WW2A",
+   "source": "الإسكان مع عمرو زكي"
+  }
+ ],
  "top": [
   {
-   "title": "الإسكان: الأولوية للأقل دخلًا في الطرح الجديد والشباب حديثى الزواج في مقدمة المستهدفين",
-   "link": "https://www.youm7.com/story/2026/9/19/%D8%A7%D9%84%D8%A5%D8%B3%D9%83%D8%A7%D9%86-%D8%A7%D9%84%D8%A3%D9%88%D9%84%D9%88%D9%8A%D8%A9-%D9%84%D9%84%D8%A3%D9%82%D9%84-%D8%AF%D8%AE%D9%84%D9%8B%D8%A7-%D9%81%D9%8A-%D8%A7%D9%84%D8%B7%D8%B1%D8%AD-%D8%A7%D9%84%D8%AC%D8%AF%D9%8A%D8%AF-%D9%88%D8%A7%D9%84%D8%B4%D8%A8%D8%A7%D8%A8-%D8%AD%D8%AF%D9%8A%D8%AB%D9%89-%D8%A7%D9%84%D8%B2%D9%88%D8%A7%D8%AC/7551674",
-   "source": "اليوم السابع"
+   "title": "قبل ساعات من بدء التقديم.. الإسكان تستعرض تفاصيل طرح 25 ألف وحدة بنظامي الإيجار والإيجار التمليكي",
+   "link": "https://www.shorouknews.com/news/view.aspx?cdate=20092026&id=d421fd00-294f-45f4-8d17-b890f2b5e6a0",
+   "source": "بوابة الشروق"
   },
   {
-   "title": "بعد شكاوى المصريين بالخارج.. الإسكان تكشف مصير أموال «بيت الوطن»",
-   "link": "https://www.almasryalyoum.com/news/details/4362588",
+   "title": "15 ألف شققة بنظام الإيجار التمليكي 2026.. أماكن الطرح الجديد لـ«سكن لكل المصريين 9» بالمحافظات",
+   "link": "https://www.almasryalyoum.com/news/details/4363354",
    "source": "المصري اليوم"
   },
   {
-   "title": "مصطفى بكري يطالب بسرعة حسم شكاوى المتقدمين للطرح الـ 11 ببرنامج بيت الوطن",
-   "link": "https://www.elbalad.news/7111676",
-   "source": "صدى البلد"
+   "title": "ضمن «سكن لكل المصريين 9» بالمنيا الجديدة.. طرح 25 ألف وحدة بنظامي «الإيجار» و«الإيجار المنتهي بالتملك»",
+   "link": "https://www.almasryalyoum.com/news/details/4363328",
+   "source": "المصري اليوم"
   },
   {
    "title": "سؤال برلماني بشأن أزمة حجز الوحدات السكنية للمصريين بالخارج",
@@ -1675,9 +1681,9 @@
    "source": "صدى البلد عقارات"
   },
   {
-   "title": "عبد العليم داود يسأل الحكومة عن أزمة أولوية حجز بيت الوطن للمصريين بالخارج",
-   "link": "https://www.youlyou.com/55863",
-   "source": "youlyou.com"
+   "title": "رئاسة مجلس الوزراء المصري. . بيان صادر عن وزارة الإسكان والمرافق والمجتمعات العمرانية: \"الإسكان\" تُعد تقريراً بالفيديوجراف عن أبرز أنشطة وفعاليات الوزارة خلال الفترة من 12 إلى 17 سبتمبر 2026 أعدت وزارة الإسكان والمرافق والمجتمعات العمرانية، تقريراً بالفيديوجراف",
+   "link": "https://www.facebook.com/EgyptianCabinet/videos/%D8%A8%D9%8A%D8%A7%D9%86-%D8%B5%D8%A7%D8%AF%D8%B1-%D8%B9%D9%86-%D9%88%D8%B2%D8%A7%D8%B1%D8%A9-%D8%A7%D9%84%D8%A5%D8%B3%D9%83%D8%A7%D9%86-%D9%88%D8%A7%D9%84%D9%85%D8%B1%D8%A7%D9%81%D9%82-%D9%88%D8%A7%D9%84%D9%85%D8%AC%D8%AA%D9%85%D8%B9%D8%A7%D8%AA-%D8%A7%D9%84%D8%B9%D9%85%D8%B1%D8%A7%D9%86%D9%8A%D8%A9%D8%A7%D9%84%D8%A5%D8%B3%D9%83%D8%A7%D9%86-%D8%AA%D9%8F%D8%B9%D8%AF-%D8%AA%D9%82%D8%B1%D9%8A%D8%B1%D8%A7%D9%8B-%D8%A8%D8%A7%D9%84/1554431465993298/",
+   "source": "facebook.com"
   }
  ],
  "videos": [
@@ -1731,6 +1737,13 @@
    "summary": ""
   },
   {
+   "title": "🚨 رسمياً.. أراضي جديدة وموعد الحسم لمشروع «بيت الوطن»! (لا يفوتك الموعد)",
+   "link": "https://www.youtube.com/watch?v=Bns6Wxtp83s",
+   "channel": "الاسكان لحظه بلحظه  ",
+   "published": "2026-09-09T21:52:46+00:00",
+   "summary": ""
+  },
+  {
    "title": "المصريون بالخارج يستغيثون بسبب أراضي «بيت الوطن».. الأسعار تضاعفت والمواقع بعيدة عن العمران",
    "link": "https://www.youtube.com/watch?v=bIIjxyXaOZ0",
    "channel": "Nashaat Eldeehy",
@@ -1757,18 +1770,11 @@
    "channel": "كلام في المفيد — هاني الخميسي",
    "published": "2026-09-17T12:20:09+00:00",
    "summary": ""
-  },
-  {
-   "title": "ماذا بعد المرحلة الـ 11 بيت الوطن والترتيب البعيد والقطع الغير مناسبة؟",
-   "link": "https://www.youtube.com/shorts/jMG5LZWC7SM",
-   "channel": "كلام في المفيد — هاني الخميسي",
-   "published": "2026-09-13T15:16:11+00:00",
-   "summary": ""
   }
  ],
  "counts": {
-  "total": 143,
-  "new": 5,
+  "total": 144,
+  "new": 3,
   "beit": 41
  }
 }
